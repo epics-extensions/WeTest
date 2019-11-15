@@ -68,7 +68,7 @@ from wetest.report.generator import ReportGenerator
 
 from wetest.testing.generator import TestsGenerator
 from wetest.testing.generator import SelectableTestCase, SelectableTestSuite
-from wetest.testing.reader import MacrosManager, ScenarioReader
+from wetest.testing.reader import MacrosManager, ScenarioReader, FileNotFound
 
 # logger setup
 logger = logging.getLogger(__name__)
@@ -313,7 +313,12 @@ def main():
     suite, configs = None, [{"name":"No tests to run"}]
     if len(scenarios) != 0:
         logger.info('Will load tests from files:\n\t-%s', "\n\t-".join(scenarios))
-        suite, configs = generate_tests(scenarios=scenarios, macros_mgr=macros_mgr)
+        try:
+            suite, configs = \
+                generate_tests(scenarios=scenarios, macros_mgr=macros_mgr)
+        except FileNotFound as e:
+            logger.error(e)
+            exit(4)
 
     queue_to_gui = multiprocessing.Manager().Queue()
     queue_from_gui = multiprocessing.Manager().Queue()

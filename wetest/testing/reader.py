@@ -325,7 +325,10 @@ class ScenarioReader(object):
     def __init__(self, yaml_file, macros_mgr=None, suite_macros=None):
         """Initialize Reader."""
         self.file_path = os.path.abspath(yaml_file)
-        self.file = open(self.file_path, 'r')
+        try:
+            self.file = open(self.file_path, 'r')
+        except IOError:
+            raise FileNotFound("Could not find file %s"%self.file_path)
 
         self.macros_mgr = macros_mgr if macros_mgr is not None else MacrosManager()
         self.suite_macros = suite_macros if suite_macros is not None else list()
