@@ -231,7 +231,7 @@ class MacrosManager():
             # dict by yaml load, but we want to keep it a string
             if not new_str.endswith(":"):
                 try:
-                    output = yaml.load(new_str)
+                    output = yaml.safe_load(new_str)
                 except (ValueError, yaml.scanner.ScannerError) as e:
                     # we get a ScannerError when substituting with a macro that
                     # ends by a colon, in a multiline string:
@@ -243,7 +243,7 @@ class MacrosManager():
             # especially for exponential notation or infinity or NAN
             # they might endup being read as string
             if isinstance(output, str):
-                # go back to raw new_str if yaml.load returned a string,
+                # go back to raw new_str if yaml.safe_load returned a string,
                 # in order to maintain linebreaks
                 output = new_str
 
@@ -355,7 +355,7 @@ class ScenarioReader(object):
         :returns: The deserialized file and scenarios.
         """
         logger.info("Reading file...")
-        wetest_file = self._substituteMacros(yaml.load(self.file))
+        wetest_file = self._substituteMacros(yaml.safe_load(self.file))
         logger.info("Read file.")
 
         # initialise include, tests and config block if not defined
