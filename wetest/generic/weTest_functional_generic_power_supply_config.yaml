@@ -1,0 +1,187 @@
+# functional test, config power supply:
+#   - set interlock
+#   - set ramp up and ramp down
+#   - set polarity (check votage/current is 0)
+#   - set regulation mode
+#   - set voltage min and max
+#   - set voltage
+#   - set current min and max
+#   - set current
+# by default, all tests are skipped
+
+macros:
+    - TEST_TITLE:         "config power supply ${P}"
+      P:                  "Sec-Sub(x):Dis-Dev-Idx:"
+      DELAY:              0.2   # sec: defaut delay (timeout between setter and checking getter)
+      RETRY:              2
+      # set interclock
+      IGNORE_SET_INTERLOCK: True
+      SET_INTERLOCK:        "IntckSet"
+      INTERLOCK:            1
+      # ramp up
+      IGNORE_RAMP_UP:     True
+      SET_RAMP_UP :       "RUpSet"
+      GET_RAMP_UP :       "RUpRb"
+      RAMP_UP:            50  # volt/sec or ms
+      # ramp down
+      IGNORE_RAMP_DOWN:   True
+      SET_RAMP_DOWN :     "RDwnSet"
+      GET_RAMP_DOWN :     "RDwnRb"
+      RAMP_DOWN:          50  # volt/sec or ms
+      # polarity    
+      IGNORE_POLARITY:    True
+      SET_POLARITY:       "BPosSet"
+      GET_POLARITY:       "BPosRb"
+      POLARITY: 0         # ? positive ?
+      # regulation mode (current or voltage)
+      IGNORE_REGULATION:  True
+      SET_REGULATION:     "RegModeSet"
+      GET_REGULATION:     "RegModeRb"
+      REGULATION_STATE:   0   # 0:CV, 1:CC
+      # voltage min
+      IGNORE_VOLTAGE_MIN: True
+      SET_VOLTAGE_MIN:    "UNVThrSet"    
+      GET_VOLTAGE_MIN:    "UNVThrRb"
+      MARGIN_VOLTAGE_MIN: 0 # %
+      VOLTAGE_MIN:        5 # volts
+      # voltage max
+      IGNORE_VOLTAGE_MAX: True
+      SET_VOLTAGE_MAX:    "OVVThrSet"    
+      GET_VOLTAGE_MAX:    "OVVThrRb"
+      MARGIN_VOLTAGE_MAX: 0   # %
+      VOLTAGE_MAX:        15  # volts
+      # voltage   
+      IGNORE_VOLTAGE:     True    # by default, voltage tests are skipped
+      SET_VOLTAGE:        "USet"
+      GET_VOLTAGE:        "UMes"   # should it be RBV or measure value her? TBD
+      VOLTAGE:            8   # volts
+      MARGIN_VOLTAGE:     0   # %
+      # current min
+      IGNORE_CURRENT_MIN: True
+      SET_CURRENT_MIN:    "UNCThrSet"    
+      GET_CURRENT_MIN:    "UNCThrRb"
+      MARGIN_CURRENT_MIN: 0 # %
+      CURRENT_MIN:        5 # A
+      # current max
+      IGNORE_CURRENT_MAX: True
+      SET_CURRENT_MAX:    "OVCThrSet"    
+      GET_CURRENT_MAX:    "OVCThrRb"
+      MARGIN_CURRENT_MAX: 0   # %
+      CURRENT_MAX:        15  # A
+      # current
+      IGNORE_CURRENT:     True
+      SET_CURRENT:        "ISet"
+      GET_CURRENT:        "IRb"   # should it be RBV or measure value her? TBD
+      CURRENT:            2   # amp
+      MARGIN_CURRENT:     0   # %
+
+version: {major: 1, minor: 1, bugfix: 0}
+
+config:
+    type:       functional
+    on_failure: pause
+    name:       ${TEST_TITLE}
+    prefix:     ${P}
+    delay:      ${DELAY}
+    retry:      ${RETRY}
+
+tests:
+
+    # interlerlock
+    - name: "set interlock"
+      ignore: ${IGNORE_SET_INTERLOCK}
+      setter: "${SET_INTERLOCK}"
+      values:
+        - ${INTERLOCK}
+
+    # ramp down
+    - name: "ramp-down"
+      ignore: ${IGNORE_RAMP_DOWN}
+      setter: "${SET_RAMP_DOWN}"
+      getter: "${GET_RAMP_DOWN}"
+      values:
+        - ${RAMP_DOWN}
+        
+    # ramp up
+    - name: "ramp-up"
+      ignore: ${IGNORE_RAMP_UP}
+      setter: "${SET_RAMP_UP}"
+      getter: "${GET_RAMP_UP}"
+      values:
+        - ${RAMP_UP}
+
+    # set polarity
+    - name: "set polarity"
+      ignore: ${IGNORE_POLARITY}
+      setter: "${SET_POLARITY}"
+      getter: "${GET_POLARITY}"
+      values:
+        - ${POLARITY}
+
+    # regulation mode
+    - name: "set regulation mode"
+      ignore: ${IGNORE_REGULATION}
+      setter: "${SET_REGULATION}"
+      getter: "${GET_REGULATION}"
+      values:
+        - ${REGULATION_STATE}
+
+
+    ## voltage
+    # set voltage min
+    - name: "set voltage min"
+      ignore: ${IGNORE_VOLTAGE_MIN}
+      setter: "${SET_VOLTAGE_MIN}"
+      getter: "${GET_VOLTAGE_MIN}"
+      margin: ${MARGIN_VOLTAGE_MIN}
+      values:
+        - ${VOLTAGE_MIN}
+
+    # set voltage max
+    - name: "set voltage max"
+      ignore: ${IGNORE_VOLTAGE_MAX}
+      setter: "${SET_VOLTAGE_MAX}"
+      getter: "${GET_VOLTAGE_MAX}"
+      margin: ${MARGIN_VOLTAGE_MAX}
+      values:
+        - ${VOLTAGE_MAX}
+
+    # set voltage
+    - name: "set voltage"
+      ignore: ${IGNORE_VOLTAGE}
+      setter: "${SET_VOLTAGE}"
+      getter: "${GET_VOLTAGE}"
+      margin: ${MARGIN_VOLTAGE}
+      values:
+        - ${VOLTAGE}
+        
+
+
+    ## set current
+    # set current min
+    - name: "set current min"
+      ignore: ${IGNORE_CURRENT_MIN}
+      setter: "${SET_CURRENT_MIN}"
+      getter: "${GET_CURRENT_MIN}"
+      margin: ${MARGIN_CURRENT_MIN}
+      values:
+        - ${CURRENT_MIN}
+
+    # set current max
+    - name: "set current max"
+      ignore: ${IGNORE_CURRENT_MAX}
+      setter: "${SET_CURRENT_MAX}"
+      getter: "${GET_CURRENT_MAX}"
+      margin: ${MARGIN_CURRENT_MAX}
+      values:
+        - ${CURRENT_MAX}
+    
+    # set current
+    - name: "set current"
+      ignore: ${IGNORE_CURRENT}
+      setter: "${SET_CURRENT}"
+      getter: "${GET_CURRENT}"
+      margin: ${MARGIN_CURRENT}
+      values:
+        - ${CURRENT}
+

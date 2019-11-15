@@ -1,0 +1,231 @@
+version:
+    major: 1
+    minor: 0
+    bugfix: 0
+
+config:
+    type: unit
+    name: "MKS946"
+    prefix: "INFN-Src:ISS-HVPf:"
+    delay: 2
+
+tests:
+    - name: "Relay 1"
+      setter: "Rel1S"
+      getter: "Rel1RB"
+      range:
+          start: 0
+          stop: 3
+      finally:
+          value: 0
+
+    - name: "Relay 2"
+      setter: "Rel2S"
+      getter: "Rel2RB"
+      range:
+          start: 0
+          stop: 3
+      finally:
+          value: 0
+
+    - name: "Relay 3"
+      setter: "Rel3S"
+      getter: "Rel3RB"
+      range:
+          start: 0
+          stop: 3
+      finally:
+          value: 0
+
+    - name: "Relay 4"
+      setter: "Rel4S"
+      getter: "Rel4RB"
+      range:
+          start: 0
+          stop: 3
+      finally:
+          value: 0
+
+    - name: "Relay 1 Read"
+      setter: "Rel1S"
+      getter: "Rel1R"
+      commands:
+          - name: "0"
+            set_value: 0
+            get_value: 0
+          - name: "1"
+            set_value: 1
+            get_value: 1
+          - name: "2"
+            set_value: 2
+            get_value: 1
+      finally:
+          value: 0
+
+    - name: "Relay 2 Read"
+      setter: "Rel2S"
+      getter: "Rel2R"
+      commands:
+          - name: "0"
+            set_value: 0
+            get_value: 0
+          - name: "1"
+            set_value: 1
+            get_value: 1
+          - name: "2"
+            set_value: 2
+            get_value: 1
+      finally:
+          value: 0
+
+    - name: "Relay 3 Read"
+      setter: "Rel3S"
+      getter: "Rel3R"
+      commands:
+          - name: "0"
+            set_value: 0
+            get_value: 0
+          - name: "1"
+            set_value: 1
+            get_value: 1
+          - name: "2"
+            set_value: 2
+            get_value: 1
+      finally:
+          value: 0
+
+    - name: "Relay 4 Read"
+      setter: "Rel4S"
+      getter: "Rel4R"
+      commands:
+          - name: "0"
+            set_value: 0
+            get_value: 0
+          - name: "1"
+            set_value: 1
+            get_value: 1
+          - name: "2"
+            set_value: 2
+            get_value: 1
+      finally:
+          value: 0
+
+    - name: "Lock"
+      setter: "LockS"
+      getter: "LockR"
+      range:
+          start: 0
+          stop: 2
+      finally:
+          value: 0
+
+    - name: "Pirani Channel 1 Scale"
+      setter: "CP1ScalS"
+      getter: "CP1ScalRB"
+      values:
+          - 0.02
+          - 100
+          - 1000
+          - 10000
+      finally:
+          value: 1
+
+    - name: "Pirani Channel 2 Scale"
+      setter: "CP2ScalS"
+      getter: "CP2ScalRB"
+      values:
+          - 0.02
+          - 100
+          - 1000
+          - 10000
+      finally:
+          value: 1
+
+    - name: "CP1Typ"
+      setter: "CP1TypS"
+      getter: "CP1TypR"
+      range:
+          start: 0
+          stop: 2
+      finally:
+          value: 0
+
+    - name: "CP2Typ"
+      setter: "CP2TypS"
+      getter: "CP2TypR"
+      range:
+          start: 0
+          stop: 2
+      finally:
+          value: 0
+
+    - name: "MFC3OpMod"
+      setter: "MFC3OpModS"
+      getter: "MFC3OpModR"
+      range:
+          start: 0
+          stop: 3
+      finally:
+          value: 1
+
+    - name: "MFC4OpMod"
+      setter: "MFC4OpModS"
+      getter: "MFC4OpModR"
+      range:
+          start: 0
+          stop: 3
+      finally:
+          value: 1
+
+    - name: "MFC 3 Scale"
+      setter: "MFC3ScalS"
+      getter: "MFC3ScalRB"
+      values:
+          - 1
+          - 100
+          - 10000
+          - 1000000
+      finally:
+          value: 1000000
+
+    - name: "MFC 4 Scale"
+      setter: "MFC4ScalS"
+      getter: "MFC4ScalRB"
+      values:
+          - 1
+          - 100
+          - 10000
+          - 1000000
+      finally:
+          value: 1000000
+
+    - name: "MFC 3 Flow"
+      setter: "MFC3FlowS"
+      getter: "MFC3FlowRB"
+      values:
+          - 0
+          - 10
+          - 100
+          - 1000
+      finally:
+          value: 0
+
+    - name: "MFC 4 Flow"
+      setter: "MFC4FlowS"
+      getter: "MFC4FlowRB"
+      values:
+          - 0
+          - 10
+          - 100
+          - 1000
+      finally:
+          value: 0
+
+    - name: "Units"
+      setter: "UnitS"
+      getter: "UnitR"
+      range:
+          start: 0
+          stop: 4
+      finally:
+          value: 1

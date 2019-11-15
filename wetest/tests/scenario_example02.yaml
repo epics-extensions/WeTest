@@ -1,0 +1,13 @@
+version:
+    major: 0
+    minor: 1
+    bugfix: 0
+
+tests:
+    - name: "Sequence 1"
+      commands:
+        - name: "Test 1"
+          setter: "LockS"
+          getter: "LockR"
+          set_value: 0
+          get_value: 0

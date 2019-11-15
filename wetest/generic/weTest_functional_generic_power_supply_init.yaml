@@ -1,0 +1,64 @@
+# functional test, init power supply:
+#   - off (need to set ramp down?)
+#   - reset/clear
+#   - check fault
+# by default, all tests are skipped
+
+
+macros:
+    - TEST_TITLE:         "init power supply ${P}"
+      P:                  "Sec-Sub(x):Dis-Dev-Idx:"
+      DELAY:              0.2   # sec: defaut delay (timeout between setter and checking getter)
+      RETRY:              2
+      # clear   
+      IGNORE_CLEAR:       True
+      SET_CLEAR:          "ClrSet"
+      GET_CLEAR:          "ClrRb"
+      CLEAR_STATE:        1
+      # on/off
+      IGNORE_ON_OFF:      True
+      SET_ON_OFF:         "PwrEnaCmd"
+      GET_ON_OFF:         "PwrEnaRb"
+      OFF_STATE:          0
+      DELAY_RAMP_DOWN:    1 # sec
+      # status/health
+      IGNORE_STATUS:      True
+      GET_STATUS:         "Stat"
+      STATUS:             1
+
+version: {major: 1, minor: 1, bugfix: 0}
+
+config:
+    type:       functional
+    on_failure: pause
+    name:       ${TEST_TITLE}
+    prefix:     ${P}
+    delay:      ${DELAY}
+    retry:      ${RETRY}
+
+tests:
+
+    # power off
+    - name: "power off / reset"
+      ignore: ${IGNORE_ON_OFF}
+      setter: "${SET_ON_OFF}"
+      getter: "${GET_ON_OFF}"
+      commands:
+        - name:   "turn off and wait ramp-down time"
+          value:  ${OFF_STATE}
+          delay:  ${DELAY_RAMP_DOWN}
+
+    # reset / clear status
+    - name: "reset / clear status"
+      ignore: ${IGNORE_CLEAR}
+      setter: "${SET_CLEAR}"
+      getter: "${GET_CLEAR}"
+      values:
+        - ${CLEAR_STATE}
+
+    # check status/health
+    - name: "check device status"
+      ignore: ${IGNORE_STATUS}
+      getter: "${GET_STATUS}" 
+      values:
+        - ${STATUS}

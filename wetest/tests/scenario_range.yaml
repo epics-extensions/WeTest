@@ -1,0 +1,174 @@
+# test expects CA to respond for:
+# SL-MBT-RBN1:OLightCmdCalc
+
+version:
+    major: 1
+    minor: 0
+    bugfix: 0
+
+config:
+    type: unit
+    on_failure: continue
+    name: Testing range fields
+    prefix: SL-MBT-RBN1
+
+tests:
+
+    # test include and exclude
+    - name: "Range with include stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: -1
+        stop: 10
+
+    - name: "Range with exclude stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: -10
+        include_stop: no
+
+    - name: "Range with exclude start"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        include_start: no
+
+    - name: "Range with include stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+
+    - name: "Range with exclude stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+        include_stop: False
+
+    - name: "Range with exclude start"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+        include_start: False
+
+    - name: "Range with lin and stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        lin: 5
+
+    - name: "Range with lin exclude stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        lin: 5
+        include_stop: no
+
+    - name: "Range with lin exclude start"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        lin: 5
+        include_start: no
+
+    - name: "Range with geom and stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        geom: 5
+
+    - name: "Range with geom exclude stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        geom: 5
+        include_stop: no
+
+    - name: "Range with geom exclude start"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        geom: 5
+        include_start: no
+
+    # test mixing
+    - name: "Mixed step, lin and geom"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+        lin: 5
+        geom: 5
+
+    - name: "Mixed step, lin and geom, exclude start and stop"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+        lin: 5
+        geom: 5
+        include_start: no
+        include_stop: no
+
+    - name: "Mixed step, lin and geom, randomized"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+        lin: 5
+        geom: 5
+        sort: no
+
+    # test sorting
+    - name: "Mixed step, lin and geom, randomized"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+        lin: 5
+        geom: 5
+        sort: random
+
+    - name: "Mixed step, lin and geom, reverse sort"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:
+        start: 1
+        stop: 10
+        step: 5
+        lin: 5
+        geom: 5
+        sort: reverse

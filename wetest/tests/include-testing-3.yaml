@@ -1,0 +1,12 @@
+version: {major: 1, minor: 1, bugfix: 0}
+
+macros:
+    - SUITE_TITLE: ""
+
+name: "Testing scenario include with empty scenario."
+
+include:
+    - ['wetest/tests/include-testing-0.yaml', SUITE_TITLE: '${SUITE_TITLE}-I']
+    - ['wetest/tests/include-testing-1.yaml', SUITE_TITLE: '${SUITE_TITLE}-II']
+    - 'wetest/tests/include-testing-empty.yaml'
+    - ['wetest/tests/include-testing-2.yaml', SUITE_TITLE: '${SUITE_TITLE}-III']

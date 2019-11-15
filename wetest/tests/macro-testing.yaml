@@ -1,0 +1,201 @@
+# test expects CA to respond for:
+# SL-MBT-RBN1:OLightCmdCalc
+# SL-MBT-RBN1-B1-GF1:RFLevel-Offset
+
+macros:  # here as a sequence, but could also be directly a dictionnary
+    - skip: yes
+      macro_for_macro:     final value
+      scenario_title:      "Testing macros"
+      macro_redefined:     "this value should be used"
+      macro_used_by_suite: "macro from scenario used by suite"
+    - version_min: 1
+      prefix_1: SL-MBT
+      prefix_2: -RBN1
+
+      macro_float_1: 1.06
+      macro_float_2: 1e3
+      macro_float_3: -67.7
+      macro_float_4: -1E96
+      macro_float_5: nan
+      macro_float_6: inf
+
+      macro_int_1: 6
+      macro_int_2: -2
+      macro_int_3: 68
+
+      macro_str_1: a string macro
+      macro_str_2: another string macro
+
+      macro_redefined: "this value should be ignored"
+      macro_defined_in_suite: "this value should be ignored"
+      unused_macro: "never used_macro"
+      imbricated_macro: "macro value"
+      imbricated_macro1: "imbricated_macro"
+      imbricated_macro2: "imbricated_macro1"
+      imbricated_macro3: "imbricated_macro2"
+      imbricated_macro4: "imbricated_macro3"
+
+      using_defined_macro: ${macro_for_macro}
+      macro_defined_later: "defined later"
+      using_macro_defined_later: ${macro_defined_later}
+      using_undefined_macro: ${undefined_macro}
+
+      # macro recursivity error
+      # recursive_macro_1: ${recursive_macro_1}
+      # recursive_macro_2: ${recursive_macro_2}+
+      # recursive_macro_3: ${recursive_macro_4}+
+      # recursive_macro_4: ${recursive_macro_3}-
+
+      macro_ending_with_colon_1: "${macro_for_macro}:"
+      macro_ending_with_colon_2: "string ending with colon:"
+
+      # its possible to use macros in macros if they have been defined before
+      # it can work without a list, but not always since dictionnary are not ordered
+      # therefore enforced to be defined before in the list
+      skip_float_test: $(skip)
+      skip_integer_test: $(skip)
+      skip_concatenation_test: $(skip)
+      skip_definition_test: no
+      skip_syntax_test: $(skip)
+      skip_list_test: $(skip)
+      skip_dict_test: $(skip)
+
+      dict_of_fields: {start: 2, stop: 12, step: 2}
+      list_of_values: [2, 4, 6, 8]
+
+      test_1: {skip: $(skip), name: "value test as a macro", setter: ":OLightCmdCalc", getter: ":OLightCmdCalc", values: [3, 6, 9]}
+      test_2:
+        name: "command test as a macro"
+        setter: ":OLightCmdCalc"
+        getter: ":OLightCmdCalc"
+        skip: $(skip)
+        commands:
+          - name: "command name"
+            value: 2
+
+version:
+    major: 1
+    minor: ${version_min}
+    bugfix: 0
+
+config:
+    type: unit
+    name: ${scenario_title}
+    prefix: ${prefix_1}${prefix_2}
+    # prefix: "${prefix_1}${prefix_2}:"  # that will give the wrong PV name but enables to test prefix ending with colon
+    delay: 1
+
+
+tests:
+
+    - name: "tests float macro:"
+      skip: $(skip_float_test)
+      setter: RFLevel-Offset
+      getter: RFLevel-Offset
+      prefix: "-B1-GF1:"
+      message: |
+          Macro substitution with curly brackets is possible but
+          not recommanded because it is also used to define dictionnaries in yaml.
+          Therefore, you might need to quote macro to tell its a string instead,
+          unless you are using multiline sequence and maps syntax.
+      margin: 0
+      values: ["${macro_float_1}", "${ macro_float_2 }", "${  macro_float_3}", $(macro_float_4), $( macro_float_5 ), $(macro_float_6 )]
+
+    - name: "tests integer macros"
+      skip: ${skip_integer_test}
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      message: Also test macro in finally block, no need to quote here not mistook for a dictionnary because not a oneliner map.
+      range:
+          start: ${macro_int_2}
+          stop: $(macro_int_3)
+          step: ${ macro_int_1}
+      finally:
+        setter: -B1-GF1:RFLevel-Offset
+        value: ${macro_int_3}
+
+    - name: "Test concatenation"
+      skip: $(skip_concatenation_test)
+      message: |
+          example of macro concatenation
+          ${macro_ending_with_colon_1}
+          ${macro_ending_with_colon_2}
+          ${macro_str_1}
+          ${macro_str_2}
+          ${macro_str_1}${macro_str_2}
+          ${macro_float_1}
+          ${macro_float_2}
+          $(macro_float_1)$(macro_float_2)
+          $(macro_float_1)${macro_float_2}
+          ${macro_float_1}$(macro_float_2)
+          ${using_defined_macro}
+          ${using_undefined_macro}
+          ${recursive_macro_1}
+          ${recursive_macro_2}
+          ${recursive_macro_3}
+          ${recursive_macro_4}
+      commands:
+        - name: "Validate previous finally (and test macro in a command)"
+          getter: -B1-GF1:RFLevel-Offset
+          get_value: ${macro_int_1}8
+          message: "Concatenated 6 and 8, should end up as an integer"
+
+    - name: "Testing redefinition, no definition"
+      skip: $(skip_definition_test)
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      message: Also testing macro in delay field. ${recursive_macro_4}
+      commands:
+        - name: "using macro defined twice in message"
+          message: ${macro_redefined}
+          delay: ${macro_int_1}
+          value: 2
+        - name: "using macro defined in suite"
+          message: ${macro_defined_in_suite}
+          value: 3
+        - name: "using undefined macro"
+          message: ${undefined_macro}
+          value: 4
+
+    - name: "Testing syntax error"
+      skip: $(skip_syntax_test)
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      commands:
+        - name: "empty macro"
+          message: ${}
+          value: 0
+        - name: "imbricated macro"
+          message: ${${imbricated_macro1}}
+          value: 1
+        - name: "twice imbricated macro"
+          message: ${${${imbricated_macro2}}}
+          value: 2
+        - name: "three time imbricated macro"
+          message: ${${${${imbricated_macro3}}}}
+          value: 3
+        - name: "four time imbricated macro"
+          message: ${${${${${imbricated_macro4}}}}}
+          value: 4
+        - name: "unclosed macro"
+          message: ${unclosed_macro
+          value: 5
+        - name: "imbricated unclosed macro"
+          message: ${${imbricated_macro}
+          value: 6
+
+    - name: Testing list
+      skip: $(skip_list_test)
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      values: ${list_of_values}
+
+    - name: Testing dict
+      skip: $(skip_dict_test)
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range: ${dict_of_fields}
+
+    - ${test_1}
+
+    - ${test_2}

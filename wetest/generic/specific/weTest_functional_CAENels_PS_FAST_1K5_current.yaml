@@ -1,0 +1,126 @@
+version: {major: 1, minor: 1, bugfix: 0}
+
+name: "${TEST_TITLE}"
+
+macros:
+    - TEST_TITLE:     "functional test of CAENels fast PS 1K5"
+      P:              "Sec-Sub(x):Dis-Dev-Idx:"
+      DELAY:          1 
+      RETRY:          5 
+      ## not specific to power supply (user inputs)
+      # current
+      CURRENT:        0.1 # A
+      # ramp
+      RAMP_UP:        0.1 # A/s  
+      DELAY_RAMP_UP:  5   # sec
+
+      ## specific to power supply (won't change)
+      # ramp
+      SET_RAMP_UP:    "IRampSet"
+      GET_RAMP_UP:    "IRampRb"     
+      # regulation mode (current or voltage)
+      SET_REGULATION: "RegModeSet"     
+      GET_REGULATION: "RegModeRb"    
+      # on/off
+      SET_ON_OFF:     "EnaCmd"
+      GET_ON_OFF:     "EnaRb"
+      # current
+      SET_CURRENT:    "ISet"
+      GET_CURRENT:    "IRb"
+      # status
+      GET_CH_STATUS:  "Fault"
+
+
+include:
+    # init
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_init.yaml'
+      TEST_TITLE:         "init power supply ${P}"
+      P:                  ${P}
+      DELAY:              ${DELAY} 
+      RETRY:              ${RETRY}
+      # clear   
+      IGNORE_CLEAR:       False
+      SET_CLEAR:          "ClearCmd.PROC"
+      GET_CLEAR:          "Fault"
+      CLEAR_STATE:        0
+      # on/off
+      IGNORE_ON_OFF:      False
+      SET_ON_OFF:         "EnaCmd"
+      GET_ON_OFF:         "EnaRb"
+      OFF_STATE:          0
+      DELAY_RAMP_DOWN:    1 # sec
+      # status/health
+      IGNORE_STATUS:      False
+      GET_STATUS:         "Fault"
+      STATUS:             0
+
+    # config
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_config.yaml'
+      TEST_TITLE:         "config power supply ${P}"
+      P:                  "${P}"
+      DELAY:              "${DELAY}"
+      RETRY:              "${RETRY}"
+      # ramp up
+      IGNORE_RAMP_UP:     False
+      SET_RAMP_UP :       ${SET_RAMP_UP}
+      GET_RAMP_UP :       ${GET_RAMP_UP}
+      RAMP_UP:            ${RAMP_UP}
+      # regulation mode (current or voltage)
+      IGNORE_REGULATION:  False
+      SET_REGULATION:     "${SET_REGULATION}"
+      GET_REGULATION:     "${GET_REGULATION}"
+      REGULATION_STATE:   1   # 0:CV, 1:CC
+    
+
+    # turn on / enable (FAST PS specific)
+    # config
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_turn_on.yaml'
+      TEST_TITLE:         "enable power supply ${P}"
+      P:                  "${P}"
+      DELAY:              "${DELAY}"
+      RETRY:              "${RETRY}"
+      # on/off    
+      IGNORE_ON_OFF:      False
+      SET_ON_OFF:         ${SET_ON_OFF}
+      GET_ON_OFF:         ${GET_ON_OFF}
+      ON_STATE:           1
+      DELAY_RAMP_UP:      ${DELAY} # no ramp up here, waintoing for user setpoint (next move) 
+
+
+    # config current
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_config.yaml'
+      TEST_TITLE:         "set current for power supply ${P}"
+      P:                  "${P}"
+      DELAY:              "${DELAY}"
+      RETRY:              "${RETRY}"
+      # current
+      IGNORE_CURRENT:     False
+      SET_CURRENT:        "${SET_CURRENT}"
+      GET_CURRENT:        "${SET_CURRENT}" # temp, should be "GET_CURRENT", waiting for CAENels fix
+      CURRENT:            ${CURRENT}
+      MARGIN_CURRENT:     0
+
+
+    # check desired output
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_turn_on.yaml'
+      TEST_TITLE:         "check desired output for power supply ${P}"
+      P:                  "${P}"
+      DELAY:              "${DELAY}"
+      RETRY:              "${RETRY}"
+      # on/off (alreday on, I known, but I need the delay ramp-up)    
+      IGNORE_ON_OFF:          False
+      SET_ON_OFF:             ${SET_ON_OFF}
+      GET_ON_OFF:             ${GET_ON_OFF}
+      ON_STATE:               1
+      DELAY_RAMP_UP:          ${DELAY_RAMP_UP} 
+      # measured value
+      IGNORE_MEASURED_VALUE:  False  
+      GET_MEASURED_VALUE:     "IMes" 
+      MARGIN_MEASURED_VALUE:  0 # %
+      MEASURED_VALUE:         ${CURRENT}
+      # channel status      
+      IGNORE_CH_STATUS:       False
+      GET_CH_STATUS:          "${GET_CH_STATUS}"
+      CH_STATUS:              0 # no fault
+
+      

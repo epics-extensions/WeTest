@@ -1,0 +1,85 @@
+version:
+    major: 1
+    minor: 0
+    bugfix: 0
+
+config:
+    type: functional
+    name: "Demo Acceptance Tests"
+    prefix: "LNS-ISRC-010:"
+    delay: 2
+
+tests:
+    - name: "Check HV Power Supply is Off"
+      setter: "ISS-HVPS:PwrS"
+      getter: "ISS-HVPS:PwrR"
+      values:
+          - 0
+
+    - name: "Check Coil 1 Power Supply is Off"
+      setter: "PWRC-CoilPS-01:PwrS"
+      getter: "PWRC-CoilPS-01:PwrR"
+      values:
+          - 0
+
+    - name: "Set HV Power Supply voltage to 0"
+      setter: "ISS-HVPS:VolS"
+      getter: "ISS-HVPS:VolRB"
+      values:
+          - 0
+
+    - name: "Set HV Power Supply current to 0.1A"
+      setter: "ISS-HVPS:CurS"
+      getter: "ISS-HVPS:CurRB"
+      commands:
+          - name: ""
+            set_value: 100
+            get_value: 0.1
+
+    - name: "Set HV Power Supply On"
+      setter: "ISS-HVPS:PwrS"
+      getter: "ISS-HVPS:PwrR"
+      values:
+          - 1
+
+    - name: "Set HV Power Supply voltage up to 75000"
+      setter: "ISS-HVPS:VolS"
+      getter: "ISS-HVPS:VolR"
+      margin: 5
+      range:
+          start: 5000
+          stop:  75001
+          step:  10000
+
+    - name: "Set Coil 1 Power Supply voltage to maximum"
+      setter: "PWRC-CoilPS-01:VolS"
+      getter: "PWRC-CoilPS-01:VolRB"
+      values:
+          - 10
+
+    - name: "Set Coil 1 Power Supply On"
+      setter: "PWRC-CoilPS-01:PwrS"
+      getter: "PWRC-CoilPS-01:PwrR"
+      values:
+          - 1
+
+    - name: "Set Coil 1 Power Supply current up to 500"
+      setter: "PWRC-CoilPS-01:CurS"
+      getter: "PWRC-CoilPS-01:CurR"
+      margin: 10
+      range:
+          start: 0
+          stop:  501
+          step:  100
+
+    - name: "Set Coil 1 Power Supply Off"
+      setter: "PWRC-CoilPS-01:PwrS"
+      getter: "PWRC-CoilPS-01:PwrR"
+      values:
+          - 0
+
+    - name: "Set HV Power Supply Off"
+      setter: "ISS-HVPS:PwrS"
+      getter: "ISS-HVPS:PwrR"
+      values:
+          - 0

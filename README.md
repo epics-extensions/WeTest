@@ -23,13 +23,17 @@ For example in Ubuntu:
 ```bash
 sudo apt-get install python-tk
 ```
+For example in CentOS:
+```bash
+sudo yum install tkinter
+```
 
 WeTest is currently successfully running on CentOS 7 and Ubuntu 18.04
 (support for Windows is planned but not yet available).
 
-### Using virtualenv
+### Install using virtualenv
 
-To install virtualenv, if it's not already install:
+To install virtualenv, if it's not already installed:
 
 ```bash
 sudo pip install virtualenv
@@ -38,10 +42,18 @@ sudo pip install virtualenv
 And to use virtualenv, first go in the clone repository:
 
 ```bash
-cd /path/to/cloned/repository
+cd WeTest
 virtualenv venv # creates the virtual environment in the folder ./venv
 source ./venv/bin/activate # activates the environment
 ```
+
+To install WeTest go inside the cloned repository folder and type:
+
+```bash
+pip install .
+```
+
+You can use `wetest` as a regular command line utility after that.
 
 To deactivate the environment:
 
@@ -49,15 +61,33 @@ To deactivate the environment:
 deactivate
 ```
 
-### Install WeTest
 
-Once inside the cloned repository folder:
+### Install using conda
+
+To install conda if it's not already installed see:
+https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+
+Once installed, create a python 2.7 environment for WeTest and activate it:
 
 ```bash
-pip install .
+conda create -yn wetest python=2.7
+conda activate wetest
+```
+
+To install WeTest go inside the cloned repository folder and type:
+
+```bash
+cd WeTest
+python setup.py install
 ```
 
 You can use `wetest` as a regular command line utility after that.
+
+To deactivate the environment:
+
+```bash
+conda deactivate
+```
 
 ### Setup pyepics
 

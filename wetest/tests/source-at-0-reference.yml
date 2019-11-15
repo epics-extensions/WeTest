@@ -1,0 +1,156 @@
+version:
+    major: 1
+    minor: 0
+    bugfix: 0
+
+config:
+    type: functional
+    name: "ESS Source Acceptance Tests at Catania: Reference Status"
+    prefix: "LNS-ISRC-010:"
+    delay: 2
+
+tests:
+# Initial setup
+# =============
+#
+# The source is in its initial state: every power supplies are off, and set
+# current and voltage accordingly.
+
+    - name: "Setup HV power supply"
+      prefix: "ISS-HVPS:"
+      commands:
+        - name: "Check HV power supply is off"
+          setter: "PwrS"
+          getter: "PwrR"
+          value: 0
+        - name: "Set HV power supply current limit to maximum"
+          setter: "CurS"
+          getter: "CurRB"
+          set_value: 150
+          get_value: 0.15
+        - name: "Set HV power supply voltage to 0V"
+          setter: "VolS"
+          getter: "VolRB"
+          value: 0
+
+    - name: "Setup repeller 01 power supply"
+      prefix: "PWRC-RepPS-01:"
+      commands:
+        - name: "Check Repeller 01 Power Supply is Off"
+          setter: "PwrS"
+          getter: "PwrR"
+          value: 0
+        - name: "Set Repeller 01 Power Supply voltage to -3500V"
+          setter: "VolS"
+          getter: "VolRB"
+          set_value: 3500
+          get_value: -3500
+        - name: "Set Repeller 01 Power Supply current to -2mA"
+          setter: "CurS"
+          getter: "CurRB"
+          set_value: 2
+          get_value: -0.002
+
+    - name: "Setup repeller 02 power supply"
+      prefix: "PWRC-RepPS-02:"
+      commands:
+        - name: "Check Repeller 02 Power Supply is Off"
+          setter: "PwrS"
+          getter: "PwrR"
+          value: 0
+        - name: "Set Repeller 02 Power Supply voltage to -700V"
+          setter: "VolS"
+          getter: "VolRB"
+          set_value: 700
+          get_value: -700
+        - name: "Set Repeller 02 Power Supply current to -2mA"
+          setter: "CurS"
+          getter: "CurRB"
+          set_value: 2
+          get_value: -0.002
+
+    - name: "Setup coil 01 power supply"
+      prefix: "PWRC-CoilPS-01:"
+      commands:
+        - name: "Check Coil 01 Power Supply is Off"
+          setter: "PwrS"
+          getter: "PwrR"
+          value: 0
+        - name: "Set Coil 01 Power Supply voltage to 9,5V"
+          setter: "VolS"
+          getter: "VolRB"
+          value: 9.5
+        - name: "Set Coil 01 Power Supply current to 108,8A"
+          setter: "CurS"
+          getter: "CurRB"
+          value: 108.8
+
+    - name: "Setup coil 02 power supply"
+      prefix: "PWRC-CoilPS-02:"
+      commands:
+        - name: "Check Coil 02 Power Supply is Off"
+          setter: "PwrS"
+          getter: "PwrR"
+          value: 0
+        - name: "Set Coil 02 Power Supply voltage to 9,5V"
+          setter: "VolS"
+          getter: "VolRB"
+          value: 9.5
+        - name: "Set Coil 02 Power Supply current to 68,9A"
+          setter: "CurS"
+          getter: "CurRB"
+          value: 68.9
+
+    - name: "Setup coil 03 power supply"
+      prefix: "PWRC-CoilPS-03:"
+      commands:
+        - name: "Check Coil 03 Power Supply is Off"
+          setter: "PwrS"
+          getter: "PwrR"
+          value: 0
+        - name: "Set Coil 03 Power Supply voltage to 9,5V"
+          setter: "VolS"
+          getter: "VolRB"
+          value: 9.5
+        - name: "Set Coil 03 Power Supply current to 228,4A"
+          setter: "CurS"
+          getter: "CurRB"
+          value: 228.4
+
+    - name: "Setup magnetron"
+      prefix: "ISS-Magtr:"
+      commands:
+        - name: "Magnetron is Off"
+          setter: "Setup.B6"
+          getter: "Fault2.B6"
+          value: 0
+        - name: "Set Magnetron pulse low level to 0"
+          setter: "PulsLLvlS"
+          getter: "PulsLLvlRB"
+          value: 0
+        - name: "Set Magnetron pulse high level to 1015"
+          setter: "PulsHLvlS"
+          getter: "PulsHLvlRB"
+          value: 1015
+        - name: "Set Magnetron pulse frequency to 14Hz"
+          setter: "PulsFreqS"
+          getter: "PulsFreqRB"
+          value: 14
+        - name: "Set Magnetron pulse width to 6000us"
+          setter: "WidthPulsS"
+          getter: "WidthPulsRB"
+          value: 6
+
+    - name: "Setup ATU"
+      prefix: "ISS-ATU:"
+      commands:
+        - name: "ATU X Position is 5010"
+          setter: "PosXS"
+          getter: "PosXR"
+          margin: 1
+          value: 5010
+        - name: "ATU Y Position is 5000"
+          setter: "PosYS"
+          getter: "PosYR"
+          margin: 1
+          value: 5000

@@ -1,0 +1,67 @@
+version:
+    major: 0
+    minor: 1
+    bugfix: 0
+
+config:
+    type: "unit"
+    name: "Example0[1]"
+    prefix: ""
+    delay: 1.5
+
+tests:
+    - name: "Test"
+      setter: "Sec1-Sub1:Dis1-Dev1-Idx1:Signal1"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec1-Sub1:Dis1-Dev1-Idx1:Signal2"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec1-Sub1:Dis1-Dev1-Idx1:Signal3"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec1-Sub1:Dis1-Dev1-Idx2:Signal1"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec1-Sub1:Dis1-Dev1-Idx2:Signal2"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec1-Sub2:Dis1-Dev1-Idx1:Signal1"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec1-Sub2:Dis1-Dev1-Idx1:Signal1"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec1-Sub2:Dis1-Dev1-Idx1:Signal2"
+      values: [1]
+
+
+    - name: "Test"
+      setter: "Sec1-Sub2:Dis1-Dev1-Idx1:Signal3"
+      values: [1]
+
+
+    - name: "Test"
+      setter: "Sec1-Sub2:Dis1-Dev4-Idx1:Signal1"
+      values: [1]
+
+
+    - name: "Test"
+      setter: "Sec2-Sub1:Dis1-Dev1-Idx1:Signal1"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec2-Sub1:Dis1-Dev1-Idx1:Signal2"
+      values: [1]
+
+    - name: "Test"
+      setter: "Sec2-Sub1:Dis1-Dev1-Idx1:Signal3"
+      values: [1]
+

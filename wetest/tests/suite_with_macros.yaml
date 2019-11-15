@@ -1,0 +1,72 @@
+version:
+    major: 1
+    minor: 1
+    bugfix: 0
+
+name: "Testing macros in suite"
+
+macros:
+  - skip_test: True
+    macro_defined_in_suite: "Value from suite"
+  - skip: $(skip_test)  # defining a macro here will define it for all tests
+    scenario_title: "testing macros from suite"
+
+# test with a dict and a list macros
+# test defining a macro earlier in the macro list
+
+include:
+
+    # No macros
+    - 'wetest/tests/macro-testing.yaml'  # just the scenario path
+    - ['wetest/tests/macro-testing.yaml']  # just the path in a list
+    - {path: 'wetest/tests/macro-testing.yaml'}  # just the path in a dict
+    - path: 'wetest/tests/macro-testing.yaml'  # just the path in a dict
+
+
+
+    # testing list
+
+    ## with one dict
+    - ['wetest/tests/macro-testing.yaml', {scenario_title: "$(scenario_title) as a list, with one dict, [$(macro_used_by_suite)]", macro_defined_in_suite: "value from suite", skip: no}]
+
+    ## with several dicts
+    - ['wetest/tests/macro-testing.yaml', used_in_include: "$(scenario_title) as a list, with dicts", scenario_title: "${used_in_include}", macro_defined_in_suite: "value from suite"]
+
+    ## with strings
+    ## => here the coma in the first item is misread as two items by yaml parser
+    ## => same for the double dot, that gives an issue if there is a space behind
+    ## Therefore forbiding strings.
+    # - ['wetest/tests/macro-testing.yaml', scenario_title="testing macros from suite as a list, with strings", macro_defined_in_suite:"value from suite"]
+
+    ## with one dict
+    - - 'wetest/tests/macro-testing.yaml'
+      - scenario_title: "$(scenario_title) as a list, with one dict"
+        macro_defined_in_suite: "value from suite"
+
+    ## with several dicts
+    - - 'wetest/tests/macro-testing.yaml'
+      - used_in_include: "$(scenario_title) as a list, with dicts"
+      - scenario_title: "${used_in_include}"
+      - macro_defined_in_suite: "value from suite"
+
+
+
+    # testing dict
+
+    ## onliner
+    - {path: 'wetest/tests/macro-testing.yaml', scenario_title: "$(scenario_title) as a dict", macro_defined_in_suite: "value from suite"}
+
+    ## multilines
+    - path: 'wetest/tests/macro-testing.yaml'
+      scenario_title: "$(scenario_title) as a dict"
+      macro_defined_in_suite: "value from suite"
+
+
+
+    ### Advised syntax ###
+    # onliner => list with several dicts
+    - ['wetest/tests/macro-testing.yaml', scenario_title: "$(scenario_title) as a list, with dicts",  macro_defined_in_suite: "value from suite"]
+    # multilines => dict
+    - path: 'wetest/tests/macro-testing.yaml'
+      scenario_title: "$(scenario_title) as a dict"
+      macro_defined_in_suite: "value from suite"

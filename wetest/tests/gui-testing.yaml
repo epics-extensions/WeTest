@@ -1,0 +1,271 @@
+# test expects CA to respond for:
+# SL-MBT-RBN1:OLightCmdCalc
+# SL-MBT-RBN1-B1-GF1:RFLevel-Offset
+
+version:
+    major: "1"
+    minor: 1
+    bugfix: 0
+
+config:
+    type: unit
+    # type: functionnal  # to test too
+    # on_failure: abort
+    # on_failure: pause
+    # on_failure: continue
+    name: Duplicated field
+    name: GUI test
+    prefix: SL-MBT-RBN1  # TODO try without
+    delay: 1  # TODO try without
+    skip: False
+
+tests:
+
+    - name: "Nominal range with finally"
+      delay: 0.5
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      message: One line message !
+      range:  { start: 1, stop: 10, step: 2.3}
+      finally:
+        setter: -B1-GF1:RFLevel-Offset
+        value: 12.5
+
+    - name: "First check previous test finally"
+      message: May fail because of unit testing random execution.
+      ignore: False
+      skip: True
+      commands:
+        - name: "Validate previous finally"
+          skip: False
+          getter: -B1-GF1:RFLevel-Offset
+          get_value: 12.5
+          message: "Command one-line message."
+
+    - name: "Test ignore and skip on command"
+      message: May fail because of unit testing random execution.
+      ignore: False
+      skip: True
+      commands:
+        - name: "Ignored command"
+          ignore: True
+          setter: -B1-GF1:RFLevel-Offset
+          getter: -B1-GF1:RFLevel-Offset
+          value: 14
+          message: this command will not be read
+        - name: "Skipped command"
+          setter: -B1-GF1:RFLevel-Offset
+          getter: -B1-GF1:RFLevel-Offset
+          value: 14
+          message: This command is skipped the previous has not been read
+
+    - name: "Ignore test"
+      message: This test is not read at all since it is marked as ignore
+      ignore: True
+      commands:
+        - name: "Ignored command"
+          ignore: False
+          setter: -B1-GF1:RFLevel-Offset
+          getter: -B1-GF1:RFLevel-Offset
+          value: 14
+          message: Ignore cannot be cancel from within a command, the whole test is ignored
+
+    - name: "Nominal command with delays"
+      delay: 0.5
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      message: >
+        Very (very, very, very, verrrryyy) long
+        message on a single
+        line...
+      commands:
+        - name: "command with delay"
+          value: 2
+          delay: 10
+          message: >
+            Command message
+            on a single line
+        - name: "command with margin"
+          set_value: -105
+          get_value: -100
+          margin: 5
+          message: |
+            Multiligne message:
+            Line 1/3
+            Line 2/3
+            Line 3/3
+      finally:
+        value: 12.5
+
+    - name: "Second check previous test finally"
+      message: May fail because of unit testing random execution.
+      commands:
+        - name: "Validate previous finally"
+          getter: :OLightCmdCalc
+          get_value: 12.5
+
+    - name: "Nominal values with prefix"
+      setter: :RFLevel-Offset
+      getter: :RFLevel-Offset
+      prefix: -B1-GF1
+      message: |
+          ### Multiligne title
+
+          A multiline message in markdown with a list!
+
+          * With a list
+          * In Markdown !
+      margin: 10 # percent
+      delta: 1   # absolute
+      values: [1.1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20.2]
+
+    - name: "Test with command partially OK, first cmd FAIL"
+      skip: yes
+      setter: -B1-GF1:RFLevel-Offset
+      getter: -B1-GF1:RFLevel-Offset
+      # retry: inf
+      # retry: -1
+      retry: 5
+      commands:
+        - {name: "should be FAIL", set_value: 3, get_value: 2}
+        - {name: "should be OK",  set_value: 95, get_value: 100, margin: 5}
+        - {name: "should be OK",  set_value: 95, get_value: 100, delta: 5}
+        - {name: "should be OK",  set_value: 95, get_value: 100, margin: 1, delta: 5}
+        - {name: "should be OK",  set_value: 95, get_value: 100, margin: 5, delta: 1}
+
+    - name: "Test with command partially OK, middle cmd FAIL"
+      setter: -B1-GF1:RFLevel-Offset
+      getter: -B1-GF1:RFLevel-Offset
+      retry: 1
+      commands:
+        - {name: "should be OK", value: 2}
+        - {name: "should be FAIL (greater than expected)", set_value: 4, get_value: 1, margin: 2}
+        - {name: "should be OK",  set_value: 95, get_value: 100, margin: 5}
+
+    - name: "Test with command partially OK, last cmd FAIL"
+      setter: -B1-GF1:RFLevel-Offset
+      getter: -B1-GF1:RFLevel-Offset
+      retry: 0
+      commands:
+        - {name: "should be OK", value: 2}
+        - {name: "should be FAIL (lesser than expected)", set_value: 1, get_value: 4, margin: 2}
+
+    - name: "Wrong setter PV name test"
+      ignore: True
+      setter: :WRONG-NAME
+      getter: :RFLevel-Offset
+      prefix: -B1-GF1
+      values: [15, 16]
+
+    - name: "No setter PV name test"
+      getter: :RFLevel-Offset
+      prefix: -B1-GF1
+      values: [15, 16]
+
+    - name: "Wrong getter PV name test"
+      setter: :RFLevel-Offset
+      ignore: True
+      getter: :WRONG-NAME
+      prefix: -B1-GF1
+      values: [15, 16]
+
+    - name: "No getter PV name test"
+      setter: :RFLevel-Offset
+      prefix: -B1-GF1
+      values: [15, 16]
+
+    - name: "Wrong test, missing range, values or commands"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+
+    - name: "Finally only test"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      finally:
+        value: 123.45
+
+    - name: "Third check previous test finally"
+      message: May fail because of unit testing random execution.
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      values:
+        - 123.45
+
+    - name: "Bad test, missing getter for values"
+      setter: -B1-GF1:RFLevel-Offset
+      values: [17]
+
+    - name: "Bad test, missing getter for range"
+      setter: -B1-GF1:RFLevel-Offset
+      range: {start: 0, stop: 2}
+
+    - name: "Bad test, missing setter for range"
+      getter: -B1-GF1:RFLevel-Offset
+      range: {start: 0, stop: 2}
+
+    - name: "Bad test, missing setter and getter for range"
+      # ignore: True
+      range: {start: 0, stop: 2}
+
+    - name: "Test name used twice"
+      setter: :RFLevel-Offset
+      getter: :RFLevel-Offset
+      prefix: -B1-GF1
+      values: [1.8]
+
+    - name: "Test name used twice"
+      setter: :RFLevel-Offset
+      getter: :RFLevel-Offset
+      prefix: -B1-GF1
+      values: [2]
+
+    - name: "Test duplicated command name "
+      setter: -B1-GF1:RFLevel-Offset
+      getter: -B1-GF1:RFLevel-Offset
+      commands:
+        - {name: "CMD 1", value: 2}
+        - {name: "CMD 2", set_value: 3, get_value: 2}
+        - {name: "CMD 2", set_value: 4, get_value: 4}
+
+    - name: "Command that ERRORs..."
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      commands:
+        - name: "getter without get_value"
+          setter: -B1-GF1:RFLevel-Offset
+          set_value: 4
+        - name: "setter without set_value"
+          getter: -B1-GF1:RFLevel-Offset
+          get_value: 4
+
+    - name: "Partial commands that is OK"
+      commands:
+        - name: "command with only setter"
+          setter: -B1-GF1:RFLevel-Offset
+          set_value: 4
+        - name: "command with only getter"
+          getter: -B1-GF1:RFLevel-Offset
+          get_value: 4
+        - name: "command with no setter nor getter"
+          get_value: 4
+
+    - name: "Bad test, no test kind"
+      setter: -B1-GF1:RFLevel-Offset
+      getter: -B1-GF1:RFLevel-Offset
+      # on_failure: abort
+      on_failure: pause
+
+
+    - name: "Bad test, multiple test kind"
+      setter: -B1-GF1:RFLevel-Offset
+      getter: -B1-GF1:RFLevel-Offset
+      range: {start: 0, stop: 2}
+      range: {start: 1, stop: 3}
+
+    - name: "Bad test, several test kind"
+      setter: -B1-GF1:RFLevel-Offset
+      getter: -B1-GF1:RFLevel-Offset
+      range: {start: 0, stop: 2}
+      values: [1.8]
+
+

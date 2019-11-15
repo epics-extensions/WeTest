@@ -1,0 +1,11 @@
+version:
+    major: 1
+    minor: 0
+    bugfix: 0
+
+name: "ExampleSuite01"
+
+include:
+    - 'wetest/tests/scenario_example01.yaml'
+    - 'wetest/tests/scenario_example02.yaml'
+    - 'wetest/tests/scenario_example03.yaml'

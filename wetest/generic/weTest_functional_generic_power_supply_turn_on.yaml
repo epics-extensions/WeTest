@@ -1,0 +1,100 @@
+# functional test, turn-on power supply:
+#   - check interlock
+#   - turn on poxer supply
+#   - wait delais ramp-up
+#   - check measured value
+#   - check channel status
+#   - check board status
+#   - check crate status
+# by default, all tests are skipped
+
+macros:
+    - TEST_TITLE:             "Set DELTA ES150 in nominal mode"
+      P:                      "Sec-Sub(x):Dis-Dev-Idx:"
+      DELAY:                  0.2   # sec: defaut delay (timeout between setter and checking getter)
+      RETRY:                  2
+      # check permit (permission to work)
+      IGNORE_CHECK_PERMIT:  True
+      GET_PERMIT:           "IntckRb"
+      PERMIT:               1
+      # on/off    
+      IGNORE_ON_OFF:          True
+      SET_ON_OFF:             "PwrEnaCmd"
+      GET_ON_OFF:             "PwrEnaRb"
+      ON_STATE:               1
+      DELAY_RAMP_UP:          1 # sec, delay ramp-up after power on
+      # channel status      
+      IGNORE_CH_STATUS:       True
+      GET_CH_STATUS:          "CcStat"
+      CH_STATUS:             0 # 0:CV, 1:CC
+      # board status    
+      IGNORE_BOARD_STATUS:    True
+      GET_BOARD_STATUS:       "CcStat"
+      BOARD_STATUS:           0 # 0:CV, 1:CC
+      # crate status      
+      IGNORE_CRATE_STATUS:    True
+      GET_CRATE_STATUS:       "CcStat"
+      CRATE_STATUS:           0 # 0:CV, 1:CC
+      # measured value
+      IGNORE_MEASURED_VALUE:  True  
+      GET_MEASURED_VALUE:     "UMes" 
+      MARGIN_MEASURED_VALUE:  0 # %
+      MEASURED_VALUE:         8 # volts
+
+version: {major: 1, minor: 1, bugfix: 0}
+
+config:
+    type:       functional
+    on_failure: pause
+    name:       ${TEST_TITLE}
+    prefix:     ${P}
+    delay:      ${DELAY}
+    retry:      ${RETRY}
+
+tests:
+
+    # check permission to work
+    - name: "check permission to work (interlock)"
+      ignore: ${IGNORE_CHECK_PERMIT}
+      getter: "${GET_PERMIT}"
+      values:
+        - ${PERMIT}
+
+    # turn on power supply
+    - name: "power on"
+      ignore: ${IGNORE_ON_OFF}
+      setter: "${SET_ON_OFF}"
+      getter: "${GET_ON_OFF}"
+      commands:
+        - name:   "turn on and wait ramp-up time"
+          value:  ${ON_STATE}
+          delay:  ${DELAY_RAMP_UP}
+        
+    # check channel status
+    - name: "check channel status"
+      ignore: ${IGNORE_CH_STATUS}
+      getter: "${GET_CH_STATUS}"
+      values:  
+        - "${CH_STATUS}"
+
+    # check board status
+    - name: "check board status"
+      ignore: ${IGNORE_BOARD_STATUS}
+      getter: "${GET_BOARD_STATUS}"
+      values:  
+        - "${BOARD_STATUS}"
+
+    # check crate status
+    - name: "check crate status"
+      ignore: ${IGNORE_CRATE_STATUS}
+      getter: "${GET_CRATE_STATUS}"
+      values:  
+        - "${CRATE_STATUS}"
+
+    # check measued value
+    - name: "check measured value"
+      ignore: ${IGNORE_MEASURED_VALUE}
+      getter: "${GET_MEASURED_VALUE}"
+      margin: ${MARGIN_MEASURED_VALUE}
+      values:
+        - ${MEASURED_VALUE}

@@ -1,0 +1,11 @@
+version: {major: 1, minor: 1, bugfix: 0}
+
+macros:
+    - SUITE_TITLE: ""
+
+name: "Testing scenario include."
+
+include:
+    - ['./include-testing-0.yaml', SUITE_TITLE: '${SUITE_TITLE}-A']
+    - ['include-testing-1.yaml', SUITE_TITLE: '${SUITE_TITLE}-B']
+

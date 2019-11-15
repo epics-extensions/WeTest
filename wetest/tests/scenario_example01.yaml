@@ -1,0 +1,29 @@
+version:
+    major: 0
+    minor: 1
+    bugfix: 0
+
+config:
+    type: "unit"
+    name: "Example01"
+    prefix: "LNS-ISRC-010:ISS-HVPS:"
+    delay: 1.5
+
+tests:
+    - name: "Sequence 1"
+      message: "Sequence 1 succeeded"
+      commands:
+          - name: "Command 1"
+            message: "Command 1 succeeded"
+            setter: "LockS"
+            getter: "LockR"
+            set_value: 0
+            get_value: 0
+            delay: 1.5
+          - name: "Command 2"
+            message: "Command 2 succeeded"
+            setter: "LockS"
+            getter: "LockR"
+            set_value: 1
+            get_value: 1
+            delay: 1.5

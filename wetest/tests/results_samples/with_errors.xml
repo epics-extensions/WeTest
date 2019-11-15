@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite errors="0" failures="2" name="TestsSequence-20160627162407" skipped="0" tests="20" time="138.721">
+	<testcase classname="TestsSequence" name="test_CP1Typ" time="4.040"/>
+	<testcase classname="TestsSequence" name="test_MFC 3 Flow" time="10.397"/>
+	<testcase classname="TestsSequence" name="test_MFC 3 Scale" time="8.038"/>
+	<testcase classname="TestsSequence" name="test_MFC 4 Flow" time="8.018"/>
+	<testcase classname="TestsSequence" name="test_MFC 4 Scale" time="8.016"/>
+	<testcase classname="TestsSequence" name="test_MFC3OpMod" time="6.017"/>
+	<testcase classname="TestsSequence" name="test_MFC4OpMod" time="6.013"/>
+	<testcase classname="TestsSequence" name="test_Pirani Channel 1 Scale" time="8.019"/>
+	<testcase classname="TestsSequence" name="test_Pirani Channel 2 Scale" time="8.019"/>
+	<testcase classname="TestsSequence" name="test_Relay 1" time="6.015"/>
+	<testcase classname="TestsSequence" name="test_Relay 1 Read" time="6.012"/>
+	<testcase classname="TestsSequence" name="test_Relay 2" time="6.016"/>
+	<testcase classname="TestsSequence" name="test_Relay 2 Read" time="6.014"/>
+	<testcase classname="TestsSequence" name="test_Relay 3" time="6.016"/>
+	<testcase classname="TestsSequence" name="test_Relay 3 Read" time="6.013"/>
+	<testcase classname="TestsSequence" name="test_Relay 4" time="6.014"/>
+	<testcase classname="TestsSequence" name="test_Relay 4 Read" time="6.014"/>
+	<testcase classname="TestsSequence" name="test_Units" time="8.017"/>
+	<testcase classname="TestsSequence" name="test_CP2Typ" time="6.010">
+		<failure message="1 != None" type="AssertionError">
+<![CDATA[Traceback (most recent call last):
+  File "./wetest.py", line 72, in test
+    self.assertEqual(value, getter.get())
+AssertionError: 1 != None
+]]>		</failure>
+	</testcase>
+	<testcase classname="TestsSequence" name="test_Lock" time="10.003">
+		<failure message="0 != None" type="AssertionError">
+<![CDATA[Traceback (most recent call last):
+  File "./wetest.py", line 72, in test
+    self.assertEqual(value, getter.get())
+AssertionError: 0 != None
+]]>		</failure>
+	</testcase>
+	<system-out>
+<![CDATA[]]>	</system-out>
+	<system-err>
+<![CDATA[]]>	</system-err>
+</testsuite>

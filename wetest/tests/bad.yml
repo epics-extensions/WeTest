@@ -1,0 +1,25 @@
+version:
+    major: 1
+    minor: 0
+    bugfix: 0
+
+config:
+    type: unit
+    name: "MKS946"
+    prefix: "INFN-Src:ISS-HVPf:"
+    delay: 2
+
+tests:
+    - name: "Relay 1"
+      setter: "Rel1S"
+      getter: "Rel1RB"
+      range:
+          start: 0
+          stop: 3
+      values:
+          - 0.02
+          - 100
+          - 1000
+          - 10000
+      finally:
+          value: 0

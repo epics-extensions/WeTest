@@ -1,0 +1,304 @@
+# test expects CA to respond for:
+# SL-MBT-RBN1:OLightCmdCalc
+# SL-MBT-RBN1-B1-GF1:RFLevel-Offset
+
+version:
+    major: 1
+    minor: 1
+    bugfix: 0
+
+macros:
+  - BOOL_VALUES: [True, No, 1]
+  - ENUM_VALUES: ["SWITCHING_OFF", "OFF", 1]
+  - STR_VALUES:  ["A string", "Another string", "2"]
+  - WAVEFORM_VALUES:
+    - [10, 11, 12]
+    - [13, 14, 15]
+    - [16, 17, 18]
+
+config:
+    type: functional
+    on_failure: continue
+    name: Type test
+    prefix: SL-MBT-RBN1
+
+tests:
+
+    - name: 'Nominal test boolean'
+      setter: -B1-GF1:Pulse
+      getter: -B1-GF1:Pulse
+      values: ${BOOL_VALUES}
+
+    - name: 'Nominal test enumerate'
+      setter: :ADCS1-STAT-RB
+      getter: :ADCS1-STAT-RB
+      values: ${ENUM_VALUES}
+
+    - name: "Bad test, wrong enum value"
+      setter: :ADCS1-STAT-RB
+      getter: :ADCS1-STAT-RB
+      values:
+        - "BAD VALUE"
+        - "BAD_VALUE"
+        - 26
+
+    - name: 'Nominal test string'
+      setter: :UIncPwrMes-NNAM
+      getter: :UIncPwrMes-NNAM
+      values: ${STR_VALUES}
+
+    - name: "use of margin and delta with string and enum"
+      commands:
+        - name: "Boolean with margin"
+          setter: -B1-GF1:Pulse
+          getter: -B1-GF1:Pulse
+          value: True
+          margin: 1
+          delta: 1
+        - name: "Boolean with margin"
+          setter: -B1-GF1:Pulse
+          getter: -B1-GF1:Pulse
+          set_value: False
+          get_value: True
+          margin: 1
+          delta: 1
+        - name: "String with margin"
+          setter: :UIncPwrMes-NNAM
+          getter: :UIncPwrMes-NNAM
+          value: "Test string"
+          margin: 1
+          delta: 1
+        - name: "String with margin"
+          setter: :UIncPwrMes-NNAM
+          getter: :UIncPwrMes-NNAM
+          set_value: "Test string 1"
+          get_value: "Test string 2"
+          margin: 1
+          delta: 1
+
+    - name: 'Bad test, setter error wrong PV type'
+      commands:
+        - name: "Char in float"
+          setter: -B1-GF1:RFLevel-Offset
+          getter: -B1-GF1:RFLevel-Offset
+          value: "F"
+        - name: "Char in boolean"
+          setter: -B1-GF1:Pulse
+          getter: -B1-GF1:Pulse
+          value: "B"
+        - name: "Int in string"
+          setter: :UIncPwrMes-NNAM
+          getter: :UIncPwrMes-NNAM
+          value: 2
+        - name: "Float in string"
+          setter: :UIncPwrMes-NNAM
+          getter: :UIncPwrMes-NNAM
+          value: 2.3
+        - name: "Waveform in string"
+          setter: :UIncPwrMes-NNAM
+          getter: :UIncPwrMes-NNAM
+          value: ["a", "b", "c"]
+        - name: "Waveform in float"
+          setter: -B1-GF1:RFLevel-Offset
+          getter: -B1-GF1:RFLevel-Offset
+          value: [1, 2]
+
+    - name: 'Bad test, getter error wrong PV type'
+      commands:
+        - name: "Char in float"
+          getter: -B1-GF1:RFLevel-Offset
+          value: "F"
+        - name: "Char in boolean"
+          getter: -B1-GF1:Pulse
+          value: "B"
+        - name: "Int in string"
+          getter: :UIncPwrMes-NNAM
+          value: 2
+        - name: "Float in string"
+          getter: :UIncPwrMes-NNAM
+          value: 2.3
+        - name: Waveform in string"
+          getter: :UIncPwrMes-NNAM
+          value: ["a", "b", "c"]
+        - name: Waveform in float"
+          getter: -B1-GF1:RFLevel-Offset
+          value: [1, 2]
+
+    - name: 'Nominal test waveform (char, int...)'
+      commands:
+        - name: "Char waveform"
+          setter: :ADCS1-INFO
+          getter: :ADCS1-INFO
+          value: ["a", "b", "c", 215]
+        - name: "Char waveform as string"
+          setter: :ADCS1-INFO
+          getter: :ADCS1-INFO
+          value: "abcd"
+        - name: "Double waveform"
+          setter: :UIncPwrMes
+          getter: :UIncPwrMes
+          value: [1, 2, 3.14]
+        - name: "Float waveform"
+          setter: :UIncPwrMes-BPTR
+          getter: :UIncPwrMes-BPTR
+          value: [1, 2, 3.14, "inf", "-INF"]
+        - name: "Int waveform"
+          setter: :Test-Int-Waveform
+          getter: :Test-Int-Waveform
+          value: [1, 2, "A"]
+        - name: "Empty waveform"
+          setter: :UIncPwrMes-BPTR
+          getter: :UIncPwrMes-BPTR
+          value: []
+
+    - name: 'single-value waveform issue'
+      message: pyepics get returns a float rather than a waveform, is that true for regular EPICS records as well ? 
+      commands:
+        - name: "single-value waveform"
+          setter: :UIncPwrMes-BPTR
+          getter: :UIncPwrMes-BPTR
+          value: [42]
+        - name: "Empty waveform"
+          setter: :UIncPwrMes-BPTR
+          getter: :UIncPwrMes-BPTR
+          set_value: []
+          get_value: [0.0]
+        - name: "Float PV tested as single value waveform"
+          setter: -B1-GF1:RFLevel-Offset
+          getter: -B1-GF1:RFLevel-Offset
+          set_value: 2
+          get_value: [2]
+
+    - name: 'Nominal test waveform using values'
+      setter: :UIncPwrMes-BPTR
+      getter: :UIncPwrMes-BPTR
+      values: ${WAVEFORM_VALUES}
+
+    - name: 'Nominal test waveform with delta and margin'
+      setter: :UIncPwrMes-BPTR
+      getter: :UIncPwrMes-BPTR
+      commands:
+        - name: "testing margin"
+          margin: 5
+          set_value: [95, 190]
+          get_value: [100, 200]
+        - name: "testing delta"
+          delta: 5
+          set_value: [95, 195]
+          get_value: [100, 200]
+        - name: "testing big delta and small margin"
+          delta: 5
+          margin: 1
+          set_value: [95, 195]
+          get_value: [100, 200]
+        - name: "testing small delta and big margin"
+          delta: 1
+          margin: 5
+          set_value: [95, 190]
+          get_value: [100, 200]
+
+    - name: 'Bad test waveform with delta and margin'
+      setter: :UIncPwrMes-BPTR
+      getter: :UIncPwrMes-BPTR
+      commands:
+        - name: "testing margin"
+          margin: 5
+          set_value: [94, 211]
+          get_value: [100, 200]
+        - name: "testing delta"
+          delta: 5
+          set_value: [94, 206]
+          get_value: [100, 200]
+        - name: "value out of delta and margin"
+          delta: 2
+          margin: 1.5
+          set_value: [98, 97, 203, 204]
+          get_value: [100, 100, 200, 200]
+
+    - name: 'Bad test waveform, wrong value'
+      commands:
+        - name: "String in char"
+          setter: :ADCS1-INFO
+          getter: :ADCS1-INFO
+          value: ["a string"]
+        - name: "Float in char"
+          setter: :ADCS1-INFO
+          getter: :ADCS1-INFO
+          value: [1.32]
+        - name: "bool in char"
+          setter: :ADCS1-INFO
+          getter: :ADCS1-INFO
+          value: [True, no]
+          message: apparently boolean are written and read back as 0 and 1
+        - name: "Char in float"
+          setter: :UIncPwrMes
+          getter: :UIncPwrMes
+          value: ["a", "b"]
+          message: passes OK because characters are first transformed into integers
+        - name: "Char in float"
+          setter: :UIncPwrMes
+          getter: :UIncPwrMes
+          value: ["a", "b", "NaN"]
+          message: fails because NaN does not equal NaN
+        - name: "Float in int"
+          setter: :Test-Int-Waveform
+          getter: :Test-Int-Waveform
+          value: [1.3, 3.14, 12]
+        - name: "Too many elements"
+          setter: :Test-Int-Waveform
+          getter: :Test-Int-Waveform
+          value: [1, 2, 3, 4, 5]
+        - name: "Not a waveform"
+          setter: :Test-Int-Waveform
+          getter: :Test-Int-Waveform
+          value: 13
+        - name: "Non ASCII char in char waveform"
+          setter: :ADCS1-INFO
+          getter: :ADCS1-INFO
+          value: ["à", "$", "é", 215]
+
+    - name: 'Range incompatible with string'
+      setter: :UIncPwrMes-NNAM
+      getter: :UIncPwrMes-NNAM
+      range:
+        start: 1
+        stop: 2
+
+    - name: 'Range incompatible with waveform'
+      message: "not possible to write to a waveform PV without using a list"
+      setter: :UIncPwrMes-BPTR
+      getter: :UIncPwrMes-BPTR
+      range:
+        start: 1
+        stop: 2
+
+    - name: 'Range compatible with boolean'
+      message: "it is possible to write single numeric value in a boolean PV, probably not very usefull test though"
+      setter: -B1-GF1:Pulse
+      getter: -B1-GF1:Pulse
+      range:
+        start: 1
+        stop: 3
+
+    - name: 'Range compatible with enum'
+      message: "it is possible to write single numeric value in an enum PV, probably not very usefull test though"
+      setter: :ADCS1-STAT-RB
+      getter: :ADCS1-STAT-RB
+      range:
+        start: 1
+        stop: 4
+
+
+# SL-MBT-RBN1:ADCS1-STAT-RB :	{'epics_type': 'mbbi', 'DESC': 'Get local state', 'DTYP': 'asynInt32', 'SCAN': 'I/O Intr', 'PINI': 'YES', 'INP': '@asyn(FMC1-AI, 0', 'ZRVL': '0', 'ZRST': 'UNKNOWN', 'ONVL': '1', 'ONST': 'OFF', 'TWVL': '2', 'TWST': 'SWITCHING_OFF', 'THVL': '3', 'THST': 'INITIALIZING', 'FRVL': '4', 'FRST': 'ON', 'FVVL': '5', 'FVST': 'STOPPING', 'SXVL': '6', 'SXST': 'STARTING', 'SVVL': '7', 'SVST': 'RUNNING', 'EIVL': '8', 'EIST': 'FAULT', 'EISV': 'MAJOR', 'type': 'enum', 'enums': ['UNKNOWN', 'OFF', 'SWITCHING_OFF', 'INITIALIZING', 'ON', 'STOPPING', 'STARTING', 'RUNNING', 'FAULT', 'no NIST', 'no TEST', 'no ELST', 'no TVST', 'no TTST', 'no FTST', 'no FFST'], 'states': [0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0]}
+# SL-MBT-RBN1:ADCS1-NSMP :	{'epics_type': 'longout', 'DESC': '', 'DTYP': 'asynInt32', 'OUT': '@asyn(FMC1-AI, 0', 'LOPR': '1', 'HOPR': '16384', 'DRVL': '1', 'DRVH': '16384', 'lolim': 1.0, 'hilim': 16384.0, 'type': 'int'}
+# SL-MBT-RBN1:ADCS1-NSMP-RB :	{'epics_type': 'longin', 'DESC': '', 'DTYP': 'asynInt32', 'SCAN': 'I/O Intr', 'PINI': 'YES', 'INP': '@asyn(FMC1-AI, 0', 'type': 'int'}
+# SL-MBT-RBN1:ADCS1-SMPT-RB :	{'epics_type': 'calc', 'DESC': '', 'CALC': 'B?A*1000/B:0', 'INPA': 'SL-MBT-RBN1:ADCS1-NSMP-RB CPP', 'INPB': 'SL-MBT-RBN1:ADCS1-SRAT-RB CPP', 'EGU': 'ms', 'PREC': '3', 'prec': 3.0, 'unit': 'ms'}
+# SL-MBT-RBN1:ADCS1-CLKS :	{'epics_type': 'mbbo', 'DESC': '', 'DTYP': 'asynInt32', 'OUT': '@asyn(FMC1-AI, 0', 'ZRVL': '0', 'ZRST': 'Internal', 'ONVL': '1', 'ONST': 'External', 'type': 'enum', 'enums': ['Internal', 'External', 'no TWST', 'no THST', 'no FRST', 'no FVST', 'no SXST', 'no SVST', 'no EIST', 'no NIST', 'no TEST', 'no ELST', 'no TVST', 'no TTST', 'no FTST', 'no FFST'], 'states': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
+# SL-MBT-RBN1:UIncPwrMes-NNAM :	{'epics_type': 'stringin', 'DESC': '', 'VAL': 'UIncMes', 'type': 'string'}
+# SL-MBT-RBN1:UIncPwrMes-BPT :	{'epics_type': 'stringout', 'VAL': 'typeV2dBm-RBTS-INC', 'type': 'string'}
+# SL-MBT-RBN1-B1-GF1:Modulation-RB :	{'epics_type': 'bi', 'DESC': 'Pulse Modulation State Readback', 'DTYP': 'stream', 'INP': '@RS-SMC100A.proto getPulmStat SMC100A 28', 'PINI': 'YES', 'ZNAM': 'OFF', 'ONAM': 'ON', 'type': 'enum', 'enums': ['no ZNAME', 'no ONAME'], 'states': [0, 0]}
+# SL-MBT-RBN1-B1-GF1:Pulse :	{'epics_type': 'bo', 'DESC': 'Set Pulse Generator State ON/OFF', 'DTYP': 'stream', 'OUT': '@RS-SMC100A.proto setPgenStat SMC100A 28', 'FLNK': 'SL-MBT-RBN1-B1-GF1:Pulse-RB', 'ZNAM': 'OFF', 'ONAM': 'ON', 'type': 'enum', 'enums': ['no ZNAME', 'no ONAME'], 'states': [0, 0]}
+# SL-MBT-RBN1:ADCS1-INFO :	{'epics_type': 'waveform', 'DESC': '', 'DTYP': 'asynInt8ArrayIn', 'FTVL': 'CHAR', 'NELM': '512', 'SCAN': 'I/O Intr', 'PINI': 'YES', 'INP': '@asyn(FMC1-AI, 0', 'type': 'char', 'count': 512}
+# SL-MBT-RBN1:UIncPwrMes :	{'epics_type': 'waveform', 'DESC': '', 'DTYP': 'asynFloat64ArrayIn', 'FTVL': 'DOUBLE', 'NELM': '16384', 'SCAN': 'I/O Intr', 'INP': '@asyn(FMC1-AI, 0', 'EGU': 'V', 'unit': 'V', 'type': 'float', 'count': 16384}
+# SL-MBT-RBN1:UIncPwrMes-BPTR :	{'epics_type': 'waveform', 'NELM': '101', 'FTVL': 'FLOAT', 'type': 'float', 'count': 101}
+# SL-MBT-RBN1:Test-Int-Waveform :	{'epics_type': 'waveform', 'NELM': '3', 'FTVL': 'LONG', 'type': 'int', 'count': 3}

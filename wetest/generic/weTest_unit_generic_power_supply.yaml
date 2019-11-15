@@ -1,0 +1,363 @@
+# generic unit test for power supply
+# supported: voltage, current, on/off, polarity, ramp up/down voltage and current offset, trip
+# test range and limits:
+# - check range setter
+# - chech Read Back value (should it be measured value?)
+# - check limits setter
+# by default, all tests are ignored
+
+## WAITING FOR WETEST UPDATE ##
+# finally value should be set to the value before the test to not keep user config #
+###############################
+
+include:
+    - path:           'wetest/generic/weTest_functional_generic_power_supply_init.yaml'
+      P:              "${P}"
+      DELAY:          ${DELAY}
+      RETRY:          ${RETRY}
+      # clear   
+      IGNORE_CLEAR:       False
+      SET_CLEAR:          "ClearCmd.PROC"
+      GET_CLEAR:          "Fault"
+      CLEAR_STATE:        0
+      # on/off
+      IGNORE_ON_OFF:      False
+      SET_ON_OFF:         "EnaCmd"
+      GET_ON_OFF:         "EnaRb"
+      OFF_STATE:          0
+      DELAY_RAMP_DOWN:    1 # sec
+      # status/health
+      IGNORE_STATUS:      False
+      GET_STATUS:         "Fault"
+      STATUS:             0
+    - "tests"
+
+macros:
+    - TEST_TITLE:     "unit test of the power supply"
+      P:              "Sec-Sub(x):Dis-Dev-Idx:"
+      DELAY:          0.1 # sec: defaut delay (timeout between setter and checking getter)
+      RETRY:          2 # 2 retry in case of failure
+      # voltage
+      IGNORE_VOLTAGE: True    # by default, voltage tests are ignored
+      SET_VOLTAGE:    "USet"
+      GET_VOLTAGE:    "URb"   # should it be RBV or measured value here? TBD
+      MAX_VOLTAGE:    30  # volts
+      MIN_VOLTAGE:    0   # volts
+      STEP_VOLTAGE:   5   # volts
+      OVER_VOLTAGE:   31  # volts
+      UNDER_VOLTAGE:  -1  # volts
+      MARGIN_VOLTAGE: 0   # %
+      FINAL_VOLTAGE:  0   # volts
+      # current
+      IGNORE_CURRENT: True
+      SET_CURRENT:    "ISet"
+      GET_CURRENT:    "IRb"   # should it be RBV or measured value here? TBD
+      MAX_CURRENT:    5   # amp
+      MIN_CURRENT:    0   # amp
+      STEP_CURRENT:   1   # amp
+      OVER_CURRENT:   6   # amp
+      UNDER_CURRENT:  -1
+      MARGIN_CURRENT: 0   # %
+      FINAL_CURRENT:  0   # amp
+      # on/off
+      IGNORE_ON_OFF:  True
+      SET_ON_OFF:     "Pw"
+      GET_ON_OFF:     "PwRb"
+      OFF_STATE:      0 # off
+      ON_STATE:       1 # on
+      FINAL_ON_OFF:   0 # off
+      # polarity
+      IGNORE_POLARITY: True
+      SET_POLARITY:   "BPosSet"
+      GET_POLARITY:   "BPosRb"
+      FINAL_POLARITY: 0 # ? positive ?
+      # ramp-up
+      IGNORE_RAMP_UP: True
+      SET_RAMP_UP:    "RUp"
+      GET_RAMP_UP:    "RUpRb"  
+      MAX_RAMP_UP:    5   # volt/sec
+      MIN_RAMP_UP:    0   # volt/sec
+      STEP_RAMP_UP:   1   # volt/sec
+      OVER_RAMP_UP:   6   # volt/sec
+      UNDER_RAMP_UP:  -1
+      MARGIN_RAMP_UP: 0   # %
+      FINAL_RAMP_UP:  0   # volt/sec
+      # ramp-down
+      IGNORE_RAMP_DOWN: True
+      SET_RAMP_DOWN:    "RDwn"
+      GET_RAMP_DOWN:    "RDwnRb" 
+      MAX_RAMP_DOWN:    5   # volt/sec
+      MIN_RAMP_DOWN:    0   # volt/sec
+      STEP_RAMP_DOWN:   1   # volt/sec
+      OVER_RAMP_DOWN:   6   # volt/sec
+      UNDER_RAMP_DOWN:  -1
+      MARGIN_RAMP_DOWN: 0   # %
+      FINAL_RAMP_DOWN:  0   # volts
+      # voltage offset
+      IGNORE_VOLTAGE_OFFSET: True
+      SET_VOLTAGE_OFFSET:    "RDwn"
+      GET_VOLTAGE_OFFSET:    "RDwnRb" 
+      MAX_VOLTAGE_OFFSET:    5   # volt/sec
+      MIN_VOLTAGE_OFFSET:    0   # volt/sec
+      STEP_VOLTAGE_OFFSET:   1   # volt/sec
+      OVER_VOLTAGE_OFFSET:   6   # volt/sec
+      UNDER_VOLTAGE_OFFSET:  -1
+      MARGIN_VOLTAGE_OFFSET: 0   # %
+      FINAL_VOLTAGE_OFFSET:  0   # volt/sec
+      # current offset
+      IGNORE_CURRENT_OFFSET: True
+      SET_CURRENT_OFFSET:    "RDwn"
+      GET_CURRENT_OFFSET:    "RDwnRb" 
+      MAX_CURRENT_OFFSET:    5   # amp
+      MIN_CURRENT_OFFSET:    0   # amp
+      STEP_CURRENT_OFFSET:   1   # amp
+      OVER_CURRENT_OFFSET:   6   # amp
+      UNDER_CURRENT_OFFSET:  -1
+      MARGIN_CURRENT_OFFSET: 0   # %
+      FINAL_CURRENT_OFFSET:  0   # amp
+      # trip
+      IGNORE_TRIP: True
+      SET_TRIP:   "Trip"
+      GET_TRIP:   "TripRb"
+      FINAL_TRIP: 1 # ? allowed ?
+      # regulation mode
+      IGNORE_REGULATION:  True
+      SET_REGULATION:     "RegModeSet"
+      GET_REGULATION:     "RegModeRb"
+      REGULATION_STATE:   [0, 1]  # 0:CV, 1:CC
+      FINAL_REGULATION:   0       # CV
+
+version:
+    major: 1
+    minor: 1
+    bugfix: 0
+
+config:
+    type:   unit
+    name:   "${TEST_TITLE}"
+    prefix: "${P}"
+    delay:  "${DELAY}" 
+    retry:  ${RETRY}
+
+tests:
+
+    # voltage
+    - name: "voltage range"
+      ignore:  ${IGNORE_VOLTAGE}
+      setter: "${SET_VOLTAGE}"
+      getter: "${GET_VOLTAGE}"
+      margin: ${MARGIN_VOLTAGE}
+      range:
+        start: ${MIN_VOLTAGE}
+        stop:  ${MAX_VOLTAGE}
+        step:  ${STEP_VOLTAGE}
+      finally:
+        value: ${FINAL_VOLTAGE}
+
+    - name: "voltage limits"
+      ignore:   ${IGNORE_VOLTAGE}
+      setter: "${SET_VOLTAGE}"
+      getter: "${GET_VOLTAGE}"
+      commands:
+        - name: "min"
+          margin: ${MARGIN_VOLTAGE}
+          set_value: ${UNDER_VOLTAGE}
+          get_value: ${MIN_VOLTAGE}
+        - name: "max"
+          margin: ${MARGIN_VOLTAGE}
+          set_value: ${OVER_VOLTAGE}
+          get_value: ${MAX_VOLTAGE}
+      finally:
+        value: ${FINAL_VOLTAGE}
+
+    # current
+    - name: "current range"
+      ignore:   ${IGNORE_CURRENT}
+      setter: "${SET_CURRENT}"
+      getter: "${GET_CURRENT}"
+      margin: ${MARGIN_CURRENT}
+      range:
+        start: ${MIN_CURRENT}
+        stop:  ${MAX_CURRENT}
+        step:  ${STEP_CURRENT}
+      finally:
+        value: ${FINAL_CURRENT}
+
+    - name: "current limits"
+      ignore:   ${IGNORE_CURRENT}
+      setter: "${SET_CURRENT}"
+      getter: "${GET_CURRENT}"
+      commands:
+        - name: "min"
+          margin: ${MARGIN_CURRENT}
+          set_value: ${UNDER_CURRENT}
+          get_value: ${MIN_CURRENT}
+        - name: "max"
+          margin: ${MARGIN_CURRENT}
+          set_value: ${OVER_CURRENT}
+          get_value: ${MAX_CURRENT}
+      finally:
+        value: ${FINAL_CURRENT}
+
+    # on/off
+    # !! is it dangerous to on/off the HV without known configuration ? !!
+    - name: "on/off"
+      ignore:   "${IGNORE_ON_OFF}"
+      setter: "${SET_ON_OFF}"
+      getter: "${GET_ON_OFF}"
+      values:
+        - ${OFF_STATE}  # off
+        - ${ON_STATE}   # on
+      finally:
+        value: ${FINAL_ON_OFF}
+
+    # polarity
+    # !! is it dangerous to change polarity like that ? !!
+    # polarity
+    - name: "polarity"
+      ignore:   "${IGNORE_POLARITY}"
+      setter: "${SET_POLARITY}"
+      getter: "${GET_POLARITY}"
+      values:
+        - 0 # ? positive ?
+        - 1 # ? negative ?
+      finally:
+        value: ${FINAL_POLARITY}
+
+
+    # ramp-up
+    - name: "ramp-up range"
+      ignore:   ${IGNORE_RAMP_UP}
+      setter: "${SET_RAMP_UP}"
+      getter: "${GET_RAMP_UP}"
+      margin: ${MARGIN_RAMP_UP}
+      range:
+        start: ${MIN_RAMP_UP}
+        stop:  ${MAX_RAMP_UP}
+        step:  ${STEP_RAMP_UP}
+      finally:
+        value: ${FINAL_RAMP_UP}
+
+    - name: "ramp-up limits"
+      ignore:   ${IGNORE_RAMP_UP}
+      setter: "${SET_RAMP_UP}"
+      getter: "${GET_RAMP_UP}"
+      commands:
+        - name: "min"
+          margin: ${MARGIN_RAMP_UP}
+          set_value: ${UNDER_RAMP_UP}
+          get_value: ${MIN_RAMP_UP}
+        - name: "max"
+          margin: ${MARGIN_RAMP_UP}
+          set_value: ${OVER_RAMP_UP}
+          get_value: ${MAX_RAMP_UP}
+      finally:
+        value: ${FINAL_RAMP_UP}
+
+    # ramp-down
+    - name: "ramp-down range"
+      ignore:   ${IGNORE_RAMP_DOWN}
+      setter: "${SET_RAMP_DOWN}"
+      getter: "${GET_RAMP_DOWN}"
+      margin: ${MARGIN_RAMP_DOWN}
+      range:
+        start: ${MIN_RAMP_DOWN}
+        stop:  ${MAX_RAMP_DOWN}
+        step:  ${STEP_RAMP_DOWN}
+      finally:
+        value: ${FINAL_RAMP_DOWN}
+
+    - name: "ramp-down limits"
+      ignore:   ${IGNORE_RAMP_DOWN}
+      setter: "${SET_RAMP_DOWN}"
+      getter: "${GET_RAMP_DOWN}"
+      commands:
+        - name: "min"
+          margin: ${MARGIN_RAMP_DOWN}
+          set_value: ${UNDER_RAMP_DOWN}
+          get_value: ${MIN_RAMP_DOWN}
+        - name: "max"
+          margin: ${MARGIN_RAMP_DOWN}
+          set_value: ${OVER_RAMP_DOWN}
+          get_value: ${MAX_RAMP_DOWN}
+      finally:
+        value: ${FINAL_RAMP_DOWN}
+
+    # curent offset
+    - name: "current offset range"
+      ignore:   ${IGNORE_CURRENT_OFFSET}
+      setter: "${SET_CURRENT_OFFSET}"
+      getter: "${GET_CURRENT_OFFSET}"
+      margin: ${MARGIN_CURRENT_OFFSET}
+      range:
+        start: ${MIN_CURRENT_OFFSET}
+        stop:  ${MAX_CURRENT_OFFSET}
+        step:  ${STEP_CURRENT_OFFSET}
+      finally:
+        value: ${FINAL_CURRENT_OFFSET}
+
+    - name: "current offset limits"
+      ignore:   ${IGNORE_CURRENT_OFFSET}
+      setter: "${SET_CURRENT_OFFSET}"
+      getter: "${GET_CURRENT_OFFSET}"
+      commands:
+        - name: "min"
+          margin: ${MARGIN_CURRENT_OFFSET}
+          set_value: ${UNDER_CURRENT_OFFSET}
+          get_value: ${MIN_CURRENT_OFFSET}
+        - name: "max"
+          margin: ${MARGIN_CURRENT_OFFSET}
+          set_value: ${OVER_CURRENT_OFFSET}
+          get_value: ${MAX_CURRENT_OFFSET}
+      finally:
+        value: ${FINAL_CURRENT_OFFSET}
+
+
+    # voltage offset
+    - name: "voltage offset range"
+      ignore:   ${IGNORE_VOLTAGE_OFFSET}
+      setter: "${SET_VOLTAGE_OFFSET}"
+      getter: "${GET_VOLTAGE_OFFSET}"
+      margin: ${MARGIN_VOLTAGE_OFFSET}
+      range:
+        start: ${MIN_VOLTAGE_OFFSET}
+        stop:  ${MAX_VOLTAGE_OFFSET}
+        step:  ${STEP_VOLTAGE_OFFSET}
+      finally:
+        value: ${FINAL_VOLTAGE_OFFSET}
+
+    - name: "voltage offset limits"
+      ignore:   ${IGNORE_VOLTAGE_OFFSET}
+      setter: "${SET_VOLTAGE_OFFSET}"
+      getter: "${GET_VOLTAGE_OFFSET}"
+      commands:
+        - name: "min"
+          margin: ${MARGIN_VOLTAGE_OFFSET}
+          set_value: ${UNDER_VOLTAGE_OFFSET}
+          get_value: ${MIN_VOLTAGE_OFFSET}
+        - name: "max"
+          margin: ${MARGIN_VOLTAGE_OFFSET}
+          set_value: ${OVER_VOLTAGE_OFFSET}
+          get_value: ${MAX_VOLTAGE_OFFSET}
+      finally:
+        value: ${FINAL_VOLTAGE_OFFSET}
+
+    # trip
+    - name: "trip"
+      ignore:   "${IGNORE_TRIP}"
+      setter: "${SET_TRIP}"
+      getter: "${GET_TRIP}"
+      values:
+        - 0 # ? not allowed ?
+        - 1 # ? allowed ?
+      finally:
+        value: ${FINAL_TRIP}
+
+    # regulation mode
+    - name: "regulation mode"
+      ignore:   "${IGNORE_REGULATION}"
+      setter: "${SET_REGULATION}"
+      getter: "${GET_REGULATION}"
+      values: ${REGULATION_STATE}
+      finally:
+        value: ${FINAL_REGULATION}

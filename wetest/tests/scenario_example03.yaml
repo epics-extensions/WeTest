@@ -1,0 +1,20 @@
+version:
+    major: 0
+    minor: 1
+    bugfix: 0
+
+config:
+    type: functional
+    name: "Example 03"
+    prefix: "LOCATION:"
+    delay: 2
+
+tests:
+    - name: "Sequence 1"
+      prefix: "DEVICE:"
+      commands:
+        - name: "Test 1"
+          setter: "LockS"
+          getter: "LockR"
+          set_value: 0
+          get_value: 0

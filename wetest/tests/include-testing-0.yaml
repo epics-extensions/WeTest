@@ -1,0 +1,16 @@
+version: {major: 1, minor: 1, bugfix: 0}
+
+macros:
+    - SUITE_TITLE: ""
+
+name: "Testing scenario without include"
+
+config:
+    name: "Scenario without include ${SUITE_TITLE}"
+    prefix: SL-MBT-RBN1
+
+tests:
+    - name: "A test"
+      setter: :OLightCmdCalc
+      getter: :OLightCmdCalc
+      range:  { start: 1, stop: 10, step: 3}
