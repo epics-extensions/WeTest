@@ -12,19 +12,12 @@
 # _NO_ RESPONSIBILITY FOR ANY CONSEQUENCE RESULTING FROM THE USE, MODIFICATION,
 # OR REDISTRIBUTION OF THIS SOFTWARE.
 
-"""WeTest is the main module of the testing tool."""
-
-__author__ = "Nicolas Senaud <nicolas.senaud@cea.fr>"
-__copyright__ = "(C) 2017 CEA (CEA/DRF/Irfu/SIS/LDISC)"
-__license__ = ""
-__version__ = "0.3.0"
-__date__ = "2017-06-28"
-__description__ = \
+DESCRIPTION = \
 """WeTest is a testing facility for EPICS modules. Tests are described in a 
-YAML file, and executed over the Channel Access via Pyepics library. 
+YAML file, and executed over the Channel Access using pyepics library.
+A PDF report is generated with the tests results.
 It also enables to monitor PVs (extracted from the tests and from specified DB).
 """
-__status__ = "Beta"
 
 import logging
 
@@ -32,6 +25,7 @@ import argparse
 import multiprocessing
 from multiprocessing import Queue
 import os
+import pkg_resources
 import re
 import signal
 import sys
@@ -68,7 +62,9 @@ from wetest.report.generator import ReportGenerator
 
 from wetest.testing.generator import TestsGenerator
 from wetest.testing.generator import SelectableTestCase, SelectableTestSuite
-from wetest.testing.reader import MacrosManager, ScenarioReader, FileNotFound
+from wetest.testing.reader import (
+    MacrosManager, ScenarioReader, FileNotFound, display_changlog
+    )
 
 # logger setup
 logger = logging.getLogger(__name__)
@@ -223,7 +219,10 @@ def main():
     logger.info("Launching WeTest...")
 
     # parse arguments
-    parser = argparse.ArgumentParser(description=__description__)
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
+
+    parser.add_argument('-V', '--version', action='count', default=0,
+                        help="Show WeTest version, also shows major changes is doubling the option")
 
     # tests relative arguments
     parser.add_argument("scenario_file", metavar="TEST_FILE",
@@ -269,6 +268,16 @@ def main():
     args = parser.parse_args()
 
     logger.info("Processing arguments...")
+
+
+    version = pkg_resources.require("WeTest")[0].version
+    if args.version:
+        major, minor, bugfix = [int(x) for x in version.split(".")]
+        logger.warning(
+            "Installed WeTest is of version %d.%d.%d", major, minor, bugfix)
+        if args.version > 1:
+            display_changlog((major,0,0),(major, minor, bugfix))
+        sys.exit(1)
 
     with_gui = not args.no_gui
 

@@ -20,6 +20,7 @@
 
 import logging
 import os
+import pkg_resources
 import re
 import sys
 import time
@@ -50,9 +51,8 @@ fv_logger.addHandler(stream_handler)
 fv_logger.addHandler(FILE_HANDLER)
 
 # Maximum file version supported
-MAJOR = 1
-MINOR = 2
-BUGFIX = 0
+VERSION = pkg_resources.require("WeTest")[0].version
+MAJOR, MINOR, BUGFIX = [int(x) for x in VERSION.split(".")]
 
 CHANGELOG_WARN = {
     1: {
@@ -93,6 +93,39 @@ class MacroError(WeTestError):
     """Something went wrong when parsing the macros"""
     pass
 
+
+
+def display_changlog(file_version, wetest_version):
+    """Displays the changelog warnings, only between the two versions."""
+
+    if file_version > wetest_version:
+        logger.warning("Some feature are not yet implemented in WeTest.")
+        min_version = wetest_version
+        max_version = file_version
+        return
+    elif file_version < wetest_version:
+        if file_version[0:2] == wetest_version[0:2]: # only bugfix change
+            logger.warning("Some retrocompatible changes have been made to WeTest.")
+        else:
+            logger.warning(
+                "Some NON-retrocompatible changes have been made to WeTest since %s",
+                ".".join([str(x) for x in file_version])
+                )
+        min_version = file_version
+        max_version = wetest_version
+    else:
+        logger.warning("Same version.")
+        return
+
+    for major in range(min_version[0], max_version[0]+1): # do stop value too
+        if major in CHANGELOG_WARN:
+            for minor in sorted(CHANGELOG_WARN[major]):
+                if (major, minor) <= min_version[:2]:
+                    continue # too early
+                elif (major, minor) > max_version[:2]:
+                    break # too new
+                else:
+                    logger.warning("%d.%d.x:\n%s", major, minor, CHANGELOG_WARN[major][minor])
 
 def query_yes_no(question, default=None):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -678,44 +711,18 @@ class ScenarioReader(object):
             logger.warning("File version (%s) for older version than the installed WeTest (%s).", self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
 
         if not compatible_version and try_continue:
-            self.display_changlog((major, minor, bugfix), (MAJOR, MINOR, BUGFIX))
+            display_changlog((major, minor, bugfix), (MAJOR, MINOR, BUGFIX))
             time.sleep(0.2)
             try_continue = query_yes_no("Try running tests nontheless ?", "yes")
 
         if not try_continue:
-            raise UnsupportedFileFormat(
+            logger.error(
                 'File format version is: %s, but wetest version is: %s' %
                 (self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
             )
+            exit(5)
 
         return compatible_version
-
-
-    def display_changlog(self, file_version, wetest_version):
-        """Displays the changelog warnings, only between the two versions."""
-
-        if file_version > wetest_version:
-            logger.warning("Some feature are not yet implemented in WeTest.")
-            min_version = wetest_version
-            max_version = file_version
-            return
-        elif file_version < wetest_version:
-            logger.warning("Some non-retrocompatible changes have been made to WeTest.")
-            min_version = file_version
-            max_version = wetest_version
-        else:
-            logger.warning("Same version.")
-            return
-
-        for major in range(min_version[0], max_version[0]+1): # do stop value too
-            if major in CHANGELOG_WARN:
-                for minor in sorted(CHANGELOG_WARN[major]):
-                    if (major, minor) <= min_version[:2]:
-                        continue # too early
-                    elif (major, minor) > max_version[:2]:
-                        break # too new
-                    else:
-                        logger.warning("v%d.%d:\n%s", major, minor, CHANGELOG_WARN[major][minor])
 
     def is_valid(self):
         """YAML file format is valid.
