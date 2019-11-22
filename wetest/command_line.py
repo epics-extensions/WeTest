@@ -149,7 +149,7 @@ class ListStream(list):
         pass
 
 
-def generate_tests(scenarios, macros_mgr=None):
+def generate_tests(scenarios, macros_mgr=None, propagate=False):
     """Create a test suite from a YAML file (suite or scenario).
 
     :param scenario_file: A list of YAML scenario file path.
@@ -162,12 +162,16 @@ def generate_tests(scenarios, macros_mgr=None):
 
     # get data from scenarios
     ## read the first file
-    tests_data = ScenarioReader(scenarios.pop(0), macros_mgr=macros_mgr).get_deserialized()
+    tests_data = ScenarioReader(
+        scenarios.pop(0), macros_mgr=macros_mgr, propagate=propagate
+        ).get_deserialized()
     if "scenarios" not in tests_data:
         tests_data["scenarios"]=[]
     ## append scenario from remaining files
     for scenario in scenarios:
-        new_tests_data = ScenarioReader(scenario, macros_mgr=macros_mgr).get_deserialized()
+        new_tests_data = ScenarioReader(
+            scenario, macros_mgr=macros_mgr, propagate=propagate
+            ).get_deserialized()
         tests_data["scenarios"] += new_tests_data["scenarios"]
 
     # Get titles
@@ -231,6 +235,8 @@ def main():
     parser.add_argument("-m", "--macros", metavar='MACRO=VALUE',
                         type=str, nargs="+", action="append",
                         help="Override macros defined in file.")
+    parser.add_argument("--propagate-macros", action='store_true', default=False,
+                        help="Macros defined in a file are given to included files. Default behavior is that only macros set on the include line are given to the included file.")
 
     # PVs relative arguments
     pvs_group = parser.add_mutually_exclusive_group(required=False)
@@ -315,7 +321,7 @@ def main():
         logger.info('Will load tests from files:\n\t-%s', "\n\t-".join(scenarios))
         try:
             suite, configs = \
-                generate_tests(scenarios=scenarios, macros_mgr=macros_mgr)
+                generate_tests(scenarios=scenarios, macros_mgr=macros_mgr, propagate=args.propagate_macros)
         except FileNotFound as e:
             logger.error(e)
             exit(4)

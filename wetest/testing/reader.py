@@ -51,12 +51,15 @@ fv_logger.addHandler(FILE_HANDLER)
 
 # Maximum file version supported
 MAJOR = 1
-MINOR = 1
+MINOR = 2
 BUGFIX = 0
 
-CHANGELOG_WARN ={
+CHANGELOG_WARN = {
     1: {
-        1: "  - Range now tests the `stop` value, use `include_stop: False` to deactivate",
+        1: """  - Range now tests the `stop` value,
+  use `include_stop: False` to deactivate""",
+        2: """  - Now only macros from include line are provided to included file,
+  use `--propagate` CLI option to provide all macros already defined instead""",
     },
 }
 
@@ -149,7 +152,7 @@ class MacrosManager():
             self.unknown_macros.update(unknown_macros)
 
     def __str__(self):
-        output = "MacroManager:"
+        output = "MacrosManager:"
         output += "\nknown macros:\n"+str(sorted(self.known_macros))
         output += "\nused macros:\n"+str(sorted(self.used_macros))
         output += "\nunknown macros:\n"+str(sorted(self.unknown_macros))
@@ -320,9 +323,10 @@ class ScenarioReader(object):
         :param suite_macros: list of macros name defined in the suite and therefore
                             not necessarily for this scenario, should not be checked
                             when looking for unused macros
+        :param propagate: a boolean, whether or not to share all macros with included files
     """
 
-    def __init__(self, yaml_file, macros_mgr=None, suite_macros=None):
+    def __init__(self, yaml_file, macros_mgr=None, suite_macros=None, propagate=False):
         """Initialize Reader."""
         self.file_path = os.path.abspath(yaml_file)
         try:
@@ -332,6 +336,7 @@ class ScenarioReader(object):
 
         self.macros_mgr = macros_mgr if macros_mgr is not None else MacrosManager()
         self.suite_macros = suite_macros if suite_macros is not None else list()
+        self.propagate = propagate
 
         self.deserialized_scenarios = []
         self.deserialized = self._deserialize()
@@ -390,7 +395,10 @@ class ScenarioReader(object):
 
         for scenario in wetest_file['include']:
 
-            sc_macros_mgr = self.macros_mgr.deep_copy()
+            if self.propagate:
+                sc_macros_mgr = self.macros_mgr.deep_copy()
+            else:
+                sc_macros_mgr = MacrosManager()
 
             logger.debug('Processing: %s', scenario)
             if isinstance(scenario, str) and scenario == "tests":
@@ -667,7 +675,7 @@ class ScenarioReader(object):
             logger.error("File version (%s) too recent for installed WeTest (%s).", self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
         elif minor < MINOR:
             compatible_version = False
-            logger.warning("File version (%s) for older version than the current WeTest (%s).", self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
+            logger.warning("File version (%s) for older version than the installed WeTest (%s).", self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
 
         if not compatible_version and try_continue:
             self.display_changlog((major, minor, bugfix), (MAJOR, MINOR, BUGFIX))

@@ -3,7 +3,7 @@
 # SL-MBT-RBN1-B1-GF1:RFLevel-Offset
 
 macros:  # here as a sequence, but could also be directly a dictionnary
-    - skip: yes
+    - skip: no
       macro_for_macro:     final value
       scenario_title:      "Testing macros"
       macro_redefined:     "this value should be used"
