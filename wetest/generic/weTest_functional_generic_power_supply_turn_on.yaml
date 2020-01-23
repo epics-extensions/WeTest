@@ -41,7 +41,7 @@ macros:
       MARGIN_MEASURED_VALUE:  0 # %
       MEASURED_VALUE:         8 # volts
 
-version: {major: 1, minor: 1, bugfix: 0}
+version: {major: 1, minor: 2, bugfix: 0}
 
 config:
     type:       functional
