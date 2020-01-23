@@ -157,7 +157,7 @@ mapping:
                                 "set_value":  { type: any   }  # not compatible with value
                                 "value":      { type: any   }  # not compatible with get_value or set_value
                                 "delay":      { type: float }
-                                "ignore":     { type: bool, desc: here it is possible to ignore a command be not to cancel ignore from test level }
+                                "ignore":     { type: bool, desc: here it is possible to ignore a command but not to cancel ignore from test level }
                                 "skip":       { type: bool  }
                                 "on_failure": { type: str, enum: [continue, pause, abort]}
                                 "retry":      { type: int   }
