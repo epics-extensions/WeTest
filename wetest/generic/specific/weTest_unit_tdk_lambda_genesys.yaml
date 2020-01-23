@@ -1,0 +1,97 @@
+# this file is a generic. Usage: call by an other wetest script.
+
+# - check the range of:
+#     - voltage
+#     - current
+#     - operation mode
+
+version: {major: 1, minor: 2, bugfix: 0}
+
+name: "unit test of TDK Lambda Genesys power supply"
+
+macros:
+    - TEST_TITLE:   
+      P:      "CEA:"
+      DELAY:  0.2 
+      RETRY:  5
+      ## not specific to power supply (user inputs)
+      # voltage 
+      MAX_VOLTAGE:    10
+      MIN_VOLTAGE:    0
+      STEP_VOLTAGE:   5
+      OVER_VOLTAGE:   11
+      UNDER_VOLTAGE:  -1
+      FINAL_VOLTAGE:  0   # should be value before unit test
+      # current
+      MAX_CURRENT:    500
+      MIN_CURRENT:    0
+      STEP_CURRENT:   100
+      OVER_CURRENT:   501
+      UNDER_CURRENT:  -1
+      FINAL_CURRENT:  0   # should be value before unit test
+
+
+      ## specific to power supply (won't change)
+      IGNORE_VOLTAGE: False  
+      IGNORE_CURRENT: False
+      # PV names
+      SET_VOLTAGE:    "USet"
+      GET_VOLTAGE:    "URb"
+      SET_CURRENT:    "ISet"
+      GET_CURRENT:    "IRb"
+
+
+include:
+    - path: 'wetest/generic/weTest_unit_generic_power_supply.yaml'
+      TEST_TITLE:     "unit test of TDK Lambda Genesys ${MAX_VOLTAGE}V-${MAX_CURRENT}A power supply - ${P}"
+      P:              ${P}
+      DELAY:          ${DELAY}
+      RETRY:          ${RETRY}
+      # init
+      # Reset: This includes setting the programming limits to zero, output off, and auto-restart off
+      # are you sure you want to do this?
+      # IGNORE_CLEAR:   False
+      # SET_CLEAR:      "RstCmd"
+      # GET_CLEAR:      "RstCmd"
+      # CLEAR_STATE:    0
+      # IGNORE_ON_OFF:  True
+      # IGNORE_STATUS:  True
+
+      # clear   
+      IGNORE_CLEAR:       False
+      SET_CLEAR:          'RstCmd'
+      GET_CLEAR:          'RstCmd'
+      CLEAR_STATE:        0
+      # on/off
+      IGNORE_ON_OFF:      True
+      SET_ON_OFF:         'fake'
+      GET_ON_OFF:         'fake'
+      OFF_STATE:          'fake'
+      DELAY_RAMP_DOWN:    0
+      # status/health
+      IGNORE_STATUS:      True
+      GET_STATUS:         'fake'
+      STATUS:             'fake'
+
+      # voltage
+      IGNORE_VOLTAGE: ${IGNORE_VOLTAGE}  
+      SET_VOLTAGE:    ${SET_VOLTAGE}
+      GET_VOLTAGE:    ${GET_VOLTAGE}  
+      MAX_VOLTAGE:    ${MAX_VOLTAGE}
+      MIN_VOLTAGE:    ${MIN_VOLTAGE}
+      STEP_VOLTAGE:   ${STEP_VOLTAGE}
+      OVER_VOLTAGE:   ${OVER_VOLTAGE}
+      UNDER_VOLTAGE:  ${UNDER_VOLTAGE}
+      FINAL_VOLTAGE:  ${FINAL_VOLTAGE}
+      # current
+      IGNORE_CURRENT: ${IGNORE_CURRENT} 
+      SET_CURRENT:    ${SET_CURRENT}
+      GET_CURRENT:    ${GET_CURRENT}
+      MAX_CURRENT:    ${MAX_CURRENT}
+      MIN_CURRENT:    ${MIN_CURRENT}
+      STEP_CURRENT:   ${STEP_CURRENT}
+      OVER_CURRENT:   ${OVER_CURRENT}
+      UNDER_CURRENT:  ${UNDER_CURRENT}
+      FINAL_CURRENT:  ${FINAL_CURRENT}
+
+
