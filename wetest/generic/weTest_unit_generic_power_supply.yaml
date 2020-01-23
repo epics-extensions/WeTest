@@ -16,20 +16,20 @@ include:
       DELAY:          ${DELAY}
       RETRY:          ${RETRY}
       # clear   
-      IGNORE_CLEAR:       False
-      SET_CLEAR:          "ClearCmd.PROC"
-      GET_CLEAR:          "Fault"
-      CLEAR_STATE:        0
+      IGNORE_CLEAR:       ${IGNORE_CLEAR}
+      SET_CLEAR:          ${SET_CLEAR}
+      GET_CLEAR:          ${GET_CLEAR}
+      CLEAR_STATE:        ${CLEAR_STATE}
       # on/off
-      IGNORE_ON_OFF:      False
-      SET_ON_OFF:         "EnaCmd"
-      GET_ON_OFF:         "EnaRb"
-      OFF_STATE:          0
-      DELAY_RAMP_DOWN:    1 # sec
+      IGNORE_ON_OFF:      ${IGNORE_ON_OFF}
+      SET_ON_OFF:         ${SET_ON_OFF}
+      GET_ON_OFF:         ${GET_ON_OFF}
+      OFF_STATE:          ${OFF_STATE}
+      DELAY_RAMP_DOWN:    ${DELAY_RAMP_DOWN}
       # status/health
-      IGNORE_STATUS:      False
-      GET_STATUS:         "Fault"
-      STATUS:             0
+      IGNORE_STATUS:      ${IGNORE_STATUS}
+      GET_STATUS:         ${GET_STATUS}
+      STATUS:             ${STATUS}
     - "tests"
 
 macros:
@@ -127,10 +127,7 @@ macros:
       REGULATION_STATE:   [0, 1]  # 0:CV, 1:CC
       FINAL_REGULATION:   0       # CV
 
-version:
-    major: 1
-    minor: 1
-    bugfix: 0
+version: {major: 1, minor: 2, bugfix: 0}
 
 config:
     type:   unit
