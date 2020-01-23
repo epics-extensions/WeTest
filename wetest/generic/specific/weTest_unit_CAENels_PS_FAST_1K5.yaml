@@ -31,9 +31,9 @@ macros:
       IGNORE_REGULATION:  False
       # PV names
       SET_VOLTAGE:    "USet"
-      GET_VOLTAGE:    "USet" # no read back for now (CAENels bug)
+      GET_VOLTAGE:    "URb"
       SET_CURRENT:    "ISet"
-      GET_CURRENT:    "ISet"
+      GET_CURRENT:    "IRb"
       SET_RAMP_UP:    "URampSet"
       GET_RAMP_UP:    "URampRb"  
       SET_RAMP_DOWN:  "IRampSet"
