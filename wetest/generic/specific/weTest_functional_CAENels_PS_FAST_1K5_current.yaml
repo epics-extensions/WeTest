@@ -96,7 +96,7 @@ include:
       # current
       IGNORE_CURRENT:     False
       SET_CURRENT:        "${SET_CURRENT}"
-      GET_CURRENT:        "${SET_CURRENT}" # temp, should be "GET_CURRENT", waiting for CAENels fix
+      GET_CURRENT:        "${GET_CURRENT}" 
       CURRENT:            ${CURRENT}
       MARGIN_CURRENT:     0
 
