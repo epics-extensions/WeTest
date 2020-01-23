@@ -7,13 +7,14 @@
 
 macros:
     - TEST_TITLE:         "init power supply ${P}"
-      P:                  "Sec-Sub(x):Dis-Dev-Idx:"
+      P:                  "CEA:"
       DELAY:              0.2   # sec: defaut delay (timeout between setter and checking getter)
       RETRY:              2
+      IGNORE_INIT:        True
       # clear   
-      IGNORE_CLEAR:       True
-      SET_CLEAR:          "ClrSet"
-      GET_CLEAR:          "ClrRb"
+      IGNORE_CLEAR:       False
+      SET_CLEAR:          "RstCmd"
+      GET_CLEAR:          "RstCmd"
       CLEAR_STATE:        1
       # on/off
       IGNORE_ON_OFF:      True
@@ -26,7 +27,7 @@ macros:
       GET_STATUS:         "Stat"
       STATUS:             1
 
-version: {major: 1, minor: 1, bugfix: 0}
+version: {major: 1, minor: 2, bugfix: 0}
 
 config:
     type:       functional
@@ -35,6 +36,7 @@ config:
     prefix:     ${P}
     delay:      ${DELAY}
     retry:      ${RETRY}
+    ignore:     ${IGNORE_INIT}
 
 tests:
 
