@@ -14,9 +14,14 @@ macros:
       P:                  "Sec-Sub(x):Dis-Dev-Idx:"
       DELAY:              0.2   # sec: defaut delay (timeout between setter and checking getter)
       RETRY:              2
+      # remote mode
+      IGNORE_REMOTE:      True 
+      SET_REMOTE:         "LocRemSet"
+      REMOTE:             1
       # set interclock
       IGNORE_SET_INTERLOCK: True
       SET_INTERLOCK:        "IntckSet"
+      GET_INTERLOCK:        "IntckGet"
       INTERLOCK:            1
       # ramp up
       IGNORE_RAMP_UP:     True
@@ -38,6 +43,12 @@ macros:
       SET_REGULATION:     "RegModeSet"
       GET_REGULATION:     "RegModeRb"
       REGULATION_STATE:   0   # 0:CV, 1:CC
+      # voltage   
+      IGNORE_VOLTAGE:     True    # by default, voltage tests are skipped
+      SET_VOLTAGE:        "USet"
+      GET_VOLTAGE:        "UMes"   # should it be RBV or measure value her? TBD
+      VOLTAGE:            8   # volts
+      MARGIN_VOLTAGE:     0   # %
       # voltage min
       IGNORE_VOLTAGE_MIN: True
       SET_VOLTAGE_MIN:    "UNVThrSet"    
@@ -50,12 +61,6 @@ macros:
       GET_VOLTAGE_MAX:    "OVVThrRb"
       MARGIN_VOLTAGE_MAX: 0   # %
       VOLTAGE_MAX:        15  # volts
-      # voltage   
-      IGNORE_VOLTAGE:     True    # by default, voltage tests are skipped
-      SET_VOLTAGE:        "USet"
-      GET_VOLTAGE:        "UMes"   # should it be RBV or measure value her? TBD
-      VOLTAGE:            8   # volts
-      MARGIN_VOLTAGE:     0   # %
       # current min
       IGNORE_CURRENT_MIN: True
       SET_CURRENT_MIN:    "UNCThrSet"    
@@ -75,7 +80,7 @@ macros:
       CURRENT:            2   # amp
       MARGIN_CURRENT:     0   # %
 
-version: {major: 1, minor: 1, bugfix: 0}
+version: {major: 1, minor: 2, bugfix: 0}
 
 config:
     type:       functional
@@ -86,11 +91,18 @@ config:
     retry:      ${RETRY}
 
 tests:
+    # set remote/local
+    - name: "set remote control"
+      ignore: ${IGNORE_REMOTE}
+      setter: "${SET_REMOTE}"
+      values:
+        - ${REMOTE}
 
     # interlerlock
     - name: "set interlock"
       ignore: ${IGNORE_SET_INTERLOCK}
       setter: "${SET_INTERLOCK}"
+      getter: "${GET_INTERLOCK}"
       values:
         - ${INTERLOCK}
 
@@ -128,6 +140,14 @@ tests:
 
 
     ## voltage
+    # set voltage
+    - name: "set voltage"
+      ignore: ${IGNORE_VOLTAGE}
+      setter: "${SET_VOLTAGE}"
+      getter: "${GET_VOLTAGE}"
+      margin: ${MARGIN_VOLTAGE}
+      values:
+        - ${VOLTAGE}
     # set voltage min
     - name: "set voltage min"
       ignore: ${IGNORE_VOLTAGE_MIN}
@@ -145,15 +165,6 @@ tests:
       margin: ${MARGIN_VOLTAGE_MAX}
       values:
         - ${VOLTAGE_MAX}
-
-    # set voltage
-    - name: "set voltage"
-      ignore: ${IGNORE_VOLTAGE}
-      setter: "${SET_VOLTAGE}"
-      getter: "${GET_VOLTAGE}"
-      margin: ${MARGIN_VOLTAGE}
-      values:
-        - ${VOLTAGE}
         
 
 
