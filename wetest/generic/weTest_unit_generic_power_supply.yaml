@@ -10,6 +10,15 @@
 # finally value should be set to the value before the test to not keep user config #
 ###############################
 
+version: {major: 1, minor: 2, bugfix: 0}
+
+config:
+    type:   unit
+    name:   "${TEST_TITLE}"
+    prefix: "${P}"
+    delay:  "${DELAY}" 
+    retry:  ${RETRY}
+
 include:
     - path:           'wetest/generic/weTest_functional_generic_power_supply_init.yaml'
       P:              "${P}"
@@ -34,6 +43,27 @@ include:
 
 macros:
     - TEST_TITLE:     "unit test of the power supply"
+
+      ###
+      # default macro for init, useful if it not the macro is not given at an higher level
+      IGNORE_INIT:        True
+      # clear   
+      IGNORE_CLEAR:       True
+      SET_CLEAR:          "RstCmd"
+      GET_CLEAR:          "RstCmd"
+      CLEAR_STATE:        1
+      # on/off
+      IGNORE_ON_OFF:      True
+      SET_ON_OFF:         "PwrEnaCmd"
+      GET_ON_OFF:         "PwrEnaRb"
+      OFF_STATE:          0
+      DELAY_RAMP_DOWN:    1 # sec
+      # status/health
+      IGNORE_STATUS:      True
+      GET_STATUS:         "Stat"
+      STATUS:             1
+      ###
+
       P:              "Sec-Sub(x):Dis-Dev-Idx:"
       DELAY:          0.1 # sec: defaut delay (timeout between setter and checking getter)
       RETRY:          2 # 2 retry in case of failure
@@ -126,15 +156,6 @@ macros:
       GET_REGULATION:     "RegModeRb"
       REGULATION_STATE:   [0, 1]  # 0:CV, 1:CC
       FINAL_REGULATION:   0       # CV
-
-version: {major: 1, minor: 2, bugfix: 0}
-
-config:
-    type:   unit
-    name:   "${TEST_TITLE}"
-    prefix: "${P}"
-    delay:  "${DELAY}" 
-    retry:  ${RETRY}
 
 tests:
 
