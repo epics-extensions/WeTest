@@ -1,0 +1,125 @@
+## Functional test for basic power supply (eg: DeltasESxxx, ...)
+# 1. switch off
+# 2. set current
+# 3. set voltage
+# 4. [OPTION to do] set ramp
+# 5. [OPTION] select polarity
+# 6. power on
+# 7. wait few sec
+# 8. check desired output
+# 9. [OPTION] check operation mode (CC/CV)
+
+version: {major: 1, minor: 2, bugfix: 0}
+
+name: "${TEST_TITLE}"
+
+macros:
+    - TEST_TITLE:       "functional test of DeltaESxxx"
+      P:                "CEA:"
+      DELAY:            1 
+      RETRY:            2 
+      ## not specific to power supply (user inputs)
+      # config
+      VOLTAGE:          2 # Volts
+      CURRENT:          0.2 # A
+      IGNORE_CH_STATUS: True
+      IGNORE_POLARITY:  True
+      POLARITY:         "Positive field"
+      DELAY_RAMP_UP:    1 # sec
+      # check desired output (measured value)
+      GET_DESIRED_OUTPUT:     "IMes"  
+      DESIRED_OUTPUT:         ${CURRENT}  
+      DESIRED_OUTPUT_MARGIN:  1 #%  
+
+
+      ## specific to power supply (won't change)  
+      ## but user can still change them if needed
+      # on/off
+      SET_ON_OFF:       "PwrEnaCmd"
+      GET_ON_OFF:       "PwrEnaRb"
+      OFF_STATE:        0
+      ON_STATE:         1
+      DELAY_RAMP_DOWN:  1 # sec
+      # voltage
+      SET_VOLTAGE:      "USet"
+      GET_VOLTAGE:      "URb"   
+      # current
+      SET_CURRENT:      "ISet"
+      GET_CURRENT:      "IRb"
+      # UVL
+      SET_POLARITY:     "BPosSet"
+      GET_POLARITY:     "BPosRb" 
+      # check CC/CV mode    
+      GET_OPERATION_MODE: "CcStat"
+      OPERATION_MODE:     "CC"
+     
+
+
+include:
+    # init
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_init.yaml'
+      TEST_TITLE:         "init power supply ${P}"
+      P:                  ${P}
+      DELAY:              ${DELAY} 
+      RETRY:              ${RETRY}
+      # init
+      IGNORE_CLEAR:     True
+      IGNORE_ON_OFF:    False
+      SET_ON_OFF:       ${SET_ON_OFF}
+      GET_ON_OFF:       ${GET_ON_OFF}
+      OFF_STATE:        ${OFF_STATE}
+      DELAY_RAMP_DOWN:  ${DELAY_RAMP_DOWN}
+      IGNORE_STATUS:    True
+
+
+    # config
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_config.yaml'
+      TEST_TITLE:           "config power supply ${P}"
+      P:                    "${P}"
+      DELAY:                "${DELAY}"
+      RETRY:                "${RETRY}"
+
+      # set target voltage
+      IGNORE_VOLTAGE:     False   
+      SET_VOLTAGE:        "${SET_VOLTAGE}"
+      GET_VOLTAGE:        "${GET_VOLTAGE}"  
+      VOLTAGE:            "${VOLTAGE}"
+      MARGIN_VOLTAGE:     0 # %
+
+      # set current
+      IGNORE_CURRENT:     False
+      SET_CURRENT:        "${SET_CURRENT}"
+      GET_CURRENT:        "${GET_CURRENT}" 
+      CURRENT:            ${CURRENT}
+      MARGIN_CURRENT:     0 # %
+
+      # set polarity
+      IGNORE_POLARITY:    $(IGNORE_POLARITY)
+      SET_POLARITY:       ${SET_POLARITY}
+      GET_POLARITY:       ${GET_POLARITY}
+      POLARITY:           ${POLARITY}         
+
+
+    # check desired output
+    - path: 'wetest/generic/weTest_functional_generic_power_supply_turn_on.yaml'
+      TEST_TITLE:         "check desired output for power supply ${P}"
+      P:                  "${P}"
+      DELAY:              "${DELAY}"
+      RETRY:              "${RETRY}"
+      # on/off   
+      IGNORE_ON_OFF:          False
+      SET_ON_OFF:             ${SET_ON_OFF}
+      GET_ON_OFF:             ${GET_ON_OFF}
+      ON_STATE:               ${ON_STATE}
+      DELAY_RAMP_UP:          ${DELAY_RAMP_UP} 
+      # check CC/CV mode    
+      IGNORE_CH_STATUS:       ${IGNORE_CH_STATUS}
+      GET_CH_STATUS:          ${GET_OPERATION_MODE}
+      CH_STATUS:              ${OPERATION_MODE}
+      # check desired output (measured value)
+      IGNORE_MEASURED_VALUE:  False  
+      GET_MEASURED_VALUE:     ${GET_DESIRED_OUTPUT} 
+      MARGIN_MEASURED_VALUE:  ${DESIRED_OUTPUT_MARGIN}
+      MEASURED_VALUE:         ${DESIRED_OUTPUT}
+
+      
