@@ -16,6 +16,6 @@ wetest.egg-info
 wetest/bin
 *.py@neomake_*.py
 .ropeproject/
-venv/
+venv*/
 .cache/
 no_macros.yml
