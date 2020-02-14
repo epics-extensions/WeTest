@@ -64,14 +64,14 @@ include:
       CLEAR_STATE:        0
       # on/off
       IGNORE_ON_OFF:      True
-      SET_ON_OFF:         'fake'
-      GET_ON_OFF:         'fake'
-      OFF_STATE:          'fake'
+      # SET_ON_OFF:         'fake'
+      # GET_ON_OFF:         'fake'
+      # OFF_STATE:          'fake'
       DELAY_RAMP_DOWN:    0
       # status/health
       IGNORE_STATUS:      True
-      GET_STATUS:         'fake'
-      STATUS:             'fake'
+      # GET_STATUS:         'fake'
+      # STATUS:             'fake'
 
       # voltage
       IGNORE_VOLTAGE: ${IGNORE_VOLTAGE}  

@@ -96,8 +96,8 @@ include:
 
       # set fodback protection
       IGNORE_SET_INTERLOCK: True
-      SET_INTERLOCK:        "fake" # "FoldbackprotectionSet"
-      INTERLOCK:            "fake" # "ON"
+      # SET_INTERLOCK:        "FoldbackprotectionSet"
+      # INTERLOCK:            "ON"
 
       # set target voltage
       IGNORE_VOLTAGE:     False   
