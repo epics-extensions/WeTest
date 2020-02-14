@@ -12,7 +12,7 @@ macros:
       RETRY:              2
       IGNORE_INIT:        True
       # clear   
-      IGNORE_CLEAR:       False
+      IGNORE_CLEAR:       True
       SET_CLEAR:          "RstCmd"
       GET_CLEAR:          "RstCmd"
       CLEAR_STATE:        1
