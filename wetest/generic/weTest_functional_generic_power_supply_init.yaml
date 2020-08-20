@@ -50,7 +50,7 @@ tests:
           value:  ${OFF_STATE}
           delay:  ${DELAY_RAMP_DOWN}
 
-    # reset / clear status
+    # reset / clear status: no state to release button, may be a problem ?
     - name: "reset / clear status"
       ignore: ${IGNORE_CLEAR}
       setter: "${SET_CLEAR}"
