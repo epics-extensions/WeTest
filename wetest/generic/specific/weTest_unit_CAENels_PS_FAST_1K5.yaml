@@ -57,6 +57,24 @@ include:
       P:              ${P}
       DELAY:          ${DELAY}
       RETRY:          ${RETRY}
+
+      # init
+      # clear
+      IGNORE_CLEAR:       ${IGNORE_CLEAR}
+      SET_CLEAR:          ${SET_CLEAR}
+      GET_CLEAR:          ${GET_CLEAR}
+      CLEAR_STATE:        ${CLEAR_STATE}
+      # on/off
+      IGNORE_ON_OFF:      ${IGNORE_ON_OFF}
+      SET_ON_OFF:         ${SET_ON_OFF}
+      GET_ON_OFF:         ${GET_ON_OFF}
+      OFF_STATE:          ${OFF_STATE}
+      DELAY_RAMP_DOWN:    ${DELAY_RAMP_DOWN}
+      # status/health
+      IGNORE_STATUS:      ${IGNORE_STATUS}
+      GET_STATUS:         ${GET_STATUS}
+      STATUS:             ${STATUS}
+
       # voltage
       IGNORE_VOLTAGE: ${IGNORE_VOLTAGE}
       SET_VOLTAGE:    ${SET_VOLTAGE}
