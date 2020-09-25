@@ -113,7 +113,7 @@ tests:
       getter: "${GET_RAMP_DOWN}"
       values:
         - ${RAMP_DOWN}
-        
+
     # ramp up
     - name: "ramp-up"
       ignore: ${IGNORE_RAMP_UP}
@@ -165,7 +165,7 @@ tests:
       margin: ${MARGIN_VOLTAGE_MAX}
       values:
         - ${VOLTAGE_MAX}
-        
+
 
 
     ## set current
@@ -186,7 +186,7 @@ tests:
       margin: ${MARGIN_CURRENT_MAX}
       values:
         - ${CURRENT_MAX}
-    
+
     # set current
     - name: "set current"
       ignore: ${IGNORE_CURRENT}

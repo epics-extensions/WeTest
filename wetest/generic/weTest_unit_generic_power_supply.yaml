@@ -16,7 +16,7 @@ config:
     type:   unit
     name:   "${TEST_TITLE}"
     prefix: "${P}"
-    delay:  "${DELAY}" 
+    delay:  "${DELAY}"
     retry:  ${RETRY}
 
 include:
@@ -24,7 +24,7 @@ include:
       P:              "${P}"
       DELAY:          ${DELAY}
       RETRY:          ${RETRY}
-      # clear   
+      # clear
       IGNORE_CLEAR:       ${IGNORE_CLEAR}
       SET_CLEAR:          ${SET_CLEAR}
       GET_CLEAR:          ${GET_CLEAR}
@@ -47,7 +47,7 @@ macros:
       ###
       # default macro for init, useful if it not the macro is not given at an higher level
       IGNORE_INIT:        True
-      # clear   
+      # clear
       IGNORE_CLEAR:       True
       SET_CLEAR:          "RstCmd"
       GET_CLEAR:          "RstCmd"
@@ -104,7 +104,7 @@ macros:
       # ramp-up
       IGNORE_RAMP_UP: True
       SET_RAMP_UP:    "RUp"
-      GET_RAMP_UP:    "RUpRb"  
+      GET_RAMP_UP:    "RUpRb"
       MAX_RAMP_UP:    5   # volt/sec
       MIN_RAMP_UP:    0   # volt/sec
       STEP_RAMP_UP:   1   # volt/sec
@@ -115,7 +115,7 @@ macros:
       # ramp-down
       IGNORE_RAMP_DOWN: True
       SET_RAMP_DOWN:    "RDwn"
-      GET_RAMP_DOWN:    "RDwnRb" 
+      GET_RAMP_DOWN:    "RDwnRb"
       MAX_RAMP_DOWN:    5   # volt/sec
       MIN_RAMP_DOWN:    0   # volt/sec
       STEP_RAMP_DOWN:   1   # volt/sec
@@ -126,7 +126,7 @@ macros:
       # voltage offset
       IGNORE_VOLTAGE_OFFSET: True
       SET_VOLTAGE_OFFSET:    "RDwn"
-      GET_VOLTAGE_OFFSET:    "RDwnRb" 
+      GET_VOLTAGE_OFFSET:    "RDwnRb"
       MAX_VOLTAGE_OFFSET:    5   # volt/sec
       MIN_VOLTAGE_OFFSET:    0   # volt/sec
       STEP_VOLTAGE_OFFSET:   1   # volt/sec
@@ -137,7 +137,7 @@ macros:
       # current offset
       IGNORE_CURRENT_OFFSET: True
       SET_CURRENT_OFFSET:    "RDwn"
-      GET_CURRENT_OFFSET:    "RDwnRb" 
+      GET_CURRENT_OFFSET:    "RDwnRb"
       MAX_CURRENT_OFFSET:    5   # amp
       MIN_CURRENT_OFFSET:    0   # amp
       STEP_CURRENT_OFFSET:   1   # amp

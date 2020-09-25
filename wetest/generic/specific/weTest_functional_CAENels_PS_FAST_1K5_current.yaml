@@ -1,4 +1,4 @@
-version: {major: 1, minor: 1, bugfix: 0}
+version: {major: 1, minor: 2, bugfix: 0}
 
 name: "${TEST_TITLE}"
 
@@ -36,9 +36,9 @@ include:
     - path: 'wetest/generic/weTest_functional_generic_power_supply_init.yaml'
       TEST_TITLE:         "init power supply ${P}"
       P:                  ${P}
-      DELAY:              ${DELAY} 
+      DELAY:              ${DELAY}
       RETRY:              ${RETRY}
-      # clear   
+      # clear
       IGNORE_CLEAR:       False
       SET_CLEAR:          "ClearCmd.PROC"
       GET_CLEAR:          "Fault"
@@ -70,7 +70,7 @@ include:
       SET_REGULATION:     "${SET_REGULATION}"
       GET_REGULATION:     "${GET_REGULATION}"
       REGULATION_STATE:   1   # 0:CV, 1:CC
-    
+
 
     # turn on / enable (FAST PS specific)
     # config
@@ -79,7 +79,7 @@ include:
       P:                  "${P}"
       DELAY:              "${DELAY}"
       RETRY:              "${RETRY}"
-      # on/off    
+      # on/off
       IGNORE_ON_OFF:      False
       SET_ON_OFF:         ${SET_ON_OFF}
       GET_ON_OFF:         ${GET_ON_OFF}
@@ -96,7 +96,7 @@ include:
       # current
       IGNORE_CURRENT:     False
       SET_CURRENT:        "${SET_CURRENT}"
-      GET_CURRENT:        "${GET_CURRENT}" 
+      GET_CURRENT:        "${GET_CURRENT}"
       CURRENT:            ${CURRENT}
       MARGIN_CURRENT:     0
 
@@ -107,20 +107,18 @@ include:
       P:                  "${P}"
       DELAY:              "${DELAY}"
       RETRY:              "${RETRY}"
-      # on/off (alreday on, I known, but I need the delay ramp-up)    
+      # on/off (alreday on, I known, but I need the delay ramp-up)
       IGNORE_ON_OFF:          False
       SET_ON_OFF:             ${SET_ON_OFF}
       GET_ON_OFF:             ${GET_ON_OFF}
       ON_STATE:               1
-      DELAY_RAMP_UP:          ${DELAY_RAMP_UP} 
+      DELAY_RAMP_UP:          ${DELAY_RAMP_UP}
       # measured value
-      IGNORE_MEASURED_VALUE:  False  
-      GET_MEASURED_VALUE:     "IMes" 
+      IGNORE_MEASURED_VALUE:  False
+      GET_MEASURED_VALUE:     "IMes"
       MARGIN_MEASURED_VALUE:  0 # %
       MEASURED_VALUE:         ${CURRENT}
-      # channel status      
+      # channel status
       IGNORE_CH_STATUS:       False
       GET_CH_STATUS:          "${GET_CH_STATUS}"
       CH_STATUS:              0 # no fault
-
-      

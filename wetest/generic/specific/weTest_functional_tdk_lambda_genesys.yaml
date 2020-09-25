@@ -20,8 +20,8 @@ name: "${TEST_TITLE}"
 macros:
     - TEST_TITLE:     "functional test of TDK lambda genesys"
       P:              "CEA:"
-      DELAY:          1 
-      RETRY:          5 
+      DELAY:          1
+      RETRY:          5
       ## not specific to power supply (user inputs)
       # config
       VOLTAGE:        20 # Volts
@@ -30,39 +30,39 @@ macros:
       CURRENT:        5 # A
       DELAY_RAMP_UP:  1 # sec
       # check desired output (measured value)
-      GET_DESIRED_OUTPUT:     "IMes"  
-      DESIRED_OUTPUT:         ${CURRENT}  
-      DESIRED_OUTPUT_MARGIN:  1 #%  
+      GET_DESIRED_OUTPUT:     "IMes"
+      DESIRED_OUTPUT:         ${CURRENT}
+      DESIRED_OUTPUT_MARGIN:  1 # %
 
 
-      ## specific to power supply (won't change)  
+      ## specific to power supply (won't change)
       # on/off
       SET_ON_OFF:   "EnaCmd"
       GET_ON_OFF:   "EnaStat"
       # voltage
       SET_VOLTAGE:  "USet"
-      GET_VOLTAGE:  "URb"   
+      GET_VOLTAGE:  "URb"
       # MES_VOLTAGE:  "UMes"
       # current
       SET_CURRENT:  "ISet"
       GET_CURRENT:  "IRb"
       # UVL
       SET_UVL:      "UvlSet"
-      GET_UVL:      "UvlRb" 
+      GET_UVL:      "UvlRb"
       # OVP
       SET_OVP:      "OvpSet"
-      GET_OVP:      "OvpRb"  
+      GET_OVP:      "OvpRb"
 
       # OVP
-      GET_OVP_FAULT:  "OvpErrR"     
+      GET_OVP_FAULT:  "OvpErrR"
       OVP_NOT_FAULT:  "OFF"
-      # check flodback fault   
+      # check flodback fault
       GET_FOLDBACK_FAULT: "FoldbackprotectionStat"
       FOLDBACK_NOT_FAULT: "NO"
-      # check CC/CV mode    
+      # check CC/CV mode
       GET_OPERATION_MODE: "operatingModeR"
       OPERATION_MODE:     "CC"
-     
+
 
 
 include:
@@ -70,7 +70,7 @@ include:
     - path: 'wetest/generic/weTest_functional_generic_power_supply_init.yaml'
       TEST_TITLE:         "init power supply ${P}"
       P:                  ${P}
-      DELAY:              ${DELAY} 
+      DELAY:              ${DELAY}
       RETRY:              ${RETRY}
       # init
       # Reset: This includes setting the programming limits to zero, output off, and auto-restart off
@@ -89,8 +89,8 @@ include:
       DELAY:                "${DELAY}"
       RETRY:                "${RETRY}"
 
-      # remote  
-      IGNORE_REMOTE:        False 
+      # remote
+      IGNORE_REMOTE:        False
       SET_REMOTE:           "LocRemSet"
       REMOTE:               1
 
@@ -100,22 +100,22 @@ include:
       # INTERLOCK:            "ON"
 
       # set target voltage
-      IGNORE_VOLTAGE:     False   
+      IGNORE_VOLTAGE:     False
       SET_VOLTAGE:        "${SET_VOLTAGE}"
-      GET_VOLTAGE:        "${GET_VOLTAGE}"  
+      GET_VOLTAGE:        "${GET_VOLTAGE}"
       VOLTAGE:            "${VOLTAGE}"
-      MARGIN_VOLTAGE:     0 # 
+      MARGIN_VOLTAGE:     0 #
 
       # UVL
       IGNORE_VOLTAGE_MIN: False
-      SET_VOLTAGE_MIN:    "${SET_UVL}"    
+      SET_VOLTAGE_MIN:    "${SET_UVL}"
       GET_VOLTAGE_MIN:    "${GET_UVL}"
       MARGIN_VOLTAGE_MIN: 0 # %
       VOLTAGE_MIN:        "${UVL}"
 
       # OVP
       IGNORE_VOLTAGE_MAX: False
-      SET_VOLTAGE_MAX:    "${SET_OVP}"    
+      SET_VOLTAGE_MAX:    "${SET_OVP}"
       GET_VOLTAGE_MAX:    "${GET_OVP}"
       MARGIN_VOLTAGE_MAX: 0   # %
       VOLTAGE_MAX:        "${OVP}"
@@ -123,7 +123,7 @@ include:
       # set current
       IGNORE_CURRENT:       False
       SET_CURRENT:          "${SET_CURRENT}"
-      GET_CURRENT:          "${GET_CURRENT}" 
+      GET_CURRENT:          "${GET_CURRENT}"
       CURRENT:              ${CURRENT}
       MARGIN_CURRENT:       0
 
@@ -136,28 +136,26 @@ include:
       P:                  "${P}"
       DELAY:              "${DELAY}"
       RETRY:              "${RETRY}"
-      # on/off   
+      # on/off
       IGNORE_ON_OFF:          False
       SET_ON_OFF:             ${SET_ON_OFF}
       GET_ON_OFF:             ${GET_ON_OFF}
       ON_STATE:               1
-      DELAY_RAMP_UP:          ${DELAY_RAMP_UP} 
-      # check OVP fault   
-      IGNORE_CH_STATUS:        True   
+      DELAY_RAMP_UP:          ${DELAY_RAMP_UP}
+      # check OVP fault
+      IGNORE_CH_STATUS:        True
       GET_CH_STATUS:           ${GET_OVP_FAULT}
       CH_STATUS:               ${OVP_NOT_FAULT}
-      # check flodback fault   
+      # check flodback fault
       IGNORE_BOARD_STATUS:    False
       GET_BOARD_STATUS:       ${GET_FOLDBACK_FAULT}
       BOARD_STATUS:           ${FOLDBACK_NOT_FAULT}
-      # check CC/CV mode    
+      # check CC/CV mode
       IGNORE_CRATE_STATUS:    False
       GET_CRATE_STATUS:       ${GET_OPERATION_MODE}
       CRATE_STATUS:           ${OPERATION_MODE}
       # check desired output (measured value)
-      IGNORE_MEASURED_VALUE:  False  
-      GET_MEASURED_VALUE:     ${GET_DESIRED_OUTPUT} 
+      IGNORE_MEASURED_VALUE:  False
+      GET_MEASURED_VALUE:     ${GET_DESIRED_OUTPUT}
       MARGIN_MEASURED_VALUE:  ${DESIRED_OUTPUT_MARGIN}
       MEASURED_VALUE:         ${DESIRED_OUTPUT}
-
-      

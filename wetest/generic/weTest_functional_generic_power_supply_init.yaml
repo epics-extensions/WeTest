@@ -11,7 +11,7 @@ macros:
       DELAY:              0.2   # sec: defaut delay (timeout between setter and checking getter)
       RETRY:              2
       IGNORE_INIT:        True
-      # clear   
+      # clear
       IGNORE_CLEAR:       True
       SET_CLEAR:          "RstCmd"
       GET_CLEAR:          "RstCmd"
@@ -61,6 +61,6 @@ tests:
     # check status/health
     - name: "check device status"
       ignore: ${IGNORE_STATUS}
-      getter: "${GET_STATUS}" 
+      getter: "${GET_STATUS}"
       values:
         - ${STATUS}

@@ -10,12 +10,12 @@ version: {major: 1, minor: 2, bugfix: 0}
 name: "unit test of TDK Lambda Genesys power supply"
 
 macros:
-    - TEST_TITLE:   
+    - TEST_TITLE:
       P:      "CEA:"
-      DELAY:  0.2 
+      DELAY:  0.2
       RETRY:  5
       ## not specific to power supply (user inputs)
-      # voltage 
+      # voltage
       MAX_VOLTAGE:    10
       MIN_VOLTAGE:    0
       STEP_VOLTAGE:   5
@@ -32,7 +32,7 @@ macros:
 
 
       ## specific to power supply (won't change)
-      IGNORE_VOLTAGE: False  
+      IGNORE_VOLTAGE: False
       IGNORE_CURRENT: False
       # PV names
       SET_VOLTAGE:    "USet"
@@ -57,7 +57,7 @@ include:
       # IGNORE_ON_OFF:  True
       # IGNORE_STATUS:  True
 
-      # clear   
+      # clear
       IGNORE_CLEAR:       False
       SET_CLEAR:          'RstCmd'
       GET_CLEAR:          'RstCmd'
@@ -74,9 +74,9 @@ include:
       # STATUS:             'fake'
 
       # voltage
-      IGNORE_VOLTAGE: ${IGNORE_VOLTAGE}  
+      IGNORE_VOLTAGE: ${IGNORE_VOLTAGE}
       SET_VOLTAGE:    ${SET_VOLTAGE}
-      GET_VOLTAGE:    ${GET_VOLTAGE}  
+      GET_VOLTAGE:    ${GET_VOLTAGE}
       MAX_VOLTAGE:    ${MAX_VOLTAGE}
       MIN_VOLTAGE:    ${MIN_VOLTAGE}
       STEP_VOLTAGE:   ${STEP_VOLTAGE}
@@ -84,7 +84,7 @@ include:
       UNDER_VOLTAGE:  ${UNDER_VOLTAGE}
       FINAL_VOLTAGE:  ${FINAL_VOLTAGE}
       # current
-      IGNORE_CURRENT: ${IGNORE_CURRENT} 
+      IGNORE_CURRENT: ${IGNORE_CURRENT}
       SET_CURRENT:    ${SET_CURRENT}
       GET_CURRENT:    ${GET_CURRENT}
       MAX_CURRENT:    ${MAX_CURRENT}
