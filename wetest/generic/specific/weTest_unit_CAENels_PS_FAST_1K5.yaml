@@ -1,14 +1,14 @@
-version: {major: 1, minor: 1, bugfix: 0}
+version: {major: 1, minor: 2, bugfix: 0}
 
 name: "unit test of CAENels fast PS 1K5"
 
 macros:
-    - TEST_TITLE:   
+    - TEST_TITLE:
       P:              "Sec-Sub(x):Dis-Dev-Idx:"
-      DELAY:          1 
-      RETRY:          5 
+      DELAY:          1
+      RETRY:          5
       ## not specific to power supply (user inputs)
-      # voltage 
+      # voltage
       MAX_VOLTAGE:    10
       MIN_VOLTAGE:    0
       STEP_VOLTAGE:   5
@@ -24,7 +24,7 @@ macros:
       FINAL_CURRENT:  0
 
       ## specific to power supply (won't change)
-      IGNORE_VOLTAGE:     False  
+      IGNORE_VOLTAGE:     False
       IGNORE_CURRENT:     False
       IGNORE_RAMP_UP:     False
       IGNORE_RAMP_DOWN:   False
@@ -35,7 +35,7 @@ macros:
       SET_CURRENT:    "ISet"
       GET_CURRENT:    "IRb"
       SET_RAMP_UP:    "URampSet"
-      GET_RAMP_UP:    "URampRb"  
+      GET_RAMP_UP:    "URampRb"
       SET_RAMP_DOWN:  "IRampSet"
       GET_RAMP_DOWN:  "IRampRb"
       SET_REGULATION: "RegModeSet"
@@ -58,9 +58,9 @@ include:
       DELAY:          ${DELAY}
       RETRY:          ${RETRY}
       # voltage
-      IGNORE_VOLTAGE: ${IGNORE_VOLTAGE}  
+      IGNORE_VOLTAGE: ${IGNORE_VOLTAGE}
       SET_VOLTAGE:    ${SET_VOLTAGE}
-      GET_VOLTAGE:    ${GET_VOLTAGE}  
+      GET_VOLTAGE:    ${GET_VOLTAGE}
       MAX_VOLTAGE:    ${MAX_VOLTAGE}
       MIN_VOLTAGE:    ${MIN_VOLTAGE}
       STEP_VOLTAGE:   ${STEP_VOLTAGE}
@@ -68,7 +68,7 @@ include:
       UNDER_VOLTAGE:  ${UNDER_VOLTAGE}
       FINAL_VOLTAGE:  0 # should be value before unit test
       # current
-      IGNORE_CURRENT: ${IGNORE_CURRENT} 
+      IGNORE_CURRENT: ${IGNORE_CURRENT}
       SET_CURRENT:    ${SET_CURRENT}
       GET_CURRENT:    ${GET_CURRENT}
       MAX_CURRENT:    ${MAX_CURRENT}
@@ -78,9 +78,9 @@ include:
       UNDER_CURRENT:  ${UNDER_CURRENT}
       FINAL_CURRENT:  0 # should be value before unit test
       # ramp volt
-      IGNORE_RAMP_UP: ${IGNORE_RAMP_UP} 
+      IGNORE_RAMP_UP: ${IGNORE_RAMP_UP}
       SET_RAMP_UP:    ${SET_RAMP_UP}
-      GET_RAMP_UP:    ${GET_RAMP_UP}  
+      GET_RAMP_UP:    ${GET_RAMP_UP}
       MAX_RAMP_UP:    ${MAX_RAMP}
       MIN_RAMP_UP:    ${MIN_RAMP}
       STEP_RAMP_UP:   ${STEP_RAMP}
@@ -88,9 +88,9 @@ include:
       UNDER_RAMP_UP:  ${UNDER_RAMP}
       FINAL_RAMP_UP:  ${FINAL_RAMP}
       # ramp current
-      IGNORE_RAMP_DOWN: ${IGNORE_RAMP_DOWN} 
+      IGNORE_RAMP_DOWN: ${IGNORE_RAMP_DOWN}
       SET_RAMP_DOWN:    ${SET_RAMP_DOWN}
-      GET_RAMP_DOWN:    ${GET_RAMP_DOWN}  
+      GET_RAMP_DOWN:    ${GET_RAMP_DOWN}
       MAX_RAMP_DOWN:    ${MAX_RAMP}
       MIN_RAMP_DOWN:    ${MIN_RAMP}
       STEP_RAMP_DOWN:   ${STEP_RAMP}
@@ -98,9 +98,8 @@ include:
       UNDER_RAMP_DOWN:  ${UNDER_RAMP}
       FINAL_RAMP_DOWN:  ${FINAL_RAMP}
       # regulation mode
-      IGNORE_REGULATION:  ${IGNORE_REGULATION} 
+      IGNORE_REGULATION:  ${IGNORE_REGULATION}
       SET_REGULATION:     ${SET_REGULATION}
       GET_REGULATION:     ${GET_REGULATION}
       REGULATION_STATE:   ${REGULATION_STATE}
       FINAL_REGULATION:   ${FINAL_REGULATION}
-    
