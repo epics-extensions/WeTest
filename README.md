@@ -43,7 +43,8 @@ And to use virtualenv, first go in the clone repository:
 
 ```bash
 cd WeTest
-virtualenv venv # creates the virtual environment in the folder ./venv
+virtualenv --python=<path-to-pyton-version> venv # creates the virtual environment in the folder ./venv
+eg: $ virtualenv --python=/usr/bin/python2.7 venv
 source ./venv/bin/activate # activates the environment
 ```
 
