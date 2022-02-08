@@ -3,5 +3,5 @@ numpy==1.12.1
 pyepics==3.2.6
 pykwalify==1.7.0
 PyYAML==5.1
-reportlab==3.4.0
+reportlab==3.5.55
 Pillow==6.2.2
