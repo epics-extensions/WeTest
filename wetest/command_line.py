@@ -277,7 +277,7 @@ def main():
             "Installed WeTest is of version %d.%d.%d", major, minor, bugfix)
         if args.version > 1:
             display_changlog((major,0,0),(major, minor, bugfix))
-        sys.exit(1)
+        sys.exit(0)
 
     with_gui = not args.no_gui
 
