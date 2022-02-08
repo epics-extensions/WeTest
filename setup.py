@@ -30,7 +30,7 @@ def readme():
 
 
 setup(name='wetest',
-      version='1.2.0',
+      version='1.2.1',
       description='WeTest allows you to test EPICS modules',
       long_description=readme(),
       classifiers=[

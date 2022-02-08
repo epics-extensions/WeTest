@@ -10,16 +10,16 @@
 # OR REDISTRIBUTION OF THIS SOFTWARE.
 
 type: map
-required: yes
+required: True
 mapping:
     "version":
         desc: "Version is useful te check compatibility of a file and a WeTest version"
         type: map
-        required: yes
+        required: True
         mapping:
-            "major":  { type: int, required: yes }
-            "minor":  { type: int, required: yes }
-            "bugfix": { type: int, required: yes }
+            "major":  { type: int, required: True }
+            "minor":  { type: int, required: True }
+            "bugfix": { type: int, required: True }
 
     "name":
       type: str
@@ -37,18 +37,18 @@ mapping:
               type: str
             - desc: "Path to a scenario file and macros"
               type: map
-              allowempty: yes  # the map can have keys which are not present in the schema, and these can map to anything.
+              allowempty: True  # the map can have keys which are not present in the schema, and these can map to anything.
               mapping:
-                  "path":  { type: str, required: yes }
+                  "path":  { type: str, required: True }
             - desc: "Path to a scenario file and macros"
               type: seq
               sequence:
                   - desc: "Path to a scenario file"
                     type: str
-                    required: yes
+                    required: True
                   - desc: "A dictionnary with one or several macro"
                     type: map
-                    allowempty: yes
+                    allowempty: True
 
     "config":
         desc: "This configure the `tests` block"
@@ -57,7 +57,7 @@ mapping:
             "name":
               desc: Scenario Name
               type: str
-              required: yes
+              required: True
             "type":
                 type: str
                 enum: ['unit', 'functional']
@@ -77,9 +77,9 @@ mapping:
         sequence:
             - desc: "A test can be composed of one or several atomic tests"
               type: map
-              required: yes
+              required: True
               mapping:
-                  "name":       { type: str, required: yes}
+                  "name":       { type: str, required: True}
                   "prefix":     { type: str   }
                   "use_prefix": { type: bool, desc: whether or not to use prefix from config first}
                   "delay":      { type: float }
@@ -98,10 +98,10 @@ mapping:
                   "range":
                       desc: "A range is a kind of for loop"
                       type: map
-                      required: no  # actually one of "range", "values" or "commands" should be set
+                      required: False  # actually one of "range", "values" or "commands" should be set
                       mapping:
-                          "start": { type: number, required: yes }
-                          "stop":  { type: number, required: yes }
+                          "start": { type: number, required: True }
+                          "stop":  { type: number, required: True }
                           "step":
                             type: number
                             range: { min: 0 }
@@ -127,19 +127,19 @@ mapping:
                   "values":
                       desc: "A list of values to test"
                       type: seq
-                      required: no  # actually one of "range", "values" or "commands" should be set
+                      required: False  # actually one of "range", "values" or "commands" should be set
                       sequence:
                           - type: any  # actually expecting a numeric, string, boolean or waveform, not expecting a map
-                            required: yes
+                            required: True
 
                   "commands":
                       desc: "A list of arbitrary commands to test"
                       type: seq
-                      required: no  # actually one of "range", "values" or "commands" should be set
+                      required: False  # actually one of "range", "values" or "commands" should be set
                       sequence:
                           - type: map
                             mapping:
-                                "name":      { type: str, required: yes }
+                                "name":      { type: str, required: True }
                                 "message":   { type: str }
                                 "margin":
                                     desc: "margin allows to set a percentage in which the value will be considered to be OK"
@@ -166,7 +166,7 @@ mapping:
                       type: map
                       mapping:
                           "setter": { type: str, desc: "uses test setter if not provided" }
-                          "value":  { type: number, required: yes }
+                          "value":  { type: number, required: True }
 
                   "ignore": { type: bool, desc: "Whether the test should be read or not, default to False (read test fields)." }
                   "skip":   { type: bool, desc: "Whether the test should be executed or not, default to False (execute)." }
