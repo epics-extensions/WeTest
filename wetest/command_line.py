@@ -29,14 +29,14 @@ import pkg_resources
 import re
 import signal
 import sys
-import Tkinter as tk
+import tkinter as tk
 import time
 import unittest
 
 import colorlog
 import epics
 
-from Queue import Empty
+from queue import Empty
 
 from wetest.common.constants import (
     SELECTION_FROM_GUI, START_FROM_GUI, RESUME_FROM_GUI, PAUSE_FROM_GUI, ABORT_FROM_GUI,
@@ -314,7 +314,7 @@ def main():
                     raise
         logger.info(
             "using CLI macros:\n%s",
-            "\n".join( ["\t%s: %s"%(k,v) for k,v in cli_macros.items()] )
+            "\n".join( ["\t%s: %s"%(k,v) for k,v in list(cli_macros.items())] )
             )
     macros_mgr = MacrosManager(known_macros = cli_macros)
 
@@ -352,7 +352,7 @@ def main():
             suite=suite)
 
     # show naming compatibility in CLI
-    for pv_name, pv in pv_refs.items():
+    for pv_name, pv in list(pv_refs.items()):
         try:
             naming.split(pv_name)
         except NamingError as e:

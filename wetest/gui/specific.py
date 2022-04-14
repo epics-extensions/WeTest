@@ -19,17 +19,17 @@
 # - http://www.tcl.tk/man/tcl8.5/TkCmd/colors.htm
 # - https://www.color-blindness.com/color-name-hue/
 
-from __future__ import print_function
+
 
 import logging
 import multiprocessing
 import re
 import subprocess
-import Tkinter as tk
-import ttk
+import tkinter as tk
+import tkinter.ttk
 
 from multiprocessing import Queue
-from Queue import Empty
+from queue import Empty
 from PIL import ImageTk, Image
 from pkg_resources import resource_filename
 
@@ -141,13 +141,13 @@ class PVsTreeview(MyTreeview):
         return len(self.pvs_refs)
 
     def connected_pvs_nb(self):
-        return len([ pv for pv, status in self.pvs_refs.items() if status == TAG_CONNECTED])
+        return len([ pv for pv, status in list(self.pvs_refs.items()) if status == TAG_CONNECTED])
 
     def disconnected_pvs_nb(self):
-        return len([ pv for pv, status in self.pvs_refs.items() if status == TAG_DISCONNECTED])
+        return len([ pv for pv, status in list(self.pvs_refs.items()) if status == TAG_DISCONNECTED])
 
     def unknown_pvs_nb(self):
-        return len([ pv for pv, status in self.pvs_refs.items() if status == None])
+        return len([ pv for pv, status in list(self.pvs_refs.items()) if status == None])
 
     def update_connection(self, item):
         """Set item TAG_CONNECTED and TAG_DISCONNECTED based on children tags"""
@@ -266,7 +266,7 @@ class StatusIcon(Icon):
                 }
 
         self.tooltip_text = None
-        self.status = status if status in self.status_images.keys() else STATUS_UNKNOWN
+        self.status = status if status in list(self.status_images.keys()) else STATUS_UNKNOWN
         self.images = self.status_images[self.status]
         Icon.__init__(self, master=master, images=self.images, dynamic=dynamic, *args, **kargs)
 
@@ -281,7 +281,7 @@ class StatusIcon(Icon):
             else:
                 self.stop_dynamic()
         if status is not None:
-            self.status = status if status in self.status_images.keys() else STATUS_UNKNOWN
+            self.status = status if status in list(self.status_images.keys()) else STATUS_UNKNOWN
             self.images = self.status_images[self.status]
         self.update()
 
@@ -1021,7 +1021,7 @@ class Suite(tk.Frame):
         # configure and display the scrollable frame
         ## frame are not nativelly scrollable, hence a canvas holding the frame
         self.canvas = tk.Canvas(self.parent)
-        self.vsb = ttk.Scrollbar(self.parent, orient="vertical", command=self.canvas.yview)
+        self.vsb = tkinter.ttk.Scrollbar(self.parent, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.vsb.set)
         self.vsb.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
@@ -1094,7 +1094,7 @@ class Suite(tk.Frame):
         tk.Label(self.pvs_frame).pack()
         # frame to hold tree and scrollbar
         self.tree_frame = tk.Frame(self.pvs_frame)
-        treeScroll = ttk.Scrollbar(self.tree_frame)
+        treeScroll = tkinter.ttk.Scrollbar(self.tree_frame)
         treeScroll.pack(side="right", fill="y", padx=(0,PADDING_X_LABEL*2))
         # tree to display PVs
         self.pvs_tree = PVsTreeview(self.tree_frame,
@@ -1288,7 +1288,7 @@ class Suite(tk.Frame):
 
         # add new PVs if necessary or update values and tags
         updated_sections = set()
-        for pv_name, pv in update_buffer.items():
+        for pv_name, pv in list(update_buffer.items()):
             # pv = update_buffer[pv_name]
             values = [
                 "connected" if pv.connected else "unreachable",
@@ -1517,7 +1517,7 @@ class Suite(tk.Frame):
         """Change status icon based on selection
         Return a dict with to lists, selected and skipped subtest_ids"""
         output = {SELECTED:[], SKIPPED:[]}
-        for st_id, st in self.ids_handle.items():
+        for st_id, st in list(self.ids_handle.items()):
             # st.select_label.config(state="disable")
             if st.selected == SELECTED:
                 output[SELECTED].append(st_id)
@@ -1585,7 +1585,7 @@ def build_subtest_desc(st_id, subtest_infos):
     # debug display
     debug_desc = []
     if DEBUG_INFOS:
-        debug_desc = [str(k) + ": " + str(v) for k,v in subtest_infos.__dict__.items()]
+        debug_desc = [str(k) + ": " + str(v) for k,v in list(subtest_infos.__dict__.items())]
     else:
         debug_desc = []
 
