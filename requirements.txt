@@ -1,8 +1,0 @@
-# latest versions supporting python 2.7
-colorlog==4.8.0
-numpy==1.16
-pyepics==3.4.3
-pykwalify==1.7.0
-PyYAML==5.4.1
-reportlab==3.5.55
-Pillow==6.2.2
