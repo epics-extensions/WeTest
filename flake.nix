@@ -16,7 +16,7 @@
       # support Python 3.6, which we need to support older systems.
       python = pkgs.python39;
 
-      propagatedBuildInputs = with pkgs.python3Packages; [ tkinter ];
+      propagatedBuildInputs = with pkgs.python39Packages; [ tkinter ];
 
       overrides = pkgs.poetry2nix.overrides.withDefaults (final: prev: {
         reportlab = prev.reportlab.overridePythonAttrs (old: {
@@ -26,7 +26,7 @@
     };
 
     devShells.x86_64-linux.default = pkgs.mkShell {
-      nativeBuildInputs = with pkgs; [ poetry python3Full ];
+      nativeBuildInputs = with pkgs; [ poetry python39Full ];
     };
 
   };
