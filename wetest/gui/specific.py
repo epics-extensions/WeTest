@@ -19,6 +19,7 @@
 # - https://www.color-blindness.com/color-name-hue/
 
 
+import contextlib
 import logging
 import tkinter as tk
 import tkinter.ttk
@@ -101,14 +102,14 @@ SKIPPED = "skipped"
 
 
 class PVsTreeview(MyTreeview):
-    """Adds special support for TAG_CONNECTED, TAG_DISCONNECTED and TAG_PV"""
+    """Adds special support for TAG_CONNECTED, TAG_DISCONNECTED and TAG_PV."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         MyTreeview.__init__(self, *args, **kwargs)
         self.pvs_refs = {}  # root parent is root
 
     def _update_pvs_status(self, item):
-        """Method to call to populate or update self.pvs_refs"""
+        """Method to call to populate or update self.pvs_refs."""
         item_tags = list(self.item(item, option="tags"))
         if TAG_PV in item_tags:
             self.pvs_refs[item] = None
@@ -120,14 +121,14 @@ class PVsTreeview(MyTreeview):
                 self.pvs_refs[item] = TAG_CONNECTED
 
     def insert(self, parent, index, iid=None, **kw):
-        """Same as MyTreeview insert, but register the pvs their status"""
-        item = super(PVsTreeview, self).insert(parent, index, iid, **kw)
+        """Same as MyTreeview insert, but register the pvs their status."""
+        item = super().insert(parent, index, iid, **kw)
         self._update_pvs_status(item)
         return item
 
     def add_tag(self, item, tag):
-        """Same as MyTreeview add_tag, but register the pvs and their status"""
-        changed = super(PVsTreeview, self).add_tag(item, tag)
+        """Same as MyTreeview add_tag, but register the pvs and their status."""
+        changed = super().add_tag(item, tag)
         if changed:
             self._update_pvs_status(item)
         return changed
@@ -154,10 +155,10 @@ class PVsTreeview(MyTreeview):
         )
 
     def unknown_pvs_nb(self):
-        return len([pv for pv, status in list(self.pvs_refs.items()) if status == None])
+        return len([pv for pv, status in list(self.pvs_refs.items()) if status is None])
 
     def update_connection(self, item):
-        """Set item TAG_CONNECTED and TAG_DISCONNECTED based on children tags"""
+        """Set item TAG_CONNECTED and TAG_DISCONNECTED based on children tags."""
         # find out children connection status
         mark_as_connected = False
         mark_as_disconnected = False
@@ -197,23 +198,27 @@ class StatusIcon(Icon):
         STATUS_STOP
         STATUS_ERROR
         STATUS_FAIL
-        STATUS_SUCCESS
+        STATUS_SUCCESS.
     """
 
-    def __init__(self, master, status=STATUS_NOT_SET, dynamic=False, *args, **kargs):
+    def __init__(
+        self, master, status=STATUS_NOT_SET, dynamic=False, *args, **kargs
+    ) -> None:
         self.status_images = {
             STATUS_UNKNOWN: [
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-help-2-24.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-help-2-24.png",
                         ),
                     ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-help-2-24_OFF.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-help-2-24_OFF.png",
                         ),
                     ),
                 ),
@@ -222,7 +227,8 @@ class StatusIcon(Icon):
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-help-2-24_OFF.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-help-2-24_OFF.png",
                         ),
                     ),
                 ),
@@ -303,7 +309,8 @@ class StatusIcon(Icon):
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-time-18-24.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-time-18-24.png",
                         ),
                     ),
                 ),
@@ -332,14 +339,16 @@ class StatusIcon(Icon):
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-warning-7-24.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-warning-7-24.png",
                         ),
                     ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-warning-7-24_OFF.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-warning-7-24_OFF.png",
                         ),
                     ),
                 ),
@@ -348,14 +357,16 @@ class StatusIcon(Icon):
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-x-mark-4-24.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-x-mark-4-24.png",
                         ),
                     ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-x-mark-4-24_OFF.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-x-mark-4-24_OFF.png",
                         ),
                     ),
                 ),
@@ -364,7 +375,8 @@ class StatusIcon(Icon):
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-check-mark-7-24.png",
+                            "wetest",
+                            "resources/icons/iconmonstr-check-mark-7-24.png",
                         ),
                     ),
                 ),
@@ -385,7 +397,12 @@ class StatusIcon(Icon):
         )
         self.images = self.status_images[self.status]
         Icon.__init__(
-            self, master=master, images=self.images, dynamic=dynamic, *args, **kargs,
+            self,
+            master=master,
+            images=self.images,
+            dynamic=dynamic,
+            *args,
+            **kargs,
         )
 
         self.tooltip = Tooltip(self, text=status)
@@ -409,7 +426,7 @@ class StatusIcon(Icon):
 
 
 def status_priority(status):
-    """Function to use for sorting status priority"""
+    """Function to use for sorting status priority."""
     scores = {
         STATUS_SKIP: 0,
         STATUS_SUCCESS: 5,
@@ -430,7 +447,7 @@ def status_priority(status):
 
 def duration_str(duration):
     """Compute duration string to show, change format based on duration value."""
-    if duration == None:  # do not show
+    if duration is None:  # do not show
         duration_text = "-----"
 
     elif duration < 1:  # show in ms
@@ -464,7 +481,7 @@ class InfosStatusFrame(tk.Frame):
         select=SELECTED,
         *args,
         **options,
-    ):
+    ) -> None:
         self.title = title  # not used, for debug purposes
         self.infos = infos  # not used, for debug purposes
 
@@ -478,28 +495,32 @@ class InfosStatusFrame(tk.Frame):
             "right_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-63-12.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-arrow-63-12.png",
                     ),
                 ),
             ),
             "left_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-64-12.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-arrow-64-12.png",
                     ),
                 ),
             ),
             "down_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-65-12.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-arrow-65-12.png",
                     ),
                 ),
             ),
             "up_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-66-12.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-arrow-66-12.png",
                     ),
                 ),
             ),
@@ -507,7 +528,8 @@ class InfosStatusFrame(tk.Frame):
             "info": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-speech-bubble-20-16.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-speech-bubble-20-16.png",
                     ),
                 ),
             ),
@@ -515,21 +537,24 @@ class InfosStatusFrame(tk.Frame):
             SELECTED: ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-checkbox-9-16.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-checkbox-9-16.png",
                     ),
                 ),
             ),
             PARTIAL: ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-checkbox-10-16.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-checkbox-10-16.png",
                     ),
                 ),
             ),
             SKIPPED: ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-checkbox-11-16.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-checkbox-11-16.png",
                     ),
                 ),
             ),
@@ -537,7 +562,8 @@ class InfosStatusFrame(tk.Frame):
             "random": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-media-control-55-16.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-media-control-55-16.png",
                     ),
                 ),
             ),
@@ -562,7 +588,9 @@ class InfosStatusFrame(tk.Frame):
         self.status_frame.pack(side="right")
         self.prev_status = None
         self.status_icon = StatusIcon(
-            master=self.status_frame, status=status, dynamic=False,
+            master=self.status_frame,
+            status=status,
+            dynamic=False,
         )
         self.status_icon.pack(side="left", pady=1, padx=1)
 
@@ -572,10 +600,15 @@ class InfosStatusFrame(tk.Frame):
 
         # display title
         self.select_label = tk.Label(
-            self.infos_frame, text=self.indent, anchor="w", compound="right",
+            self.infos_frame,
+            text=self.indent,
+            anchor="w",
+            compound="right",
         )  # , background="#FFFFFF")
         self.select_label.pack(
-            side="left", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
+            side="left",
+            pady=PADDING_Y_LABEL,
+            padx=(PADDING_X_LABEL, 0),
         )
         self.toogle_label = tk.Label(
             self.infos_frame,
@@ -585,11 +618,16 @@ class InfosStatusFrame(tk.Frame):
             compound="right",
         )
         self.toogle_label.pack(
-            side="left", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
+            side="left",
+            pady=PADDING_Y_LABEL,
+            padx=(PADDING_X_LABEL, 0),
         )
         self.title_label = tk.Label(self.infos_frame, text=title, anchor="w")
         self.title_label.pack(
-            side="left", fill="x", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
+            side="left",
+            fill="x",
+            pady=PADDING_Y_LABEL,
+            padx=(PADDING_X_LABEL, 0),
         )
 
         # add infos to infos_frame
@@ -608,7 +646,9 @@ class InfosStatusFrame(tk.Frame):
 
         # show execution duration
         self.duration_label = tk.Label(
-            self.title_frame, text=" %s " % duration_str(None), anchor="w",
+            self.title_frame,
+            text=" %s " % duration_str(None),
+            anchor="w",
         )
         self.duration_label.pack(side="left")  # padding in text
         self.prev_duration = None  # store previous duration for duration colorization
@@ -617,7 +657,8 @@ class InfosStatusFrame(tk.Frame):
             BLACK  # change label foreground in case of significant (10%) change
         )
         self.duration_tooltip = Tooltip(
-            self.duration_label, text=self.prev_duration_str,
+            self.duration_label,
+            text=self.prev_duration_str,
         )
 
         # configure and collapsable frame
@@ -629,7 +670,10 @@ class InfosStatusFrame(tk.Frame):
             ]
         )
         self.sub_frame = tk.Frame(
-            self, relief="sunken", borderwidth=BORDERWIDTH, background=self.sub_frame_bg,
+            self,
+            relief="sunken",
+            borderwidth=BORDERWIDTH,
+            background=self.sub_frame_bg,
         )
 
         # call refresh icon status
@@ -642,7 +686,7 @@ class InfosStatusFrame(tk.Frame):
         # see also bind_title_frame
         self.select_label.bind("<Button-1>", self.toogle_select)
 
-    def reset(self, status=None):
+    def reset(self, status=None) -> None:
         """Reinitialize for replay, keep previous result but empty traceback."""
         # discriminate the first run
         if self.prev_status is None:
@@ -672,7 +716,9 @@ class InfosStatusFrame(tk.Frame):
 
         # reset status
         self.status_icon = StatusIcon(
-            master=self.status_frame, status=status, dynamic=False,
+            master=self.status_frame,
+            status=status,
+            dynamic=False,
         )
         self.status_icon.pack(side="left", pady=1, padx=1)
 
@@ -693,7 +739,7 @@ class InfosStatusFrame(tk.Frame):
 
     def bind_title_frame(self, event, callback=None):
         """Bind the event and callback to info_frame, title_label and toogle_label
-        to unbind set callback to None
+        to unbind set callback to None.
         """
         if callback is None:
             self.infos_frame.bind(event, lambda e: None)
@@ -714,7 +760,7 @@ class InfosStatusFrame(tk.Frame):
 
     def bind_status_icon(self, event, callback=None):
         """Bind the event and callback to status_icon
-        to unbind set callback to None
+        to unbind set callback to None.
         """
         if callback is None:
             self.status_icon.bind(event, lambda e: None)
@@ -722,7 +768,7 @@ class InfosStatusFrame(tk.Frame):
             self.status_icon.bind(event, callback)
 
     def update_icon_tooltip(self, traceback_text):
-        """Change status_icon tooltip and update"""
+        """Change status_icon tooltip and update."""
         self.status_icon.tooltip_text = traceback_text
         self.status_icon.change_status()
 
@@ -777,7 +823,7 @@ class InfosStatusFrame(tk.Frame):
 
 
 class SubtestFrame(InfosStatusFrame):
-    """An InfosStatusFrame with an id, which updates its parents status"""
+    """An InfosStatusFrame with an id, which updates its parents status."""
 
     def __init__(
         self,
@@ -792,7 +838,7 @@ class SubtestFrame(InfosStatusFrame):
         select=SELECTED,
         *args,
         **options,
-    ):
+    ) -> None:
         # initialise attributes
         self.parent_test = parent_test
         self.id = st_id
@@ -846,18 +892,19 @@ class SubtestFrame(InfosStatusFrame):
             if self.test_data.setter is None or self.test_data.getter is None
             else "normal",
             command=clip_generator(
-                "%s %s" % (self.test_data.setter, self.test_data.getter),
+                f"{self.test_data.setter} {self.test_data.getter}",
             ),
         )
         self.popup_menu.add_separator()
         self.popup_menu.add_command(
-            label="copy failure or error traceback", state="disabled",
+            label="copy failure or error traceback",
+            state="disabled",
         )
         self.index_ref = {"setter": 0, "getter": 1, "all": 2, "sep": 3, "traceback": 4}
 
     def update_status(self, status=None, dynamic=None, duration=None):
         """Update own status and and tells parent to update."""
-        super(SubtestFrame, self).update_status(status, dynamic)
+        super().update_status(status, dynamic)
         # display duration
         if duration is not None:
             self.durations.append(float(duration))
@@ -899,20 +946,20 @@ class SubtestFrame(InfosStatusFrame):
             self.bind_status_icon("<Button-1>")
             self.bind_title_frame("<Button-1>")
 
-        super(SubtestFrame, self).reset(status=status)
+        super().reset(status=status)
 
     def check_selection(self):
         """Request parent to check selection."""
         self.parent_test.check_selection()
 
     def set_children_status(self, status, dynamic=None):
-        """Mark as required when not a definitive status, call parent status update"""
+        """Mark as required when not a definitive status, call parent status update."""
         if self.status_icon.status in [STATUS_STOP, STATUS_PAUSE, STATUS_WAIT]:
             self.update_status(status=status, dynamic=dynamic)
         self.update_status()
 
     def set_traceback(self, traceback_text, tooltip_only=False):
-        """Update status_icon tooltip, sub_frame content and parent traceback
+        """Update status_icon tooltip, sub_frame content and parent traceback.
 
         Unless tooltip only is set to True, then only the tooltip is updated.
         """
@@ -954,7 +1001,9 @@ class SubtestFrame(InfosStatusFrame):
 
             # send traceback to parent
             self.parent_test.add_traceback(
-                self.status_icon.status, self.id, self.traceback,
+                self.status_icon.status,
+                self.id,
+                self.traceback,
             )
 
     def traceback_click(self, event=None):
@@ -965,7 +1014,7 @@ class SubtestFrame(InfosStatusFrame):
         self.traceback_toggle()
 
     def traceback_toggle(self):
-        """Toogle sub_frame visibility and toggle_button displayed character"""
+        """Toogle sub_frame visibility and toggle_button displayed character."""
         if self.traceback_show.get() == EXPANDED:
             self.sub_frame.pack(side="bottom", fill="x", expand=1)
             self.toogle_label.config(image=self.icons["down_arrow"])
@@ -975,7 +1024,7 @@ class SubtestFrame(InfosStatusFrame):
 
 
 class TestFrame(InfosStatusFrame):
-    """An InfosStatusFrame with subtests content"""
+    """An InfosStatusFrame with subtests content."""
 
     def __init__(
         self,
@@ -988,7 +1037,7 @@ class TestFrame(InfosStatusFrame):
         dynamic=False,
         *args,
         **options,
-    ):
+    ) -> None:
         # initialise attributes
         self.parent_scenario = parent_scenario
         self.ids_handle = ids_handle
@@ -1019,7 +1068,9 @@ class TestFrame(InfosStatusFrame):
 
         # empty label for padding at sub_frame bottom
         self.padding_label = tk.Label(
-            self.sub_frame, text="", background=self.sub_frame_bg,
+            self.sub_frame,
+            text="",
+            background=self.sub_frame_bg,
         )
         self.padding_label.pack(side="bottom", fill="x", pady=PADDING_Y_LABEL, expand=1)
         Tooltip(self.padding_label, text=title)
@@ -1032,7 +1083,7 @@ class TestFrame(InfosStatusFrame):
         self.subtests_toggle()
 
     def subtests_toggle(self):
-        """Toogle sub_frame visibility and toggle_button displayed character"""
+        """Toogle sub_frame visibility and toggle_button displayed character."""
         if self.subtests_show.get() == EXPANDED:
             self.sub_frame.pack(side="bottom", fill="x", expand=1)
             self.toogle_label.config(image=self.icons["down_arrow"])
@@ -1085,7 +1136,7 @@ class TestFrame(InfosStatusFrame):
         self.check_selection()
         return subtest
 
-    def update_status(self):
+    def update_status(self) -> None:
         """Update status based on children statuses and and tells parent to update."""
         if len(self.status_children) == 0:
             return
@@ -1095,17 +1146,14 @@ class TestFrame(InfosStatusFrame):
             [child.status_icon.status for child in self.status_children],
             key=status_priority,
         )
-        new_dynamic = any([child.status_icon.dynamic for child in self.status_children])
-        super(TestFrame, self).update_status(new_status, new_dynamic)
+        new_dynamic = any(child.status_icon.dynamic for child in self.status_children)
+        super().update_status(new_status, new_dynamic)
 
         # display durations
         self.durations = [
             sum(c.durations) for c in self.status_children if len(c.durations) > 0
         ]
-        if len(self.durations) == 0:
-            total_duration = None
-        else:
-            total_duration = sum(self.durations)
+        total_duration = None if len(self.durations) == 0 else sum(self.durations)
         self.duration_label.config(text=" %s " % duration_str(total_duration))
         # get colors from children
         durations_colors = {c.duration_color for c in self.status_children}
@@ -1122,18 +1170,18 @@ class TestFrame(InfosStatusFrame):
 
     def check_selection(self):
         """Check children selection and Request parent to check selection."""
-        super(TestFrame, self).check_selection()
+        super().check_selection()
         self.parent_scenario.check_selection()
 
     def add_traceback(self, status, id, traceback):
-        """Register the traceback and update status_icon tooltip"""
-        self.traceback.append("%s %s: %s" % (status, id, traceback))
+        """Register the traceback and update status_icon tooltip."""
+        self.traceback.append(f"{status} {id}: {traceback}")
         self.update_icon_tooltip("\n".join(self.traceback))
         self.parent_scenario.add_traceback(status, id, traceback)
 
 
 class ScenarioFrame(InfosStatusFrame):
-    """An InfosStatusFrame with tests content"""
+    """An InfosStatusFrame with tests content."""
 
     def __init__(
         self,
@@ -1146,7 +1194,7 @@ class ScenarioFrame(InfosStatusFrame):
         dynamic=False,
         *args,
         **options,
-    ):
+    ) -> None:
         # initialise attributes
         self.ids_handle = ids_handle
 
@@ -1172,7 +1220,9 @@ class ScenarioFrame(InfosStatusFrame):
             state="normal" if test_type == "unit" else "disabled",
         )
         self.test_type_widget.pack(
-            side="right", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
+            side="right",
+            pady=PADDING_Y_LABEL,
+            padx=(PADDING_X_LABEL, 0),
         )
         # self.infos_label.pack(side="right", padx=(PADDING_X_LABEL,0))
 
@@ -1189,7 +1239,9 @@ class ScenarioFrame(InfosStatusFrame):
 
         # empty label for padding at sub_frame bottom
         self.padding_label = tk.Label(
-            self.sub_frame, text="", background=self.sub_frame_bg,
+            self.sub_frame,
+            text="",
+            background=self.sub_frame_bg,
         )
         self.padding_label.pack(side="bottom", fill="x", pady=PADDING_Y_LABEL, expand=1)
         Tooltip(self.padding_label, text=title)
@@ -1209,7 +1261,7 @@ class ScenarioFrame(InfosStatusFrame):
         self.tests_toggle()
 
     def subtests_toggle(self, event=None):
-        """Toogle sub_frame visibility and toggle_button displayed character"""
+        """Toogle sub_frame visibility and toggle_button displayed character."""
         if self.subtests_show.get() == EXPANDED:
             self.tests_expand()
             for test in self.status_children:
@@ -1219,7 +1271,7 @@ class ScenarioFrame(InfosStatusFrame):
                 test.subtests_collapse()
 
     def tests_toggle(self, event=None):
-        """Toogle sub_frame visibility and toggle_button displayed character"""
+        """Toogle sub_frame visibility and toggle_button displayed character."""
         if self.tests_show.get() == EXPANDED:
             self.sub_frame.pack(side="bottom", fill="x", expand=1)
             self.toogle_label.config(image=self.icons["down_arrow"])
@@ -1263,8 +1315,8 @@ class ScenarioFrame(InfosStatusFrame):
         self.check_selection()
         return test
 
-    def update_status(self):
-        """Update own status based on children statuses"""
+    def update_status(self) -> None:
+        """Update own status based on children statuses."""
         if len(self.status_children) == 0:
             return
 
@@ -1273,17 +1325,14 @@ class ScenarioFrame(InfosStatusFrame):
             [child.status_icon.status for child in self.status_children],
             key=status_priority,
         )
-        new_dynamic = any([child.status_icon.dynamic for child in self.status_children])
-        super(ScenarioFrame, self).update_status(new_status, new_dynamic)
+        new_dynamic = any(child.status_icon.dynamic for child in self.status_children)
+        super().update_status(new_status, new_dynamic)
 
         # display durations
         self.durations = [
             sum(c.durations) for c in self.status_children if len(c.durations) > 0
         ]
-        if len(self.durations) == 0:
-            total_duration = None
-        else:
-            total_duration = sum(self.durations)
+        total_duration = None if len(self.durations) == 0 else sum(self.durations)
         self.duration_label.config(text=" %s " % duration_str(total_duration))
 
         # get colors from children
@@ -1297,8 +1346,8 @@ class ScenarioFrame(InfosStatusFrame):
         self.duration_label.config(fg=self.duration_color)
 
     def add_traceback(self, status, id, traceback):
-        """Register the traceback and update status_icon tooltip"""
-        self.traceback.append("%s %s: %s" % (status, id, traceback))
+        """Register the traceback and update status_icon tooltip."""
+        self.traceback.append(f"{status} {id}: {traceback}")
         self.update_icon_tooltip("\n".join(self.traceback))
 
 
@@ -1320,7 +1369,7 @@ class Suite(tk.Frame):
         warning=None,
         *args,
         **options,
-    ):
+    ) -> None:
         tk.Frame.__init__(self, parent, *args, **options)
 
         self.parent = parent
@@ -1332,7 +1381,9 @@ class Suite(tk.Frame):
         ## frame are not nativelly scrollable, hence a canvas holding the frame
         self.canvas = tk.Canvas(self.parent)
         self.vsb = tkinter.ttk.Scrollbar(
-            self.parent, orient="vertical", command=self.canvas.yview,
+            self.parent,
+            orient="vertical",
+            command=self.canvas.yview,
         )
         self.canvas.configure(yscrollcommand=self.vsb.set)
         self.vsb.pack(side="right", fill="y")
@@ -1360,14 +1411,20 @@ class Suite(tk.Frame):
         infos = infos if infos is not None else []
         for line in infos:
             tk.Label(self.frame, text=line, anchor="w").pack(
-                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2,
+                fill="x",
+                expand=1,
+                anchor="nw",
+                padx=PADDING_X_LABEL * 2,
             )
 
         # display suite warning text
         if warning is not None:
             self.warning_frame = tk.LabelFrame(self.frame, text=" Warning ", fg="red")
             self.warning_frame.pack(
-                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2,
+                fill="x",
+                expand=1,
+                anchor="nw",
+                padx=PADDING_X_LABEL * 2,
             )
             self.warning_frame.bind("<Button-1>", self.toogle_warnings)
             # mock label for space at the begining of the warning box
@@ -1378,7 +1435,10 @@ class Suite(tk.Frame):
             self.show_warning_widget = tk.Frame(self.warning_frame)
             for line in warning:
                 warn = tk.Label(
-                    self.show_warning_widget, text=line, anchor="w", justify="left",
+                    self.show_warning_widget,
+                    text=line,
+                    anchor="w",
+                    justify="left",
                 )
                 warn.pack(fill="x", anchor="nw", padx=PADDING_X_LABEL * 2)
             # mock label for space at the end of warning box
@@ -1395,14 +1455,16 @@ class Suite(tk.Frame):
             "connected": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-check-mark-2-12.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-check-mark-2-12.png",
                     ),
                 ),
             ),
             "disconnected": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-x-mark-2-12.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-x-mark-2-12.png",
                     ),
                 ),
             ),
@@ -1425,7 +1487,8 @@ class Suite(tk.Frame):
             "mixed_section": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-folder-open-thin-12.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-folder-open-thin-12.png",
                     ),
                 ),
             ),
@@ -1450,7 +1513,10 @@ class Suite(tk.Frame):
             columns=("col_status", "col_setter", "col_getter"),
         )
         self.pvs_tree.pack(
-            side="right", fill="x", expand=1, padx=(PADDING_X_LABEL * 2, 0),
+            side="right",
+            fill="x",
+            expand=1,
+            padx=(PADDING_X_LABEL * 2, 0),
         )
 
         self.pvs_tree.column("#0", stretch=True)
@@ -1495,7 +1561,8 @@ class Suite(tk.Frame):
         # configure bindings
         ## canvas scroll region
         self.bind(
-            "<Configure>", self.on_frame_configure,
+            "<Configure>",
+            self.on_frame_configure,
         )  # based on main windows update
         self.frame.bind("<Configure>", self.on_frame_configure)  # based on frame update
         ## mouse scroll
@@ -1553,32 +1620,32 @@ class Suite(tk.Frame):
         return scenario
 
     def on_frame_configure(self, event=None):
-        """Update canvas scroll region"""
+        """Update canvas scroll region."""
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def scenario_width(self, event):
-        """Update scenario width based on event width"""
+        """Update scenario width based on event width."""
         window_width = event.width
         self.canvas.itemconfig(self.window, width=window_width - 5)
 
     def scroll_down(self, event):
-        """Scroll once upward"""
+        """Scroll once upward."""
         self.scroll(-1)
 
     def scroll_up(self, event):
-        """Scroll once downward"""
+        """Scroll once downward."""
         self.scroll(1)
 
     def scroll_start(self, event):
-        """Scroll a bunch toward the begining"""
+        """Scroll a bunch toward the begining."""
         self.scroll(-(10**1))
 
     def scroll_end(self, event):
-        """Scroll a bunch toward the end"""
+        """Scroll a bunch toward the end."""
         self.scroll(10**1)
 
     def mouse_scroll(self, event):
-        """Scrolls if it helps to show more of the scenarios"""
+        """Scrolls if it helps to show more of the scenarios."""
         # workout scroll direction
         if event.num == 5 or event.delta == -120:  # for linux or windows
             move = 1
@@ -1593,7 +1660,7 @@ class Suite(tk.Frame):
             self.canvas.yview_scroll(step, what)
 
     def toogle_warnings(self, event=None, show=None):
-        """Show or hides the warning frame"""
+        """Show or hides the warning frame."""
         if show is None:
             self.show_warning = not self.show_warning
         else:
@@ -1609,7 +1676,7 @@ class Suite(tk.Frame):
         self.on_frame_configure()
 
     def toogle_pvs(self, event=None, show=None):
-        """Change between show all or hide some pvs"""
+        """Change between show all or hide some pvs."""
         if show is None:
             self.show_pvs = not self.show_pvs
         else:
@@ -1623,13 +1690,13 @@ class Suite(tk.Frame):
         self.pvs_need_refreshing = True
 
     def check_pvs_needs_refreshing(self):
-        """Check periodically if need to call self.refresh_pvs"""
+        """Check periodically if need to call self.refresh_pvs."""
         if self.pvs_need_refreshing and not self.pvs_refreshing:
             self.refresh_pvs()
         self.parent.after(200, self.check_pvs_needs_refreshing)
 
     def refresh_pvs(self):
-        """Updates PVs tree view"""
+        """Updates PVs tree view."""
         # reinitialize
         self.pvs_frame.config(fg=BLACK)
         nb_changes = len(self.pvs_updates)
@@ -1663,7 +1730,11 @@ class Suite(tk.Frame):
             # create pv is new
             if pv_name not in self.pvs_tree.get_all():
                 self.pvs_tree.insert(
-                    parent, "end", iid=pv_name, open=True, tags=[TAG_PV],
+                    parent,
+                    "end",
+                    iid=pv_name,
+                    open=True,
+                    tags=[TAG_PV],
                 )
 
             # update pv
@@ -1724,7 +1795,8 @@ class Suite(tk.Frame):
             self.pvs_tree["height"] = min(30, len(self.pvs_tree.get_all()) - 1)
         else:
             self.pvs_tree["height"] = min(
-                10, len(self.pvs_tree.get_all(with_tag=TAG_DISCONNECTED)),
+                10,
+                len(self.pvs_tree.get_all(with_tag=TAG_DISCONNECTED)),
             )
             # force open
             self.pvs_tree.open_all(self.pvs_tree.tag_has(TAG_DISCONNECTED))
@@ -1751,7 +1823,10 @@ class Suite(tk.Frame):
             self.pvs_frame.forget()
         else:
             self.pvs_frame.pack(
-                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2,
+                fill="x",
+                expand=1,
+                anchor="nw",
+                padx=PADDING_X_LABEL * 2,
             )
 
         if nb_connected > 0:
@@ -1791,7 +1866,7 @@ class Suite(tk.Frame):
             # check each section exists
             for idx, sec in enumerate(sections[:-1]):
                 whole_section_name = "we_test_section_" + "_".join(sections[: idx + 1])
-                try:
+                with contextlib.suppress(ExistingTreeItem):
                     self.pvs_tree.insert(
                         parent,
                         "end",
@@ -1800,8 +1875,6 @@ class Suite(tk.Frame):
                         tags=[TAG_SECTION, TAG_AS_SETTER, TAG_AS_GETTER],
                         open=True,
                     )
-                except ExistingTreeItem:
-                    pass
                 parent = whole_section_name
 
         return parent
@@ -1874,7 +1947,7 @@ class Suite(tk.Frame):
 
     def apply_selection(self):
         """Change status icon based on selection
-        Return a dict with to lists, selected and skipped subtest_ids
+        Return a dict with to lists, selected and skipped subtest_ids.
         """
         output = {SELECTED: [], SKIPPED: []}
         for st_id, st in list(self.ids_handle.items()):
@@ -1899,7 +1972,7 @@ class Suite(tk.Frame):
 
 
 def get_default(iterable, idx, default=None):
-    """Return the default value if required idx or key is not available"""
+    """Return the default value if required idx or key is not available."""
     try:
         return iterable[idx]
     except (IndexError, KeyError):

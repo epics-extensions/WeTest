@@ -27,7 +27,7 @@ logger.addHandler(FILE_HANDLER)
 
 
 class ParsingError(WeTestError):
-    """Failed to parse DB file"""
+    """Failed to parse DB file."""
 
 
 def parseDbFile(filepath):
@@ -42,7 +42,7 @@ def parseDbFile(filepath):
         found_records (lsit): list of PV as a dictionnaries
 
     """
-    found_records = list()
+    found_records = []
     current_record = None
     with open(filepath) as dbfile:
         for index, line in enumerate(dbfile):
@@ -61,10 +61,12 @@ def parseDbFile(filepath):
 
             # looking for new record or new field
             new_record = re.search(
-                r"""record\(\s*(?P<type>\S+)\s*,\s*["'](?P<name>\S+)["']\s*\)""", line,
+                r"""record\(\s*(?P<type>\S+)\s*,\s*["'](?P<name>\S+)["']\s*\)""",
+                line,
             )
             new_field = re.search(
-                r"field\(\s*(?P<name>\S+)\s*,\s*(?P<value>.+)\s*\)", line,
+                r"field\(\s*(?P<name>\S+)\s*,\s*(?P<value>.+)\s*\)",
+                line,
             )
 
             # apparently the regex did not match
@@ -76,7 +78,7 @@ def parseDbFile(filepath):
             # start a new record in content_dict
             if new_record:
                 # instanciate a new record assuming previous one is finished
-                current_record = dict()
+                current_record = {}
                 current_record["name"] = new_record.group("name")
                 current_record["type"] = new_record.group("type")
                 # add to record list
@@ -88,9 +90,12 @@ def parseDbFile(filepath):
                 current_field_value = new_field.group("value")
                 if current_record is None:
                     logger.error(
-                        "Field without record line %d in %s", index + 1, filepath,
+                        "Field without record line %d in %s",
+                        index + 1,
+                        filepath,
                     )
-                    raise ParsingError("Found a field but did not start a record yet.")
+                    msg = "Found a field but did not start a record yet."
+                    raise ParsingError(msg)
                 if current_field_name in current_record:
                     logger.warning(
                         "Field redefined in same record line %d in %s",
@@ -116,7 +121,7 @@ def dir2files(dirpath, prefix="", suffix=""):
         found_files (str): list of file path found in directory
     """
     logger.info("Looking for input files in " + dirpath)
-    found_files = list()
+    found_files = []
     found_files.extend(
         [
             os.path.join(dp, f)

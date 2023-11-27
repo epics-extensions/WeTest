@@ -19,7 +19,7 @@ import time
 import unittest
 
 import epics
-import numpy
+import numpy as np
 
 from wetest.common.constants import (
     ABORT_FROM_TEST,
@@ -66,14 +66,12 @@ class EmptyTest(WeTestError):
     """
 
 
-
 class InconsistantTest(WeTestError):
     """Test filed missing with regards to other fields.
 
     Exception raised executing a test that misses a field,
     for instance a setter was provided but not set_value.
     """
-
 
 
 class InvalidTest(WeTestError):
@@ -105,7 +103,7 @@ class TestData:
         delta=None,
         test_message=None,
         subtest_message=None,
-    ):
+    ) -> None:
         """Initialize a TestData structure.
 
         :param test_title: The test name.
@@ -167,7 +165,7 @@ class TestData:
 
         logger.debug("%s", self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         output = self.__repr__()
         output += "\n\ttest_title: %s" % self.test_title
         output += "\n\tsubtest_title: %s" % self.subtest_title
@@ -208,7 +206,10 @@ def skipped_test_factory(test_data, reason):
     def skipped_test(self):
         tr_logger.log(LVL_TEST_SKIPPED, "")
         tr_logger.log(
-            LVL_TEST_SKIPPED, "Skipping   %s    %s", test_data.id, test_data.desc,
+            LVL_TEST_SKIPPED,
+            "Skipping   %s    %s",
+            test_data.id,
+            test_data.desc,
         )
         raise unittest.SkipTest(reason)
 
@@ -216,33 +217,33 @@ def skipped_test_factory(test_data, reason):
 
 
 class SelectableTestCase(unittest.TestCase):
-    """A unittest.TestCase to be filled with test methods, which can be skipped and unskipped"""
+    """A unittest.TestCase to be filled with test methods, which can be skipped and unskipped."""
 
     test_data = {}
     func_backup = {}
 
     @classmethod
     def add_test(cls, test_data, func):
-        """Adds a test method, mark the test as selected"""
+        """Adds a test method, mark the test as selected."""
         cls.test_data[test_data.id] = test_data
         cls.func_backup[test_data.id] = func
         cls.select(test_data.id)
 
     @classmethod
     def skip(cls, test_id, reason):
-        """Skip the test method `test_id`"""
+        """Skip the test method `test_id`."""
         setattr(cls, test_id, skipped_test_factory(cls.test_data[test_id], reason))
 
     @classmethod
     def select(cls, test_id):
-        """Unskip the test method `test_id`"""
+        """Unskip the test method `test_id`."""
         setattr(cls, test_id, cls.func_backup[test_id])
 
 
 class SelectableTestSuite(unittest.TestSuite):
     """A unittest.TestSuite with conveniency method to skip and unskip tests."""
 
-    def __init__(self, *args, **kargs):
+    def __init__(self, *args, **kargs) -> None:
         unittest.TestSuite.__init__(self, *args, **kargs)
         self._tests_data = {}
         self._skipped_tests = {}
@@ -268,14 +269,14 @@ class SelectableTestSuite(unittest.TestSuite):
         self._tests_data[test_id] = Test_case.test_data[test_id]
 
     def select(self, test_id):
-        """Ensure test is selected"""
+        """Ensure test is selected."""
         if test_id in self._skipped_tests:
             test_case = self._skipped_tests.pop(test_id)
             test_case.select(test_id)
             self._selected_tests[test_id] = test_case
 
     def skip(self, test_id, reason):
-        """Ensure test is skipped"""
+        """Ensure test is skipped."""
         if test_id in self._selected_tests:
             test_case = self._selected_tests.pop(test_id)
             test_case.skip(test_id, reason)
@@ -372,7 +373,10 @@ def test_generator(test_data):
             on_failure = ABORT_FROM_TEST
         tr_logger.log(LVL_TEST_RUNNING, "")
         tr_logger.log(
-            LVL_TEST_RUNNING, "Running    %s    %s", test_data.id, test_data.desc,
+            LVL_TEST_RUNNING,
+            "Running    %s    %s",
+            test_data.id,
+            test_data.desc,
         )
 
         nb_exec = 0
@@ -384,40 +388,37 @@ def test_generator(test_data):
             try:
                 # Check for empty or inconsistant test
                 if test_data.subtest_title == NO_KIND:
-                    raise EmptyTest("Test has no range, values nor commands.")
+                    msg = "Test has no range, values nor commands."
+                    raise EmptyTest(msg)
 
                 if test_data.setter is None and test_data.getter is None:
-                    raise EmptyTest("No setter nor getter set for this test.")
+                    msg = "No setter nor getter set for this test."
+                    raise EmptyTest(msg)
 
                 if test_data.setter is not None and test_data.set_value is None:
-                    raise InconsistantTest(
-                        "[setter error] No value associated to setter.",
-                    )
+                    msg = "[setter error] No value associated to setter."
+                    raise InconsistantTest(msg)
 
                 if test_data.getter is not None and test_data.get_value is None:
-                    raise InconsistantTest(
-                        "[getter error] No value associated to getter.",
-                    )
+                    msg = "[getter error] No value associated to getter."
+                    raise InconsistantTest(msg)
 
                 if test_data.set_value is not None and test_data.setter is None:
-                    raise InconsistantTest(
-                        "[setter error] No setter associated to set value.",
-                    )
+                    msg = "[setter error] No setter associated to set value."
+                    raise InconsistantTest(msg)
 
                 if test_data.get_value is not None and test_data.getter is None:
-                    raise InconsistantTest(
-                        "[getter error] No getter associated to get value.",
-                    )
+                    msg = "[getter error] No getter associated to get value."
+                    raise InconsistantTest(msg)
 
                 # Set PV if required
 
                 setter_error = True
                 if test_data.setter and test_data.set_value is not None:
                     setter = epics.PV(test_data.setter)
-                    self.assertIsNotNone(
-                        setter.status,
-                        "Unable to connect to setter PV %s" % (setter.pvname),
-                    )
+                    assert (
+                        setter.status is not None
+                    ), f"Unable to connect to setter PV {setter.pvname}"
 
                     # pyepics expect single characters to be passed as integer
                     # convert string to int or float where possible
@@ -448,9 +449,8 @@ def test_generator(test_data):
                 getter_error = True
                 if test_data.getter and test_data.get_value is not None:
                     getter = epics.PV(test_data.getter)
-                    self.assertIsNotNone(
-                        getter.status,
-                        "Unable to connect to getter PV %s" % (getter.pvname),
+                    assert getter.status is not None, (
+                        "Unable to connect to getter PV %s" % getter.pvname
                     )
 
                     # check a string value
@@ -458,30 +458,22 @@ def test_generator(test_data):
                         expected_value = test_data.get_value
                         measured_value = getter.get(as_string=True)
 
-                        self.assertEqual(
-                            expected_value,
-                            measured_value,
-                            "Expected %s to be %s, but got %s"
-                            % (
-                                getter.pvname,
-                                to_string(expected_value),
-                                to_string(measured_value),
-                            ),
-                        )
+                        assert (
+                            expected_value == measured_value
+                        ), f"Expected {getter.pvname} to be {to_string(expected_value)}, but got {to_string(measured_value)}"
 
                     # check a table of values
                     elif isinstance(test_data.get_value, list):
                         # get the measured value to know the lenght of the table to compare
                         measured_value = getter.get()
-                        if not isinstance(measured_value, numpy.ndarray):
+                        if not isinstance(measured_value, np.ndarray):
                             if len(test_data.get_value) == 1:
                                 # pyepics get does not return a list in case of
                                 # a single-element waveform
-                                measured_value = numpy.array([measured_value])
+                                measured_value = np.array([measured_value])
                             else:
                                 raise ValueError(
-                                    "Expected %s to be an array but got %s"
-                                    % (getter.pvname, to_string(measured_value)),
+                                    f"Expected {getter.pvname} to be an array but got {to_string(measured_value)}",
                                 )
 
                         # pyepics expect single characters to be passed as integer
@@ -504,16 +496,9 @@ def test_generator(test_data):
                             len(measured_value) - len(test_data.get_value)
                         )
 
-                        self.assertTrue(
-                            len(expected_value) == len(measured_value),
-                            "Expected %s to be %s elements long, and not %s: %s"
-                            % (
-                                getter.pvname,
-                                len(expected_value),
-                                len(measured_value),
-                                to_string(measured_value),
-                            ),
-                        )
+                        assert (
+                            len(expected_value) == len(measured_value)
+                        ), f"Expected {getter.pvname} to be {len(expected_value)} elements long, and not {len(measured_value)}: {to_string(measured_value)}"
 
                         # recover margin and delta
                         margin_delta_str = ""
@@ -529,51 +514,40 @@ def test_generator(test_data):
                             atol = test_data.delta
 
                         # compare and allow margin and delta
-                        isclose = numpy.equal(measured_value, expected_value)
+                        isclose = np.equal(measured_value, expected_value)
                         if rtol is not None:
-                            isclose_marging = numpy.isclose(
-                                measured_value, expected_value, rtol=rtol, atol=0,
+                            isclose_marging = np.isclose(
+                                measured_value,
+                                expected_value,
+                                rtol=rtol,
+                                atol=0,
                             )
-                            isclose = numpy.logical_or(isclose, isclose_marging)
+                            isclose = np.logical_or(isclose, isclose_marging)
                         if atol is not None:
-                            isclose_delta = numpy.isclose(
-                                measured_value, expected_value, rtol=0, atol=atol,
+                            isclose_delta = np.isclose(
+                                measured_value,
+                                expected_value,
+                                rtol=0,
+                                atol=atol,
                             )
-                            isclose = numpy.logical_or(isclose, isclose_delta)
+                            isclose = np.logical_or(isclose, isclose_delta)
 
                         # show "OK" if close otherwise show difference
-                        all_close = numpy.all(isclose)
+                        all_close = np.all(isclose)
                         if not all_close:  # compute diff only if not OK
-                            diff = numpy.abs(measured_value - expected_value)
-                            diff[isclose == True] = 0
+                            diff = np.abs(measured_value - expected_value)
+                            diff[isclose is True] = 0
                             diff_str = ["OK" if x == 0 else x for x in diff]
 
-                            self.assertTrue(
-                                all_close,
-                                "Expected %s to be %s%s,\nbut got %s,\ndifference is %s"
-                                % (
-                                    getter.pvname,
-                                    to_string(expected_value),
-                                    margin_delta_str,
-                                    to_string(measured_value),
-                                    to_string(diff_str),
-                                ),
-                            )
+                            assert all_close, f"Expected {getter.pvname} to be {to_string(expected_value)}{margin_delta_str},\nbut got {to_string(measured_value)},\ndifference is {to_string(diff_str)}"
 
                     # check a number or boolean without margin or delta
                     elif not test_data.margin and not test_data.delta:
                         expected_value = test_data.get_value
                         measured_value = getter.get()
-                        self.assertEqual(
-                            expected_value,
-                            measured_value,
-                            "Expected %s to be %s, but got %s"
-                            % (
-                                getter.pvname,
-                                to_string(expected_value),
-                                to_string(measured_value),
-                            ),
-                        )
+                        assert (
+                            expected_value == measured_value
+                        ), f"Expected {getter.pvname} to be {to_string(expected_value)}, but got {to_string(measured_value)}"
 
                     # check a number or boolean with margin or delta
                     else:
@@ -610,8 +584,7 @@ def test_generator(test_data):
                             test_data.get_value,
                             measured_value,
                             delta=max_delta,
-                            msg="Expected %s to be %.3G %s (ie. within [%.3G,%.3G]), but got %.3G"
-                            % (
+                            msg="Expected {} to be {:.3G} {} (ie. within [{:.3G},{:.3G}]), but got {:.3G}".format(
                                 getter.pvname,
                                 expected_value,
                                 margin_delta_str,
@@ -693,7 +666,7 @@ def test_generator(test_data):
 class TestsGenerator:
     """TestGenerator generates unittest test cases from a YAML file."""
 
-    def __init__(self, tests_data):
+    def __init__(self, tests_data) -> None:
         """Initialize a TestsGenerator object.
 
         :param tests_data: Deserialized YAML file(s) with tests data.
@@ -772,14 +745,14 @@ class TestsGenerator:
                 # generate the list from step, lin and geom
                 value_list = set()
                 if step != 0:
-                    value_list.update(numpy.arange(start, stop, step))
+                    value_list.update(np.arange(start, stop, step))
                 if lin != 0:
                     value_list.update(
-                        numpy.linspace(start, stop, lin, endpoint=include_stop),
+                        np.linspace(start, stop, lin, endpoint=include_stop),
                     )
                 if geom != 0:
                     value_list.update(
-                        numpy.geomspace(start, stop, geom, endpoint=include_stop),
+                        np.geomspace(start, stop, geom, endpoint=include_stop),
                     )
 
                 # check if stop value should be tested or not
@@ -913,17 +886,20 @@ class TestsGenerator:
                         get_value = command.get("value", command.get("get_value"))
 
                     delay = command.get(
-                        "delay", test_raw_data.get("delay", self.get_config("delay")),
+                        "delay",
+                        test_raw_data.get("delay", self.get_config("delay")),
                     )
                     skip = command.get(
-                        "skip", test_raw_data.get("skip", self.get_config("skip")),
+                        "skip",
+                        test_raw_data.get("skip", self.get_config("skip")),
                     )
                     on_failure = command.get(
                         "on_failure",
                         test_raw_data.get("on_failure", self.get_config("on_failure")),
                     )
                     retry = command.get(
-                        "retry", test_raw_data.get("retry", self.get_config("retry")),
+                        "retry",
+                        test_raw_data.get("retry", self.get_config("retry")),
                     )
 
                     logger.debug("adding new command subtest")
@@ -972,13 +948,15 @@ class TestsGenerator:
                 elif "setter" in test_raw_data:
                     command = test_raw_data["setter"]
                 else:
-                    raise InvalidTest("Undefined setter for finally block")
+                    msg = "Undefined setter for finally block"
+                    raise InvalidTest(msg)
 
                 value = None
                 if "value" in test_raw_data["finally"]:
                     value = test_raw_data["finally"]["value"]
                 else:
-                    raise InvalidTest("Undefined value in finally block")
+                    msg = "Undefined value in finally block"
+                    raise InvalidTest(msg)
 
                 logger.debug("adding new finally subtest")
                 finally_data = TestData(
@@ -1015,14 +993,14 @@ class TestsGenerator:
 
         return random_list
 
-    def get_test_id(self, scenario, test, subtest):
+    def get_test_id(self, scenario, test, subtest) -> str:
         """Generate test id
         The test id are not sortable in alphabetical order anymore.
         """
         return "test-%d-%d-%d" % (scenario, test, subtest)
 
     def get_config(self, field=None):
-        """Getter to access config fields
+        """Getter to access config fields.
 
         :param field:  config field name
 
@@ -1074,7 +1052,9 @@ class TestsGenerator:
                 # add test case to test suite
                 if skip:
                     tests_suite.add_skipped_test(
-                        Test_case, test_id, "Test skipped from file.",
+                        Test_case,
+                        test_id,
+                        "Test skipped from file.",
                     )
                 else:
                     tests_suite.add_selected_test(Test_case, test_id)

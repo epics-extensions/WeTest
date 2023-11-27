@@ -38,7 +38,12 @@ INCH = 72
 
 
 def get_para_with_style(
-    text="", bold=False, italic=False, style="BodyText", align="left", color=None,
+    text="",
+    bold=False,
+    italic=False,
+    style="BodyText",
+    align="left",
+    color=None,
 ):
     """Get an initialized Paragraph object.
 
@@ -95,7 +100,7 @@ def get_para_with_style(
 class _TestInfo:
     """Combine information about tests success status."""
 
-    def __init__(self, test_suite, test_results):
+    def __init__(self, test_suite, test_results) -> None:
         """Initialize _TestInfo.
 
         :param test_suite:   The ran TestSuite.
@@ -145,13 +150,19 @@ class _TestInfo:
                 logger.debug("test trace: %s", trace)
                 if test.id() == result.id():
                     self._append_to_combined(
-                        test, "Skipped", "grey", infos=test_suite.tests_infos[short_id],
+                        test,
+                        "Skipped",
+                        "grey",
+                        infos=test_suite.tests_infos[short_id],
                     )
                     success = False
 
             if success:
                 self._append_to_combined(
-                    test, "Success", "green", infos=test_suite.tests_infos[short_id],
+                    test,
+                    "Success",
+                    "green",
+                    infos=test_suite.tests_infos[short_id],
                 )
 
         # # Reorder results by their execution order
@@ -183,7 +194,9 @@ class _TestInfo:
 class ReportGenerator:
     """Generates a PDF report from test unit results."""
 
-    def __init__(self, test_suite, test_results, filename, scenario_data, naming):
+    def __init__(
+        self, test_suite, test_results, filename, scenario_data, naming
+    ) -> None:
         """Initialize ReportGenerator.
 
         :param test_suite:   The ran TestSuite.
@@ -230,7 +243,10 @@ class ReportGenerator:
         logo_table = Table(logo_array)
 
         title = get_para_with_style(
-            self.scenario_data[0]["name"], bold=True, style="Title", align="center",
+            self.scenario_data[0]["name"],
+            bold=True,
+            style="Title",
+            align="center",
         )
 
         date = get_para_with_style(
@@ -283,7 +299,7 @@ class ReportGenerator:
                     if new_section is None:
                         new_section = idx
 
-                    section_txt = "%s%s" % ("\t\t" * idx, sec)
+                    section_txt = "{}{}".format("\t\t" * idx, sec)
 
                     prev_sections[idx] = sec
                     prev_sections[idx + 1 :] = [None] * (nbr_sec - idx - 1)
@@ -297,10 +313,7 @@ class ReportGenerator:
                     )
 
             # show pv name
-            if pv.tested:
-                pv_name = pv.name
-            else:
-                pv_name = "[" + pv.name + "]"
+            pv_name = pv.name if pv.tested else "[" + pv.name + "]"
 
             # show test count
             setter_str = "-"
@@ -363,7 +376,8 @@ class ReportGenerator:
                             "",
                             [
                                 get_para_with_style(
-                                    test["infos"].test_title, bold=True,
+                                    test["infos"].test_title,
+                                    bold=True,
                                 ),
                                 get_para_with_style(
                                     test["infos"].test_message,
@@ -384,13 +398,18 @@ class ReportGenerator:
             if test["infos"].subtest_message is not None:
                 middle_cell.append(
                     get_para_with_style(
-                        test["infos"].subtest_message, style="Definition", italic=True,
+                        test["infos"].subtest_message,
+                        style="Definition",
+                        italic=True,
                     ),
                 )
             if test["trace"] is not None:
                 middle_cell.append(
                     get_para_with_style(
-                        test["trace"], align="left", color=test["color"], style="Italic",
+                        test["trace"],
+                        align="left",
+                        color=test["color"],
+                        style="Italic",
                     ),
                 )
 
@@ -399,7 +418,9 @@ class ReportGenerator:
                     get_para_with_style(str(test_count), align="center"),
                     middle_cell,
                     get_para_with_style(
-                        test["result"], align="center", color=test["color"],
+                        test["result"],
+                        align="center",
+                        color=test["color"],
                     ),
                 ],
             )
