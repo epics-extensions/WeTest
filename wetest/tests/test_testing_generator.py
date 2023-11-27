@@ -35,12 +35,10 @@ class TestTestsGenerator(unittest.TestCase):
         scenario = ScenarioReader("wetest/tests/scenario_example03.yaml")
         tests = TestsGenerator(scenario.get_deserialized())
         setter = get_key(
-            tests.data["tests"][0]["commands"][0],
-            tests.data["tests"][0],
-            "setter")
+            tests.data["tests"][0]["commands"][0], tests.data["tests"][0], "setter"
+        )
         self.assertEqual("LockS", setter)
         getter = get_key(
-            tests.data["tests"][0]["commands"][0],
-            tests.data["tests"][0],
-            "getter")
+            tests.data["tests"][0]["commands"][0], tests.data["tests"][0], "getter"
+        )
         self.assertEqual("LockR", getter)

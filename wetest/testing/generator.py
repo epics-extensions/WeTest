@@ -50,11 +50,13 @@ stream_handler.setLevel(logging.WARNING)
 tr_logger.addHandler(stream_handler)
 tr_logger.addHandler(FILE_HANDLER)
 
+
 class EmptyTest(WeTestError):
     """Test does not do anything.
 
     Exception raised executing a test without getter nor setter.
     """
+
     pass
 
 
@@ -64,22 +66,40 @@ class InconsistantTest(WeTestError):
     Exception raised executing a test that misses a field,
     for instance a setter was provided but not set_value.
     """
+
     pass
+
 
 class InvalidTest(WeTestError):
     """Something is wrong with test data."""
 
+
 class TestNotFound(WeTestError):
     """Test is not in the sequence."""
 
+
 class TestData(object):
     """A generic test representation."""
-    def __init__(self, on_failure, test_title, subtest_title, test_id='',
-                 skip=False, retry=0,
-                 getter=None, setter=None,
-                 get_value=None, set_value=None,
-                 prefix='', delay=0, margin=None, delta=None,
-                 test_message=None, subtest_message=None):
+
+    def __init__(
+        self,
+        on_failure,
+        test_title,
+        subtest_title,
+        test_id="",
+        skip=False,
+        retry=0,
+        getter=None,
+        setter=None,
+        get_value=None,
+        set_value=None,
+        prefix="",
+        delay=0,
+        margin=None,
+        delta=None,
+        test_message=None,
+        subtest_message=None,
+    ):
         """Initialize a TestData structure.
 
         :param test_title: The test name.
@@ -99,7 +119,7 @@ class TestData(object):
         :param subtest_message: If any a subtest message.
         """
         if on_failure.lower() not in [ABORT, PAUSE, CONTINUE]:
-            logger.critical("Unexpected on_failure value: %s"%on_failure)
+            logger.critical("Unexpected on_failure value: %s" % on_failure)
             self.on_failure = ABORT
         else:
             self.on_failure = on_failure.lower()
@@ -133,28 +153,32 @@ class TestData(object):
         if self.getter is not None and self.prefix is not None:
             self.getter = self.prefix + self.getter
 
-        self.desc = str(self.test_title).replace("\n"," ") + ": " + str(self.subtest_title).replace("\n"," ")
+        self.desc = (
+            str(self.test_title).replace("\n", " ")
+            + ": "
+            + str(self.subtest_title).replace("\n", " ")
+        )
 
         logger.debug("%s", self)
 
     def __str__(self):
         output = self.__repr__()
-        output += '\n\ttest_title: %s'% self.test_title
-        output += '\n\tsubtest_title: %s'% self.subtest_title
-        output += '\n\tid: %s'% self.id
-        output += '\n\ton_failure: %s'% self.on_failure
-        output += '\n\tretry: %s'% self.retry
-        output += '\n\tgetter: %s'% self.getter
-        output += '\n\tsetter: %s'% self.setter
-        output += '\n\tget_value: %s'% self.get_value
-        output += '\n\tset_value: %s'% self.set_value
-        output += '\n\tprefix: %s'% self.prefix
-        output += '\n\tdelay: %s'% self.delay
-        output += '\n\tmargin: %s'% self.margin
-        output += '\n\tdelta: %s'% self.delta
-        output += '\n\ttest_message: %s'% self.test_message
-        output += '\n\tsubtest_message: %s'% self.subtest_message
-        output += '\n\tdesc: %s'% self.desc
+        output += "\n\ttest_title: %s" % self.test_title
+        output += "\n\tsubtest_title: %s" % self.subtest_title
+        output += "\n\tid: %s" % self.id
+        output += "\n\ton_failure: %s" % self.on_failure
+        output += "\n\tretry: %s" % self.retry
+        output += "\n\tgetter: %s" % self.getter
+        output += "\n\tsetter: %s" % self.setter
+        output += "\n\tget_value: %s" % self.get_value
+        output += "\n\tset_value: %s" % self.set_value
+        output += "\n\tprefix: %s" % self.prefix
+        output += "\n\tdelay: %s" % self.delay
+        output += "\n\tmargin: %s" % self.margin
+        output += "\n\tdelta: %s" % self.delta
+        output += "\n\ttest_message: %s" % self.test_message
+        output += "\n\tsubtest_message: %s" % self.subtest_message
+        output += "\n\tdesc: %s" % self.desc
         return output
 
 
@@ -166,19 +190,24 @@ def add_doc(value):
     :returns: Function's docstring.
 
     """
+
     def _doc(func):
         func.__doc__ = value
         return func
+
     return _doc
 
 
 def skipped_test_factory(test_data, reason):
     def skipped_test(self):
         tr_logger.log(LVL_TEST_SKIPPED, "")
-        tr_logger.log(LVL_TEST_SKIPPED, "Skipping   %s    %s", test_data.id, test_data.desc)
+        tr_logger.log(
+            LVL_TEST_SKIPPED, "Skipping   %s    %s", test_data.id, test_data.desc
+        )
         raise unittest.SkipTest(reason)
 
     return skipped_test
+
 
 class SelectableTestCase(unittest.TestCase):
     """A unittest.TestCase to be filled with test methods, which can be skipped and unskipped"""
@@ -207,7 +236,7 @@ class SelectableTestCase(unittest.TestCase):
 class SelectableTestSuite(unittest.TestSuite):
     """A unittest.TestSuite with conveniency method to skip and unskip tests."""
 
-    def __init__(self, *args,**kargs):
+    def __init__(self, *args, **kargs):
         unittest.TestSuite.__init__(self, *args, **kargs)
         self._tests_data = {}
         self._skipped_tests = {}
@@ -220,14 +249,14 @@ class SelectableTestSuite(unittest.TestSuite):
 
     def add_skipped_test(self, Test_case, test_id, reason):
         """Add a test to and its data to the suite and reference it as skipped."""
-        self._skipped_tests[test_id]=Test_case
+        self._skipped_tests[test_id] = Test_case
         Test_case.skip(test_id, reason)
         self.addTest(Test_case(test_id))
         self._tests_data[test_id] = Test_case.test_data[test_id]
 
     def add_selected_test(self, Test_case, test_id):
         """Add a test to and its data to the suite and reference it as selected."""
-        self._selected_tests[test_id]=Test_case
+        self._selected_tests[test_id] = Test_case
         Test_case.select(test_id)
         self.addTest(Test_case(test_id))
         self._tests_data[test_id] = Test_case.test_data[test_id]
@@ -283,6 +312,7 @@ def get_margin(data):
 
     return margin
 
+
 def get_delta(data):
     """Get allowed delta between setter and getter values.
 
@@ -291,6 +321,7 @@ def get_delta(data):
     :returns: allowed delta.
     """
     return data.get("delta", None)
+
 
 def get_key(prefered, backup, key):
     """Get key by priority.
@@ -306,6 +337,7 @@ def get_key(prefered, backup, key):
     """
     return prefered.get(key, backup.get(key))
 
+
 def test_generator(test_data):
     """Generates a test function from test's data.
 
@@ -314,7 +346,7 @@ def test_generator(test_data):
 
     :returns: a test function, to be add to a unittest.TestCase.
     """
-    logger.info('Generating test: %s', test_data.desc)
+    logger.info("Generating test: %s", test_data.desc)
 
     @add_doc(test_data.desc)
     def test(self):
@@ -333,7 +365,9 @@ def test_generator(test_data):
         else:
             on_failure = ABORT_FROM_TEST
         tr_logger.log(LVL_TEST_RUNNING, "")
-        tr_logger.log(LVL_TEST_RUNNING, "Running    %s    %s", test_data.id, test_data.desc)
+        tr_logger.log(
+            LVL_TEST_RUNNING, "Running    %s    %s", test_data.id, test_data.desc
+        )
 
         nb_exec = 0
         setter_error = False
@@ -343,31 +377,41 @@ def test_generator(test_data):
             nb_exec += 1
             try:
                 # Check for empty or inconsistant test
-                if test_data.subtest_title == NO_KIND :
+                if test_data.subtest_title == NO_KIND:
                     raise EmptyTest("Test has no range, values nor commands.")
 
-                if test_data.setter is None and test_data.getter is None :
+                if test_data.setter is None and test_data.getter is None:
                     raise EmptyTest("No setter nor getter set for this test.")
 
-                if test_data.setter is not None and test_data.set_value is None :
-                    raise InconsistantTest("[setter error] No value associated to setter.")
+                if test_data.setter is not None and test_data.set_value is None:
+                    raise InconsistantTest(
+                        "[setter error] No value associated to setter."
+                    )
 
-                if test_data.getter is not None and test_data.get_value is None :
-                    raise InconsistantTest("[getter error] No value associated to getter.")
+                if test_data.getter is not None and test_data.get_value is None:
+                    raise InconsistantTest(
+                        "[getter error] No value associated to getter."
+                    )
 
-                if test_data.set_value is not None and test_data.setter is None :
-                    raise InconsistantTest("[setter error] No setter associated to set value.")
+                if test_data.set_value is not None and test_data.setter is None:
+                    raise InconsistantTest(
+                        "[setter error] No setter associated to set value."
+                    )
 
-                if test_data.get_value is not None and test_data.getter is None :
-                    raise InconsistantTest("[getter error] No getter associated to get value.")
+                if test_data.get_value is not None and test_data.getter is None:
+                    raise InconsistantTest(
+                        "[getter error] No getter associated to get value."
+                    )
 
                 # Set PV if required
 
                 setter_error = True
                 if test_data.setter and test_data.set_value is not None:
                     setter = epics.PV(test_data.setter)
-                    self.assertIsNotNone(setter.status,
-                        "Unable to connect to setter PV %s" %(setter.pvname))
+                    self.assertIsNotNone(
+                        setter.status,
+                        "Unable to connect to setter PV %s" % (setter.pvname),
+                    )
 
                     # pyepics expect single characters to be passed as integer
                     # convert string to int or float where possible
@@ -397,23 +441,30 @@ def test_generator(test_data):
                 # Get and test if required
                 getter_error = True
                 if test_data.getter and test_data.get_value is not None:
-
                     getter = epics.PV(test_data.getter)
-                    self.assertIsNotNone(getter.status,
-                        "Unable to connect to getter PV %s" %(getter.pvname))
+                    self.assertIsNotNone(
+                        getter.status,
+                        "Unable to connect to getter PV %s" % (getter.pvname),
+                    )
 
                     # check a string value
                     if isinstance(test_data.get_value, str):
                         expected_value = test_data.get_value
                         measured_value = getter.get(as_string=True)
 
-                        self.assertEqual(expected_value, measured_value,
+                        self.assertEqual(
+                            expected_value,
+                            measured_value,
                             "Expected %s to be %s, but got %s"
-                            %(getter.pvname,to_string(expected_value),to_string(measured_value)))
+                            % (
+                                getter.pvname,
+                                to_string(expected_value),
+                                to_string(measured_value),
+                            ),
+                        )
 
                     # check a table of values
                     elif isinstance(test_data.get_value, list):
-
                         # get the measured value to know the lenght of the table to compare
                         measured_value = getter.get()
                         if not isinstance(measured_value, numpy.ndarray):
@@ -422,9 +473,10 @@ def test_generator(test_data):
                                 # a single-element waveform
                                 measured_value = numpy.array([measured_value])
                             else:
-                                raise ValueError("Expected %s to be an array but got %s"
-                                    %(getter.pvname, to_string(measured_value))
-                                    )
+                                raise ValueError(
+                                    "Expected %s to be an array but got %s"
+                                    % (getter.pvname, to_string(measured_value))
+                                )
 
                         # pyepics expect single characters to be passed as integer
                         # convert string to int or float where possible
@@ -442,36 +494,45 @@ def test_generator(test_data):
                                 expected_value.append(v)
 
                         # add zero after the expected values
-                        expected_value += [0]*(len(measured_value)-len(test_data.get_value))
+                        expected_value += [0] * (
+                            len(measured_value) - len(test_data.get_value)
+                        )
 
-                        self.assertTrue(len(expected_value) == len(measured_value),
+                        self.assertTrue(
+                            len(expected_value) == len(measured_value),
                             "Expected %s to be %s elements long, and not %s: %s"
-                            %(getter.pvname,
-                            len(expected_value),
-                            len(measured_value),
-                            to_string(measured_value)
-                            ))
+                            % (
+                                getter.pvname,
+                                len(expected_value),
+                                len(measured_value),
+                                to_string(measured_value),
+                            ),
+                        )
 
                         # recover margin and delta
                         margin_delta_str = ""
                         rtol = None
                         atol = None
                         if test_data.margin is not None:
-                            margin_delta_str += " ±%.3G%%"%(test_data.margin*100)
+                            margin_delta_str += " ±%.3G%%" % (test_data.margin * 100)
                             rtol = test_data.margin
                         if test_data.margin is not None and test_data.delta is not None:
                             margin_delta_str += " or"
                         if test_data.delta is not None:
-                            margin_delta_str += " ±%.3G"%test_data.delta
+                            margin_delta_str += " ±%.3G" % test_data.delta
                             atol = test_data.delta
 
                         # compare and allow margin and delta
                         isclose = numpy.equal(measured_value, expected_value)
                         if rtol is not None:
-                            isclose_marging = numpy.isclose(measured_value, expected_value, rtol=rtol, atol=0)
+                            isclose_marging = numpy.isclose(
+                                measured_value, expected_value, rtol=rtol, atol=0
+                            )
                             isclose = numpy.logical_or(isclose, isclose_marging)
                         if atol is not None:
-                            isclose_delta = numpy.isclose(measured_value, expected_value, rtol=0, atol=atol)
+                            isclose_delta = numpy.isclose(
+                                measured_value, expected_value, rtol=0, atol=atol
+                            )
                             isclose = numpy.logical_or(isclose, isclose_delta)
 
                         # show "OK" if close otherwise show difference
@@ -479,29 +540,41 @@ def test_generator(test_data):
                         if not all_close:  # compute diff only if not OK
                             diff = numpy.abs(measured_value - expected_value)
                             diff[isclose == True] = 0
-                            diff_str = ["OK" if x==0 else x for x in diff]
+                            diff_str = ["OK" if x == 0 else x for x in diff]
 
-                            self.assertTrue(all_close,
+                            self.assertTrue(
+                                all_close,
                                 "Expected %s to be %s%s,\nbut got %s,\ndifference is %s"
-                                %(getter.pvname,
-                                to_string(expected_value),
-                                margin_delta_str,
-                                to_string(measured_value),
-                                to_string(diff_str)
-                                ))
+                                % (
+                                    getter.pvname,
+                                    to_string(expected_value),
+                                    margin_delta_str,
+                                    to_string(measured_value),
+                                    to_string(diff_str),
+                                ),
+                            )
 
                     # check a number or boolean without margin or delta
                     elif not test_data.margin and not test_data.delta:
                         expected_value = test_data.get_value
                         measured_value = getter.get()
-                        self.assertEqual(expected_value, measured_value,
+                        self.assertEqual(
+                            expected_value,
+                            measured_value,
                             "Expected %s to be %s, but got %s"
-                            %(getter.pvname,to_string(expected_value),to_string(measured_value)))
+                            % (
+                                getter.pvname,
+                                to_string(expected_value),
+                                to_string(measured_value),
+                            ),
+                        )
 
                     # check a number or boolean with margin or delta
                     else:
                         if test_data.margin is not None:
-                            margin = abs(float(test_data.get_value) * float(test_data.margin))
+                            margin = abs(
+                                float(test_data.get_value) * float(test_data.margin)
+                            )
                         else:
                             margin = 0
                         if test_data.delta is not None:
@@ -511,34 +584,61 @@ def test_generator(test_data):
 
                         if margin > delta:
                             max_delta = margin
-                            margin_delta_str = "±%.3G%%"%(test_data.margin*100)
+                            margin_delta_str = "±%.3G%%" % (test_data.margin * 100)
                         else:
                             max_delta = delta
-                            margin_delta_str = "±%.3G"%delta
+                            margin_delta_str = "±%.3G" % delta
 
-                        expected_value = float("NaN") if test_data.get_value is None else float(test_data.get_value)
-                        measured_value = float("NaN") if getter.get() is None else float(getter.get())
+                        expected_value = (
+                            float("NaN")
+                            if test_data.get_value is None
+                            else float(test_data.get_value)
+                        )
+                        measured_value = (
+                            float("NaN")
+                            if getter.get() is None
+                            else float(getter.get())
+                        )
 
-                        self.assertAlmostEqual(test_data.get_value, measured_value, delta=max_delta,
+                        self.assertAlmostEqual(
+                            test_data.get_value,
+                            measured_value,
+                            delta=max_delta,
                             msg="Expected %s to be %.3G %s (ie. within [%.3G,%.3G]), but got %.3G"
-                            %(getter.pvname,
-                            expected_value,
-                            margin_delta_str,
-                            expected_value-max_delta,
-                            expected_value+max_delta,
-                            measured_value))
+                            % (
+                                getter.pvname,
+                                expected_value,
+                                margin_delta_str,
+                                expected_value - max_delta,
+                                expected_value + max_delta,
+                                measured_value,
+                            ),
+                        )
 
                 getter_error = False
-                elapsed = time.time()-start_time
-                tr_logger.log(LVL_TEST_SUCCESS,"Success of %s    (in %.3fs) ", test_data.id, elapsed)
+                elapsed = time.time() - start_time
+                tr_logger.log(
+                    LVL_TEST_SUCCESS,
+                    "Success of %s    (in %.3fs) ",
+                    test_data.id,
+                    elapsed,
+                )
                 break  # no exception then no need for retry
 
             # test fails
-            except (AssertionError) as e:
+            except AssertionError as e:
                 # loop again if they are retries left
                 if nb_exec <= test_data.retry:
-                    elapsed = time.time()-start_time
-                    tr_logger.log(LVL_TEST_RUNNING, "Retry (%d/%s) %s    (in %.3fs) %s", nb_exec, test_data.retry, test_data.id, elapsed, e)
+                    elapsed = time.time() - start_time
+                    tr_logger.log(
+                        LVL_TEST_RUNNING,
+                        "Retry (%d/%s) %s    (in %.3fs) %s",
+                        nb_exec,
+                        test_data.retry,
+                        test_data.id,
+                        elapsed,
+                        e,
+                    )
 
                     if on_failure != CONTINUE:
                         tr_logger.log(LVL_RUN_CONTROL, "%s", on_failure)
@@ -548,8 +648,14 @@ def test_generator(test_data):
                     continue
 
                 # otherwise mark as failed
-                elapsed = time.time()-start_time
-                tr_logger.log(LVL_TEST_FAILED, "Failure of %s    (in %.3fs) %s", test_data.id, elapsed, e)
+                elapsed = time.time() - start_time
+                tr_logger.log(
+                    LVL_TEST_FAILED,
+                    "Failure of %s    (in %.3fs) %s",
+                    test_data.id,
+                    elapsed,
+                    e,
+                )
                 tr_logger.log(LVL_RUN_CONTROL, "%s", on_failure)
                 if on_failure != CONTINUE:
                     # give time to pause or abort runner before running next test
@@ -559,15 +665,16 @@ def test_generator(test_data):
 
             # something is not right with this test (ignore retry)
             except (EmptyTest, InconsistantTest, Exception) as e:
-                elapsed = time.time()-start_time
+                elapsed = time.time() - start_time
                 tr_logger.log(
                     LVL_TEST_ERRORED,
                     "Error   of %s    (in %.3fs) %s%s%s",
                     test_data.id,
                     elapsed,
-                    "[setter error] "*setter_error,
-                    "[getter error] "*getter_error,
-                    e)
+                    "[setter error] " * setter_error,
+                    "[getter error] " * getter_error,
+                    e,
+                )
                 tr_logger.log(LVL_RUN_CONTROL, "%s", on_failure)
                 if on_failure != CONTINUE:
                     # give time to pause or abort runner before running next test
@@ -575,6 +682,7 @@ def test_generator(test_data):
                 raise
 
     return test, test_data
+
 
 class TestsGenerator(object):
     """TestGenerator generates unittest test cases from a YAML file."""
@@ -588,7 +696,6 @@ class TestsGenerator(object):
 
         self.data = tests_data
 
-
         self._create_tests_list()
 
         logger.debug("Initialized TestGenerator.")
@@ -600,7 +707,6 @@ class TestsGenerator(object):
         self.tests_list = []
 
         for test_raw_data in self.data["tests"]:
-
             # default values for setter and getter
             setter = None
             getter = None
@@ -614,20 +720,19 @@ class TestsGenerator(object):
             delay = test_raw_data.get("delay", self.get_config("delay"))
             ignore = test_raw_data.get("ignore", self.get_config("ignore"))
             skip = test_raw_data.get("skip", self.get_config("skip"))
-            on_failure = test_raw_data.get('on_failure', self.get_config("on_failure"))
-            retry = test_raw_data.get('retry', self.get_config("retry"))
+            on_failure = test_raw_data.get("on_failure", self.get_config("on_failure"))
+            retry = test_raw_data.get("retry", self.get_config("retry"))
 
             # generate subtests
             subtests_list = []
             if ignore:
-                logger.info("Ignore %s ",test_raw_data['name'])
+                logger.info("Ignore %s ", test_raw_data["name"])
                 # If ignore is True then test should not be read,
                 # but index taken into account nonetheless
                 # hence adding it in the test list as empty
                 subtests_list = None
 
             elif "range" in test_raw_data:
-
                 try:
                     setter = test_raw_data["setter"]
                 except KeyError:
@@ -663,9 +768,13 @@ class TestsGenerator(object):
                 if step != 0:
                     value_list.update(numpy.arange(start, stop, step))
                 if lin != 0:
-                    value_list.update(numpy.linspace(start, stop, lin, endpoint=include_stop))
+                    value_list.update(
+                        numpy.linspace(start, stop, lin, endpoint=include_stop)
+                    )
                 if geom != 0:
-                    value_list.update(numpy.geomspace(start, stop, geom, endpoint=include_stop))
+                    value_list.update(
+                        numpy.geomspace(start, stop, geom, endpoint=include_stop)
+                    )
 
                 # check if stop value should be tested or not
                 if include_stop and stop not in value_list:
@@ -679,7 +788,6 @@ class TestsGenerator(object):
                 if not include_start and start in value_list:
                     value_list.remove(start)
 
-
                 ordered_values = list(value_list)
                 # sort or randomize the values
                 if sort.lower() in ["true"]:
@@ -691,7 +799,6 @@ class TestsGenerator(object):
                 else:
                     logging.error("Unexpected value for `sort` field: %s", sort)
 
-
                 for value in ordered_values:
                     # use value only if setter or getter
                     set_value = value if setter is not None else None
@@ -699,19 +806,19 @@ class TestsGenerator(object):
                     if set_value is not None and get_value is not None:
                         subtest_title = str(set_value)
                     elif set_value is not None:
-                        subtest_title = " set " +str(set_value)
+                        subtest_title = " set " + str(set_value)
                     elif get_value is not None:
-                        subtest_title = " get " +str(get_value)
+                        subtest_title = " get " + str(get_value)
                     else:
                         subtest_title = "no setter nor getter"
 
-                    logger.debug('adding new range subtest')
+                    logger.debug("adding new range subtest")
                     test_data = TestData(
                         on_failure=on_failure,
                         retry=retry,
-                        test_title=test_raw_data['name'],
+                        test_title=test_raw_data["name"],
                         subtest_title=subtest_title,
-                        skip = skip,
+                        skip=skip,
                         getter=getter,
                         setter=setter,
                         get_value=get_value,
@@ -720,7 +827,7 @@ class TestsGenerator(object):
                         delay=delay,
                         margin=get_margin(test_raw_data),
                         delta=get_delta(test_raw_data),
-                        test_message=test_raw_data.get('message',None),
+                        test_message=test_raw_data.get("message", None),
                     )
 
                     subtests_list.append(test_data)
@@ -743,19 +850,19 @@ class TestsGenerator(object):
                     if set_value is not None and get_value is not None:
                         subtest_title = str(set_value)
                     elif set_value is not None:
-                        subtest_title = " set " +str(set_value)
+                        subtest_title = " set " + str(set_value)
                     elif get_value is not None:
-                        subtest_title = " get " +str(get_value)
+                        subtest_title = " get " + str(get_value)
                     else:
                         subtest_title = "no setter nor getter"
 
-                    logger.debug('adding new value subtest')
+                    logger.debug("adding new value subtest")
                     test_data = TestData(
                         on_failure=on_failure,
                         retry=retry,
-                        test_title=test_raw_data['name'],
+                        test_title=test_raw_data["name"],
                         subtest_title=subtest_title,
-                        skip = skip,
+                        skip=skip,
                         getter=getter,
                         setter=setter,
                         get_value=get_value,
@@ -764,15 +871,13 @@ class TestsGenerator(object):
                         delay=delay,
                         margin=get_margin(test_raw_data),
                         delta=get_delta(test_raw_data),
-                        test_message=test_raw_data.get('message',None),
+                        test_message=test_raw_data.get("message", None),
                     )
 
                     subtests_list.append(test_data)
 
             elif "commands" in test_raw_data:
-
                 for command in test_raw_data["commands"]:
-
                     if command.get("ignore", False):
                         # ignore has already been checked at test level
                         continue
@@ -801,26 +906,27 @@ class TestsGenerator(object):
                     if getter is not None:
                         get_value = command.get("value", command.get("get_value"))
 
-                    delay = command.get("delay",
-                        test_raw_data.get("delay",self.get_config("delay"))
-                        )
-                    skip = command.get("skip",
-                        test_raw_data.get("skip",self.get_config("skip"))
-                        )
-                    on_failure = command.get("on_failure",
-                        test_raw_data.get("on_failure",self.get_config("on_failure"))
-                        )
-                    retry = command.get("retry",
-                        test_raw_data.get("retry",self.get_config("retry"))
-                        )
+                    delay = command.get(
+                        "delay", test_raw_data.get("delay", self.get_config("delay"))
+                    )
+                    skip = command.get(
+                        "skip", test_raw_data.get("skip", self.get_config("skip"))
+                    )
+                    on_failure = command.get(
+                        "on_failure",
+                        test_raw_data.get("on_failure", self.get_config("on_failure")),
+                    )
+                    retry = command.get(
+                        "retry", test_raw_data.get("retry", self.get_config("retry"))
+                    )
 
-                    logger.debug('adding new command subtest')
+                    logger.debug("adding new command subtest")
                     test_data = TestData(
                         on_failure=on_failure,
                         retry=retry,
-                        test_title=test_raw_data['name'],
-                        subtest_title=command['name'],
-                        skip = skip,
+                        test_title=test_raw_data["name"],
+                        subtest_title=command["name"],
+                        skip=skip,
                         getter=getter,
                         setter=setter,
                         get_value=get_value,
@@ -829,26 +935,27 @@ class TestsGenerator(object):
                         delay=delay,
                         margin=get_margin(command),
                         delta=get_delta(command),
-                        test_message=test_raw_data.get('message',None),
-                        subtest_message=command.get('message',None)
+                        test_message=test_raw_data.get("message", None),
+                        subtest_message=command.get("message", None),
                     )
 
                     subtests_list.append(test_data)
 
-            else: # missing test kind (range, values or command)
+            else:  # missing test kind (range, values or command)
                 if "finally" in test_raw_data:
                     pass  # finally only test are acceptatble
-                else: # show an error "NO_KIND"
+                else:  # show an error "NO_KIND"
                     test_data = TestData(
                         on_failure=on_failure,
-                        test_title=test_raw_data['name'],
+                        test_title=test_raw_data["name"],
                         subtest_title=NO_KIND,
-                        skip = skip,)
+                        skip=skip,
+                    )
 
                     subtests_list.append(test_data)
 
             if "finally" in test_raw_data and not ignore:
-                logger.debug('Found finally statement in %s', test_raw_data)
+                logger.debug("Found finally statement in %s", test_raw_data)
                 if subtests_list is None:
                     # for instance no subtest
                     subtests_list = []
@@ -867,16 +974,16 @@ class TestsGenerator(object):
                 else:
                     raise InvalidTest("Undefined value in finally block")
 
-                logger.debug('adding new finally subtest')
+                logger.debug("adding new finally subtest")
                 finally_data = TestData(
                     on_failure=on_failure,
-                    retry=test_raw_data.get('retry', self.get_config("retry")),
-                    test_title=test_raw_data['name'],
-                    subtest_title='Final statement',
-                    skip = skip,
+                    retry=test_raw_data.get("retry", self.get_config("retry")),
+                    test_title=test_raw_data["name"],
+                    subtest_title="Final statement",
+                    skip=skip,
                     setter=command,
                     set_value=value,
-                    prefix=prefix
+                    prefix=prefix,
                 )
 
                 subtests_list.append(finally_data)
@@ -895,7 +1002,7 @@ class TestsGenerator(object):
         count = len(self.tests_list)
         random_list = [int(i) for i in range(0, count)]
 
-        logger.info("Tests type: %s", self.get_config("type") )
+        logger.info("Tests type: %s", self.get_config("type"))
         if self.get_config("type") == "unit":
             random.shuffle(random_list)
         logger.info("Tests will be executed in that order: %s", random_list)
@@ -906,7 +1013,7 @@ class TestsGenerator(object):
         """Generate test id
         The test id are not sortable in alphabetical order anymore.
         """
-        return "test-%d-%d-%d"%(scenario, test, subtest)
+        return "test-%d-%d-%d" % (scenario, test, subtest)
 
     def get_config(self, field=None):
         """Getter to access config fields
@@ -919,7 +1026,6 @@ class TestsGenerator(object):
             return self.data["config"]
         else:
             return self.data["config"][field]
-
 
     def append_to_suite(self, tests_suite, scenario_index=0):
         """Generate `unittest` tests from configuration file.
@@ -939,9 +1045,9 @@ class TestsGenerator(object):
                 continue
             for test_data in self.tests_list[idx]:
                 test_id = self.get_test_id(
-                    scenario = scenario_index,
-                    test = idx,
-                    subtest = self.tests_list[idx].index(test_data)
+                    scenario=scenario_index,
+                    test=idx,
+                    subtest=self.tests_list[idx].index(test_data),
                 )
                 test_data.id = test_id
 
@@ -949,15 +1055,20 @@ class TestsGenerator(object):
                 test_func, test_data = test_generator(test_data)
                 skip = test_data.skip
 
-                logger.debug('Add test named "%s", with description "%s": %s',
-                             test_id, test_data.desc, test_func)
+                logger.debug(
+                    'Add test named "%s", with description "%s": %s',
+                    test_id,
+                    test_data.desc,
+                    test_func,
+                )
 
                 # test_case = SelectableTestCase(test_data, test_func)
                 Test_case.add_test(test_data, test_func)
 
                 # add test case to test suite
                 if skip:
-                    tests_suite.add_skipped_test(Test_case, test_id, "Test skipped from file.")
+                    tests_suite.add_skipped_test(
+                        Test_case, test_id, "Test skipped from file."
+                    )
                 else:
                     tests_suite.add_selected_test(Test_case, test_id)
-

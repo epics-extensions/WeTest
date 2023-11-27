@@ -27,6 +27,7 @@ logger.addHandler(FILE_HANDLER)
 
 class NamingError(WeTestError):
     """Exception raise when a PV does not fit the naming."""
+
     def __init__(self, message=None, pv_name=None, naming=None):
         msg = ""
         if pv_name is not None:
@@ -39,7 +40,6 @@ class NamingError(WeTestError):
 
 
 def generate_naming(identifier):
-
     if identifier.upper() == "NONE":
         return NoNaming()
     elif identifier.upper() == "SARAF":
@@ -54,16 +54,15 @@ def generate_naming(identifier):
         raise NotImplementedError
 
 
-class Naming():
-
+class Naming:
     def __init__(self, name="Abstract Naming"):
-        self.name=name
+        self.name = name
 
     def sort(self, pv_name):
         """Key function for sorting.
         This function should not raise exception.
         """
-        raise NotImplementedError("%s has no sort method"%self.name)
+        raise NotImplementedError("%s has no sort method" % self.name)
 
     def split(self, pv_name):
         """Return the PV name decomposed into a list
@@ -75,7 +74,7 @@ class Naming():
 
         It should raise NamingError excpetion in case of error.
         """
-        raise NotImplementedError("%s has no split method"%self.name)
+        raise NotImplementedError("%s has no split method" % self.name)
 
     def ssplit(self, pv_name):
         """Return the PV name decomposed into a short list
@@ -87,7 +86,7 @@ class Naming():
 
         It should raise NamingError excpetion in case of error.
         """
-        raise NotImplementedError("%s has no ssplit method"%self.name)
+        raise NotImplementedError("%s has no ssplit method" % self.name)
 
 
 class NoNaming(Naming):
@@ -167,7 +166,7 @@ class RDS81346Naming(Naming):
                     prepend = "SL-"
                 else:
                     if prepend is not None:
-                        sections.append(prepend+sec)
+                        sections.append(prepend + sec)
                         prepend = None
                     else:
                         sections.append(sec)
