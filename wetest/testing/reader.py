@@ -30,10 +30,17 @@ from pykwalify import errors
 from pykwalify.core import Core
 import yaml
 
-from wetest.common.constants import TERSE_FORMATTER, FILE_HANDLER, LVL_FORMAT_VAL, WeTestError
+from wetest.common.constants import (
+    TERSE_FORMATTER,
+    FILE_HANDLER,
+    LVL_FORMAT_VAL,
+    WeTestError,
+)
 
 # configure logging
-logging.getLogger("pykwalify").setLevel(logging.CRITICAL)  # otherwise we get a No handler exception
+logging.getLogger("pykwalify").setLevel(
+    logging.CRITICAL
+)  # otherwise we get a No handler exception
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 stream_handler = logging.StreamHandler()
@@ -68,9 +75,12 @@ ABORT = "abort"
 PAUSE = "pause"
 CONTINUE = "continue"
 
+
 class FileNotFound(WeTestError):
     """Unable to find file corresponding to provided path."""
+
     pass
+
 
 class UnsupportedFileFormat(WeTestError):
     """Bad YAML file format exception.
@@ -78,6 +88,7 @@ class UnsupportedFileFormat(WeTestError):
     Exception raised if YAML configuration file format version is newer than
     supported one.
     """
+
     pass
 
 
@@ -86,13 +97,14 @@ class InvalidFileContent(WeTestError):
 
     Exception raised if post-schema YAML validation is not passed.
     """
+
     pass
 
 
 class MacroError(WeTestError):
     """Something went wrong when parsing the macros"""
-    pass
 
+    pass
 
 
 def display_changlog(file_version, wetest_version):
@@ -104,28 +116,31 @@ def display_changlog(file_version, wetest_version):
         max_version = file_version
         return
     elif file_version < wetest_version:
-        if file_version[0:2] == wetest_version[0:2]: # only bugfix change
+        if file_version[0:2] == wetest_version[0:2]:  # only bugfix change
             logger.warning("Some retrocompatible changes have been made to WeTest.")
         else:
             logger.warning(
                 "Some NON-retrocompatible changes have been made to WeTest since %s",
-                ".".join([str(x) for x in file_version])
-                )
+                ".".join([str(x) for x in file_version]),
+            )
         min_version = file_version
         max_version = wetest_version
     else:
         logger.warning("Same version.")
         return
 
-    for major in range(min_version[0], max_version[0]+1): # do stop value too
+    for major in range(min_version[0], max_version[0] + 1):  # do stop value too
         if major in CHANGELOG_WARN:
             for minor in sorted(CHANGELOG_WARN[major]):
                 if (major, minor) <= min_version[:2]:
-                    continue # too early
+                    continue  # too early
                 elif (major, minor) > max_version[:2]:
-                    break # too new
+                    break  # too new
                 else:
-                    logger.warning("%d.%d.x:\n%s", major, minor, CHANGELOG_WARN[major][minor])
+                    logger.warning(
+                        "%d.%d.x:\n%s", major, minor, CHANGELOG_WARN[major][minor]
+                    )
+
 
 def query_yes_no(question, default=None):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -138,9 +153,7 @@ def query_yes_no(question, default=None):
 
     The "answer" return value is True for "yes" or False for "no".
     """
-    valid = {
-        "yes": True, "y": True, "ye": True,
-        "no": False, "n": False}
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
     if default is None:
         prompt = " [y/n] "
     elif default == "yes":
@@ -153,7 +166,7 @@ def query_yes_no(question, default=None):
     while True:
         print(question + prompt)
         choice = input().lower()
-        if default is not None and choice == '':
+        if default is not None and choice == "":
             return valid[default]
         elif choice in valid:
             return valid[choice]
@@ -161,7 +174,7 @@ def query_yes_no(question, default=None):
             print("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
 
-class MacrosManager():
+class MacrosManager:
     """A class to keep track of known, used and unknown variable.
 
     You should use the same manager if you want to keep updating the same
@@ -186,9 +199,9 @@ class MacrosManager():
 
     def __str__(self):
         output = "MacrosManager:"
-        output += "\nknown macros:\n"+str(sorted(self.known_macros))
-        output += "\nused macros:\n"+str(sorted(self.used_macros))
-        output += "\nunknown macros:\n"+str(sorted(self.unknown_macros))
+        output += "\nknown macros:\n" + str(sorted(self.known_macros))
+        output += "\nused macros:\n" + str(sorted(self.used_macros))
+        output += "\nunknown macros:\n" + str(sorted(self.unknown_macros))
         return output
 
     def deep_copy(self):
@@ -196,8 +209,8 @@ class MacrosManager():
         return MacrosManager(
             known_macros=self.known_macros,
             used_macros=self.used_macros,
-            unknown_macros=self.unknown_macros
-            )
+            unknown_macros=self.unknown_macros,
+        )
 
     def mark_as_used(self, macros):
         """Complete used_macros with the provided list"""
@@ -218,7 +231,9 @@ class MacrosManager():
                 if str(k) in self.known_macros and priority_to_known:
                     pass
                 else:
-                    self.known_macros[str(k)] = self.substitue_macros(v, trace_unknown=False)
+                    self.known_macros[str(k)] = self.substitue_macros(
+                        v, trace_unknown=False
+                    )
         else:
             raise MacroError("Input can not be read as a macro: %s", new_macros)
 
@@ -250,7 +265,9 @@ class MacrosManager():
         # new is non geedy because forbiding '${}()' characters in the macro name
         # and works with imbricated macros
         self._trace_unkown = trace_unknown
-        new_str, nb_sub = re.subn(r"\$[({]{1}[^${}()]*[)}]{1}", self.corresponding_macro, a_value)
+        new_str, nb_sub = re.subn(
+            r"\$[({]{1}[^${}()]*[)}]{1}", self.corresponding_macro, a_value
+        )
         self._trace_unkown = True
 
         # try to type the returned value (boolean, int, float, dict, list... instead of a string)
@@ -273,7 +290,7 @@ class MacrosManager():
                     # ends by a colon, in a multiline string:
                     # "mapping values are not allowed here"
                     logger.debug(e)
-                    logger.debug("in: \n"+new_str)
+                    logger.debug("in: \n" + new_str)
 
             # however we can not rely on yaml load to parse an int or a float
             # especially for exponential notation or infinity or NAN
@@ -299,11 +316,13 @@ class MacrosManager():
 
             # call substitute macro again on the result if it changed
             # in order to substitute imbricated macros
-            if isinstance(output, str) and  output != a_value:
+            if isinstance(output, str) and output != a_value:
                 try:
                     return self.substitue_macros(new_str, trace_unknown=trace_unknown)
                 except RuntimeError as e:
-                    self.read_errors.append("- Recusivity issue with macros:\n%s" %output)
+                    self.read_errors.append(
+                        "- Recusivity issue with macros:\n%s" % output
+                    )
 
             return output
 
@@ -351,21 +370,21 @@ class MacrosManager():
 class ScenarioReader(object):
     """Read WeTest YAML Scenario file
 
-        :param yaml_file: A YAML suite configuration file.
-        :param macros_mgr: a MacrosManager of macros already defined before reading
-        :param suite_macros: list of macros name defined in the suite and therefore
-                            not necessarily for this scenario, should not be checked
-                            when looking for unused macros
-        :param propagate: a boolean, whether or not to share all macros with included files
+    :param yaml_file: A YAML suite configuration file.
+    :param macros_mgr: a MacrosManager of macros already defined before reading
+    :param suite_macros: list of macros name defined in the suite and therefore
+                        not necessarily for this scenario, should not be checked
+                        when looking for unused macros
+    :param propagate: a boolean, whether or not to share all macros with included files
     """
 
     def __init__(self, yaml_file, macros_mgr=None, suite_macros=None, propagate=False):
         """Initialize Reader."""
         self.file_path = os.path.abspath(yaml_file)
         try:
-            self.file = open(self.file_path, 'r')
+            self.file = open(self.file_path, "r")
         except IOError:
-            raise FileNotFound("Could not find file %s"%self.file_path)
+            raise FileNotFound("Could not find file %s" % self.file_path)
 
         self.macros_mgr = macros_mgr if macros_mgr is not None else MacrosManager()
         self.suite_macros = suite_macros if suite_macros is not None else list()
@@ -374,17 +393,18 @@ class ScenarioReader(object):
         self.deserialized_scenarios = []
         self.deserialized = self._deserialize()
 
-        self.major = self.deserialized['version']['major']
-        self.minor = self.deserialized['version']['minor']
-        self.bugfix = self.deserialized['version']['bugfix']
-        self.version = "{}.{}.{}".format(str(self.major), str(self.minor),
-                                         str(self.bugfix))
+        self.major = self.deserialized["version"]["major"]
+        self.minor = self.deserialized["version"]["minor"]
+        self.bugfix = self.deserialized["version"]["bugfix"]
+        self.version = "{}.{}.{}".format(
+            str(self.major), str(self.minor), str(self.bugfix)
+        )
 
         self.version_is_supported = self._version_is_supported()
 
         # Check YAML file schema and other validation
-        tempo_file_path = '/tmp/no_macros.yml'
-        with open(tempo_file_path, 'w') as yml_wo_macros:
+        tempo_file_path = "/tmp/no_macros.yml"
+        with open(tempo_file_path, "w") as yml_wo_macros:
             yaml.dump(self.deserialized, yml_wo_macros, default_flow_style=False)
         self.file_is_valid = self._validate_file(tempo_file_path)
 
@@ -401,46 +421,54 @@ class ScenarioReader(object):
 
         # initialise include, tests and config block if not defined
         if "include" not in wetest_file:
-            wetest_file['include'] = []
+            wetest_file["include"] = []
 
         # initialise local test position if not defined
-        if "tests" in wetest_file and "tests" not in wetest_file['include']:
+        if "tests" in wetest_file and "tests" not in wetest_file["include"]:
             wetest_file["include"].append("tests")
 
         # set default configuration
         if "config" in wetest_file:
-            wetest_file["config"].setdefault("name",   "Unnamed scenario.")
-            wetest_file["config"].setdefault("type",   "functional")
+            wetest_file["config"].setdefault("name", "Unnamed scenario.")
+            wetest_file["config"].setdefault("type", "functional")
             wetest_file["config"].setdefault("prefix", "")
             wetest_file["config"].setdefault("use_prefix", True)
-            wetest_file["config"].setdefault("delay",  1)
+            wetest_file["config"].setdefault("delay", 1)
             wetest_file["config"].setdefault("ignore", False)
-            wetest_file["config"].setdefault("skip",   False)
-            wetest_file["config"].setdefault("on_failure", CONTINUE if wetest_file["config"]["type"]=="unit" else PAUSE)
-            wetest_file["config"].setdefault("retry",  0)
+            wetest_file["config"].setdefault("skip", False)
+            wetest_file["config"].setdefault(
+                "on_failure",
+                CONTINUE if wetest_file["config"]["type"] == "unit" else PAUSE,
+            )
+            wetest_file["config"].setdefault("retry", 0)
 
         # transform local tests into something similar to an imported scenario
-        local_tests = {block:content for block,content in list(wetest_file.items()) if block in ["config", "tests"]}
+        local_tests = {
+            block: content
+            for block, content in list(wetest_file.items())
+            if block in ["config", "tests"]
+        }
 
         # Read each scenario listed in wetest_file and add them to `scenarios` block
-        logger.info('Reading scenario file(s)...')
+        logger.info("Reading scenario file(s)...")
         self.deserialized_scenarios = []
 
-        for scenario in wetest_file['include']:
-
+        for scenario in wetest_file["include"]:
             if self.propagate:
                 sc_macros_mgr = self.macros_mgr.deep_copy()
             else:
                 sc_macros_mgr = MacrosManager()
 
-            logger.debug('Processing: %s', scenario)
+            logger.debug("Processing: %s", scenario)
             if isinstance(scenario, str) and scenario == "tests":
                 self.deserialized_scenarios.append(local_tests)
                 continue
 
             if isinstance(scenario, list):
                 if not isinstance(scenario[0], str):
-                    raise InvalidFileContent("First item of include should be a file path.")
+                    raise InvalidFileContent(
+                        "First item of include should be a file path."
+                    )
                 scenario_path = scenario[0]
                 # remains a list of one or several dicts
                 sc_macros_mgr.add_new_macros(scenario[1:], priority_to_known=False)
@@ -448,24 +476,25 @@ class ScenarioReader(object):
                 scenario_path = scenario["path"]
                 sc_macros_mgr.mark_as_used("path")
                 sc_macros_mgr.add_new_macros(scenario, priority_to_known=False)
-            else: # case with no macros
+            else:  # case with no macros
                 scenario_path = scenario
 
-
             scenario_path = self.get_full_path(scenario_path)
-            logger.debug('Reading: %s', scenario_path)
-            logger.debug('with macros: %s', sc_macros_mgr.known_macros)
-
+            logger.debug("Reading: %s", scenario_path)
+            logger.debug("with macros: %s", sc_macros_mgr.known_macros)
 
             # deserialize scenario and append
-            new_sc = ScenarioReader(scenario_path,
-                macros_mgr=sc_macros_mgr, suite_macros=self.macros_mgr.known_macros)
+            new_sc = ScenarioReader(
+                scenario_path,
+                macros_mgr=sc_macros_mgr,
+                suite_macros=self.macros_mgr.known_macros,
+            )
             self.deserialized_scenarios += new_sc.deserialized_scenarios
 
             # mark macro used in scenario as used for wetest_file
             self.macros_mgr.mark_as_used(new_sc.macros_mgr.used_macros)
 
-        logger.debug('Read scenario file(s).')
+        logger.debug("Read scenario file(s).")
 
         return wetest_file
 
@@ -479,20 +508,24 @@ class ScenarioReader(object):
 
         :returns: absolute path or raise a FileNotFoundError if nothings match.
         """
-        if os.path.isfile(os.path.abspath(file_path)): # absolute or relative to current location
+        if os.path.isfile(
+            os.path.abspath(file_path)
+        ):  # absolute or relative to current location
             return os.path.abspath(file_path)
 
         current_file_location = os.path.dirname(self.file_path)
-        abs_path = os.path.abspath(os.path.join(current_file_location,file_path))
+        abs_path = os.path.abspath(os.path.join(current_file_location, file_path))
 
         if os.path.isfile(abs_path):
             return abs_path
         else:
             raise FileNotFound(
                 "Could not find either of these files:"
-                + "\n- "+os.path.abspath(file_path)
-                + "\n- "+abs_path
-                )
+                + "\n- "
+                + os.path.abspath(file_path)
+                + "\n- "
+                + abs_path
+            )
 
     def _validate_file(self, file_path=None):
         """Check if YAML file format is valid. Check if all found macro was defined.
@@ -505,10 +538,11 @@ class ScenarioReader(object):
         file_path = file_path or self.file_path
         # we actually validate file_path and not self.filepath,
         # but self.file_path holds more useful information to display
-        fv_logger.log(LVL_FORMAT_VAL, "Validation of YAML scenario file: %s", self.file_path)
+        fv_logger.log(
+            LVL_FORMAT_VAL, "Validation of YAML scenario file: %s", self.file_path
+        )
 
-        schema_path = resource_filename("wetest",
-                                        "resources/scenario_schema.yaml")
+        schema_path = resource_filename("wetest", "resources/scenario_schema.yaml")
         config = Core(source_file=file_path, schema_files=[schema_path])
 
         return self.validate_file(config)
@@ -528,74 +562,89 @@ class ScenarioReader(object):
         """
         errors = []
 
-        if 'config' in self.deserialized and 'tests' not in  self.deserialized:
+        if "config" in self.deserialized and "tests" not in self.deserialized:
             errors.append("""`config` found but no `tests`""")
 
-        if 'tests' in self.deserialized and 'config' not in  self.deserialized:
+        if "tests" in self.deserialized and "config" not in self.deserialized:
             errors.append("""`tests` found but no `config`""")
 
-        for test in self.deserialized.get('tests',[]):
+        for test in self.deserialized.get("tests", []):
             # ignore skipped tests
             if "skip" in test and test["skip"]:
                 continue
 
-            if "on_failure" in test and test['on_failure'] not in ["continue", "pause", "abort"]:
+            if "on_failure" in test and test["on_failure"] not in [
+                "continue",
+                "pause",
+                "abort",
+            ]:
                 errors.append(
                     """'%s' requires unknown on_failure mode: %s"""
-                    %(test["name"], test["on_failure"])
-                    )
+                    % (test["name"], test["on_failure"])
+                )
 
-        if 'config' in self.deserialized:
+        if "config" in self.deserialized:
             config = self.deserialized["config"]
 
             if "name" not in config:
-                errors.append(
-                    """`name` is mandatory in `config`: %s"""
-                    %config)
+                errors.append("""`name` is mandatory in `config`: %s""" % config)
             elif not isinstance(config["name"], str):
                 errors.append(
                     """`name` in `config` is supposed to be a string but got: %s"""
-                    %config["name"])
+                    % config["name"]
+                )
 
             if "type" in config and config["type"] not in ["unit", "functional"]:
                 errors.append(
                     """`type` in `config` is supposed to be either `unit` or `functional` but got: %s"""
-                    %config["type"])
+                    % config["type"]
+                )
 
             if "prefix" in config and not isinstance(config["prefix"], str):
                 errors.append(
                     """`prefix` in `config` is supposed to be a string but got: %s"""
-                    %config["prefix"])
+                    % config["prefix"]
+                )
 
             if "use_prefix" in config and not isinstance(config["use_prefix"], bool):
                 errors.append(
                     """`use_prefix` in `config` is supposed to be a boolean but got: %s"""
-                    %config["use_prefix"])
+                    % config["use_prefix"]
+                )
 
             if "delay" in config and not isinstance(config["delay"], (int, float)):
                 errors.append(
                     """`delay` in `config` is supposed to be a numerical value but got: %s"""
-                    %config["delay"])
+                    % config["delay"]
+                )
 
             if "ignore" in config and not isinstance(config["ignore"], bool):
                 errors.append(
                     """`ignore` in `config` is supposed to be a boolean but got: %s"""
-                    %config["ignore"])
+                    % config["ignore"]
+                )
 
             if "skip" in config and not isinstance(config["skip"], bool):
                 errors.append(
                     """`skip` in `config` is supposed to be a boolean but got: %s"""
-                    %config["skip"])
+                    % config["skip"]
+                )
 
-            if "on_failure" in config and config["on_failure"] not in ["continue", "pause", "abort"]:
+            if "on_failure" in config and config["on_failure"] not in [
+                "continue",
+                "pause",
+                "abort",
+            ]:
                 errors.append(
                     """`on_failure` in `config` is supposed to be either `continue`, `pause` or `functional` but got: %s"""
-                    %config["on_failure"])
+                    % config["on_failure"]
+                )
 
             if "retry" in config and not isinstance(config["retry"], int):
                 errors.append(
                     """`retry` in `config` is supposed to be an integer but got: %s"""
-                    %config["retry"])
+                    % config["retry"]
+                )
 
         return errors
 
@@ -616,35 +665,39 @@ class ScenarioReader(object):
         """
         errors = []
 
-        for test in self.deserialized.get('tests',[]):
+        for test in self.deserialized.get("tests", []):
             # ignore skipped tests
             if "skip" in test and test["skip"]:
                 continue
 
             # get test kind(s)
             kinds = ["range", "commands", "values"]
-            test_kind = [ kind for kind in kinds if kind in test ]
+            test_kind = [kind for kind in kinds if kind in test]
 
             # a test should have at least one kind (range, values or commands)
             if len(test_kind) == 0:
                 errors.append(
                     """'%s' should have a at least one of %s"""
-                    %(test["name"], ", ".join(kinds)))
+                    % (test["name"], ", ".join(kinds))
+                )
 
             # a test can be only of one kind (range, values and commands should be exclusive)
-            if len(test_kind)>1:
+            if len(test_kind) > 1:
                 errors.append(
                     """'%s' should have a uniq kind but has %d (%s)"""
-                    %(test["name"], len(test_kind), test_kind))
+                    % (test["name"], len(test_kind), test_kind)
+                )
 
             # range and values tests require a setter or a getter field
             if (
                 ("range" in test_kind or "values" in test_kind)
-                and "setter" not in test and "getter" not in test
-                ):
+                and "setter" not in test
+                and "getter" not in test
+            ):
                 errors.append(
                     """'%s' is of kind '%s' but has no setter or getter"""
-                    %(test["name"],test_kind[0]))
+                    % (test["name"], test_kind[0])
+                )
 
             # in commands value is not compatible with set_value or get_value
             # a commands expects at least a value or a set_value or a get_value
@@ -653,27 +706,32 @@ class ScenarioReader(object):
                     if "value" in cmd and "set_value" in cmd:
                         errors.append(
                             """'%s'>'%s' should not have a 'value' and a 'set_value'"""
-                            %(test["name"],cmd["name"]))
+                            % (test["name"], cmd["name"])
+                        )
                     if "value" in cmd and "get_value" in cmd:
                         errors.append(
                             """'%s'>'%s' should not have a 'value' and a 'get_value'"""
-                            %(test["name"],cmd["name"]))
+                            % (test["name"], cmd["name"])
+                        )
                     if not ("value" in cmd or "get_value" in cmd or "set_value" in cmd):
                         errors.append(
                             """'%s'>'%s' should have one of 'value', 'set_value' or 'get_value'"""
-                            %(test["name"],cmd["name"]))
+                            % (test["name"], cmd["name"])
+                        )
 
         # all macros should have been used at least once
         for k, v in list(self.macros_mgr.known_macros.items()):
             if k not in self.macros_mgr.used_macros and k not in self.suite_macros:
-                errors.append("""Unused macro "%s": %s"""% (k,v))
+                errors.append("""Unused macro "%s": %s""" % (k, v))
 
         # all macros should have been replaced
-        for k,v in list(self.macros_mgr.unknown_macros.items()):
-            errors.append("""Unknown macro "%s" (%d occurence%s)"""% (k,v,"" if v == 1 else "s"))
+        for k, v in list(self.macros_mgr.unknown_macros.items()):
+            errors.append(
+                """Unknown macro "%s" (%d occurence%s)"""
+                % (k, v, "" if v == 1 else "s")
+            )
 
         return errors
-
 
     def _version_is_supported(self, major=None, minor=None, bugfix=None):
         """Check if configuration file format version is supported.
@@ -693,8 +751,7 @@ class ScenarioReader(object):
         minor = int(minor or self.minor)
         bugfix = int(bugfix or self.bugfix)
 
-        logger.info("Configuration file format version: %i.%i.%i", major,
-                    minor, bugfix)
+        logger.info("Configuration file format version: %i.%i.%i", major, minor, bugfix)
 
         compatible_version = True
         try_continue = True
@@ -705,10 +762,18 @@ class ScenarioReader(object):
             logger.critical("File incompatible with reader of installed WeTest.")
         elif minor > MINOR:
             compatible_version = False
-            logger.error("File version (%s) too recent for installed WeTest (%s).", self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
+            logger.error(
+                "File version (%s) too recent for installed WeTest (%s).",
+                self.version,
+                "{}.{}.{}".format(MAJOR, MINOR, BUGFIX),
+            )
         elif minor < MINOR:
             compatible_version = False
-            logger.warning("File version (%s) for older version than the installed WeTest (%s).", self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
+            logger.warning(
+                "File version (%s) for older version than the installed WeTest (%s).",
+                self.version,
+                "{}.{}.{}".format(MAJOR, MINOR, BUGFIX),
+            )
 
         if not compatible_version and try_continue:
             display_changlog((major, minor, bugfix), (MAJOR, MINOR, BUGFIX))
@@ -717,8 +782,8 @@ class ScenarioReader(object):
 
         if not try_continue:
             logger.error(
-                'File format version is: %s, but wetest version is: %s' %
-                (self.version, '{}.{}.{}'.format(MAJOR, MINOR, BUGFIX))
+                "File format version is: %s, but wetest version is: %s"
+                % (self.version, "{}.{}.{}".format(MAJOR, MINOR, BUGFIX))
             )
             exit(5)
 
@@ -746,7 +811,7 @@ class ScenarioReader(object):
         return self.deserialized
 
     def _substituteMacros(self, deserialized):
-        """"Update the deserialized dictionnary with macros values
+        """ "Update the deserialized dictionnary with macros values
 
         :param deserialized: yaml file content as a dict.
         :returns: The deserialized file.
@@ -756,8 +821,8 @@ class ScenarioReader(object):
             self.macros_mgr.add_new_macros(deserialized["macros"])
 
         deserialized = self.macros_mgr.substitue_macros(
-                {k: v for k,v in list(deserialized.items()) if k != "macros"}
-                )
+            {k: v for k, v in list(deserialized.items()) if k != "macros"}
+        )
 
         self.macros_mgr.raise_errors()
 
@@ -783,16 +848,16 @@ class ScenarioReader(object):
                 schema_valid = False
 
         ncmp_valid = self.noncompulsory_validation()
-        if len(ncmp_valid)!=0:
+        if len(ncmp_valid) != 0:
             fv_logger.log(LVL_FORMAT_VAL, "Non-compulsory validation failed:")
-            fv_logger.log(LVL_FORMAT_VAL, " - " + "\n - ".join(ncmp_valid) )
+            fv_logger.log(LVL_FORMAT_VAL, " - " + "\n - ".join(ncmp_valid))
         else:
             fv_logger.info("Validated non compulsory rules.")
 
         mand_valid = self.mandatory_validation()
-        if len(mand_valid)!=0:
+        if len(mand_valid) != 0:
             fv_logger.log(LVL_FORMAT_VAL, "Mandatory validation failed:")
-            fv_logger.log(LVL_FORMAT_VAL, " - " + "\n - ".join(mand_valid) )
+            fv_logger.log(LVL_FORMAT_VAL, " - " + "\n - ".join(mand_valid))
             sys.exit(1)
         else:
             fv_logger.info("Validated mandatory rules.")
