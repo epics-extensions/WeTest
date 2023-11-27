@@ -4,15 +4,15 @@ version = "1.2.2"
 description = "WeTest allows you to test EPICS modules"
 license = "EPICS"
 authors = [
-	"Francis GOHIER <francis.gohier@cea.fr>",
-	"Katy SAINTIN <katy.saintin@cea.fr>",
-	"Rémi NICOLE <remi.nicole@cea.fr>",
-	"Victor NADOT <victor.nadot@cea.fr>",
+  "Francis GOHIER <francis.gohier@cea.fr>",
+  "Katy SAINTIN <katy.saintin@cea.fr>",
+  "Rémi NICOLE <remi.nicole@cea.fr>",
+  "Victor NADOT <victor.nadot@cea.fr>",
 ]
 readme = "README.md"
 repository = "https://github.com/epics-extensions/WeTest"
 keywords = ["epics", "testing"]
-classifiers=["Development Status :: 3 - Alpha"]
+classifiers = ["Development Status :: 3 - Alpha"]
 
 [tool.poetry.scripts]
 wetest = "wetest.command_line:main"
@@ -29,3 +29,27 @@ numpy = "^1.19.5, <1.20.0"
 pyepics = "^3.5.1"
 pykwalify = "^1.8.0"
 reportlab = "^3.6.8"
+
+[tool.ruff]
+select = ["ALL"]
+ignore = [
+  # Disable type annotations for now, it would lead to too many warnings
+  "ANN",
+  # Leave doc comments for later,
+  # as lots of functions needs to be renamed as private
+  "D",
+  # Also leave pathlib for later
+  "PTH",
+
+  # one-blank-line-before-class
+  "D203",
+  # multi-line-summary-second-line
+  "D213",
+
+  # For the formatter:
+
+  # missing-trailing-comma
+  "COM812",
+  # single-line-implicit-string-concatenation
+  "ISC001",
+]
