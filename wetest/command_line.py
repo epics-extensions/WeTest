@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -12,74 +11,68 @@
 # _NO_ RESPONSIBILITY FOR ANY CONSEQUENCE RESULTING FROM THE USE, MODIFICATION,
 # OR REDISTRIBUTION OF THIS SOFTWARE.
 
-DESCRIPTION = """WeTest is a testing facility for EPICS modules. Tests are described in a 
+DESCRIPTION = """WeTest is a testing facility for EPICS modules. Tests are described in a
 YAML file, and executed over the Channel Access using pyepics library.
 A PDF report is generated with the tests results.
 It also enables to monitor PVs (extracted from the tests and from specified DB).
 """
 
-import logging
-
 import argparse
-from copy import deepcopy
+import logging
 import multiprocessing
-from multiprocessing import Queue
 import os
-import pkg_resources
 import re
 import signal
 import sys
-import tkinter as tk
 import time
+import tkinter as tk
 import unittest
+from copy import deepcopy
 
-import colorlog
 import epics
-
-from queue import Empty
+import pkg_resources
 
 from wetest.common.constants import (
+    ABORT_FROM_GUI,
+    ABORT_FROM_MANAGER,
+    ABORT_FROM_TEST,
+    CONTINUE_FROM_TEST,
+    END_OF_TESTS,
+    FILE_HANDLER,
+    LVL_FORMAT_VAL,
+    LVL_RUN_CONTROL,
+    PAUSE_FROM_GUI,
+    PAUSE_FROM_MANAGER,
+    PAUSE_FROM_TEST,
+    PLAY_FROM_MANAGER,
+    REPORT_GENERATED,
+    RESUME_FROM_GUI,
     SELECTION_FROM_GUI,
     START_FROM_GUI,
-    RESUME_FROM_GUI,
-    PAUSE_FROM_GUI,
-    ABORT_FROM_GUI,
-    CONTINUE_FROM_TEST,
-    PAUSE_FROM_TEST,
-    ABORT_FROM_TEST,
-    END_OF_TESTS,
-    REPORT_GENERATED,
-    PAUSE_FROM_MANAGER,
-    ABORT_FROM_MANAGER,
-    PLAY_FROM_MANAGER,
+    TERSE_FORMATTER,
 )
-
-from wetest.common.constants import LVL_RUN_CONTROL, LVL_FORMAT_VAL
-from wetest.common.constants import TERSE_FORMATTER, FILE_HANDLER
-
 from wetest.gui.generator import GUIGenerator
 from wetest.gui.specific import (
-    STATUS_UNKNOWN,
-    STATUS_RUN,
-    STATUS_RETRY,
-    STATUS_SKIP,
     STATUS_ERROR,
     STATUS_FAIL,
+    STATUS_RETRY,
+    STATUS_RUN,
+    STATUS_SKIP,
     STATUS_SUCCESS,
+    STATUS_UNKNOWN,
 )
-
-from wetest.pvs.core import PVInfo, PVsTable
-from wetest.pvs.naming import generate_naming, NamingError
+from wetest.pvs.core import PVsTable
+from wetest.pvs.naming import NamingError, generate_naming
 from wetest.pvs.parse import pvs_from_path
-
 from wetest.report.generator import ReportGenerator
-
-from wetest.testing.generator import TestsGenerator
-from wetest.testing.generator import SelectableTestCase, SelectableTestSuite
+from wetest.testing.generator import (
+    SelectableTestSuite,
+    TestsGenerator,
+)
 from wetest.testing.reader import (
+    FileNotFound,
     MacrosManager,
     ScenarioReader,
-    FileNotFound,
     display_changlog,
 )
 
@@ -179,14 +172,14 @@ def generate_tests(scenarios, macros_mgr=None, propagate=False):
     # get data from scenarios
     ## read the first file
     tests_data = ScenarioReader(
-        scenarios.pop(0), macros_mgr=macros_mgr, propagate=propagate
+        scenarios.pop(0), macros_mgr=macros_mgr, propagate=propagate,
     ).get_deserialized()
     if "scenarios" not in tests_data:
         tests_data["scenarios"] = []
     ## append scenario from remaining files
     for scenario in scenarios:
         new_tests_data = ScenarioReader(
-            scenario, macros_mgr=macros_mgr, propagate=propagate
+            scenario, macros_mgr=macros_mgr, propagate=propagate,
         ).get_deserialized()
         tests_data["scenarios"] += new_tests_data["scenarios"]
 
@@ -209,7 +202,7 @@ def generate_tests(scenarios, macros_mgr=None, propagate=False):
 
     # display unit/functionnal info to user
     logger.warning(
-        "Loaded %s tests from `%s`:", suite.countTestCases(), configs[0]["name"]
+        "Loaded %s tests from `%s`:", suite.countTestCases(), configs[0]["name"],
     )
     for scenario in tests_data["scenarios"]:
         if str(scenario["config"]["type"]).lower() == "unit":
@@ -219,7 +212,7 @@ def generate_tests(scenarios, macros_mgr=None, propagate=False):
         else:
             type_str = str(scenario["config"]["type"]) + " (??)"
         logger.warning(
-            "\t- %s `%s`", type_str, scenario["config"].get("name", "Unnamed")
+            "\t- %s `%s`", type_str, scenario["config"].get("name", "Unnamed"),
         )
 
     return suite, configs
@@ -316,7 +309,7 @@ def main():
 
     # run relative arguments
     parser.add_argument(
-        "-G", "--no-gui", action="store_true", default=False, help="Do not open a GUI."
+        "-G", "--no-gui", action="store_true", default=False, help="Do not open a GUI.",
     )
     auto_play_group = parser.add_mutually_exclusive_group(required=False)
     auto_play_group.add_argument(
@@ -358,7 +351,7 @@ def main():
 
     version = pkg_resources.require("WeTest")[0].version
     if args.version:
-        major, minor, bugfix = [int(x) for x in version.split(".")]
+        major, minor, bugfix = (int(x) for x in version.split("."))
         logger.warning("Installed WeTest is of version %d.%d.%d", major, minor, bugfix)
         if args.version > 1:
             display_changlog((major, 0, 0), (major, minor, bugfix))
@@ -371,7 +364,7 @@ def main():
     if len(scenarios) == 0 and len(args.db) == 0:
         parser.print_usage()
         logger.error(
-            "A test scenario (--scenario) or a directory from which to extact PVs (--db) is required"
+            "A test scenario (--scenario) or a directory from which to extact PVs (--db) is required",
         )
         sys.exit(2)
 
@@ -442,7 +435,7 @@ def main():
         all_connected, pv_refs = True, {}
     else:
         all_connected, pv_refs = PVsTable(queue_to_gui).register_pvs(
-            pv_list=pvs_from_files, suite=suite
+            pv_list=pvs_from_files, suite=suite,
         )
 
     # show naming compatibility in CLI
@@ -460,11 +453,11 @@ def main():
         if not all_connected:
             if not args.force_play:
                 logger.error(
-                    "Not starting tests as some PVs are currently not reachable."
+                    "Not starting tests as some PVs are currently not reachable.",
                 )
             else:
                 logger.error(
-                    "Starting tests even though some PVs are currently not reachable."
+                    "Starting tests even though some PVs are currently not reachable.",
                 )
 
     # generate GUI
@@ -510,7 +503,7 @@ def main():
             if not with_gui:  # no GUI with a play button
                 logger.warning(
                     "  - To start testing, press Ctrl+D then ENTER.\n"
-                    + "  - To abort, press Ctrl+C."
+                    + "  - To abort, press Ctrl+C.",
                 )
                 sys.stdin.readlines()  # to flush previous inputs, requires Ctrl+D
                 sys.stdin.readline()  # ENTER to return from this one
@@ -518,7 +511,7 @@ def main():
             else:
                 logger.warning(
                     "  - To start testing, use GUI play button.\n"
-                    + "  - To abort, use GUI abort button, or press Ctrl+C."
+                    + "  - To abort, use GUI abort button, or press Ctrl+C.",
                 )
 
         if with_gui:
@@ -584,9 +577,9 @@ class ProcessManager:
         self.results = None
 
     def start_runner_process(self):
-        """start runner in another process (also needs to be CA compatible)"""
+        """Start runner in another process (also needs to be CA compatible)"""
         self.p_run_and_report = epics.CAProcess(
-            target=self.run_and_report, name="run_and_report"
+            target=self.run_and_report, name="run_and_report",
         )
         self.p_run_and_report.start()
         self.ns.pid_run_and_report = self.p_run_and_report.pid
@@ -594,9 +587,9 @@ class ProcessManager:
         self.p_run_and_report_started.wait()  # to be able to abort from p_parse_output
 
     def start_parser_process(self):
-        """start parse_output in another process"""
+        """Start parse_output in another process"""
         self.p_parse_output = multiprocessing.Process(
-            target=self.parse_output, name="parse_output"
+            target=self.parse_output, name="parse_output",
         )
         self.p_parse_output.start()
         self.ns.pid_p_parse_output = self.p_parse_output.pid
@@ -604,9 +597,9 @@ class ProcessManager:
         self.p_parse_output_started.wait()  # to be able to abort properly from p_gui_commands
 
     def start_gui_command_process(self):
-        """sstart gui_commands in another process"""
+        """Sstart gui_commands in another process"""
         self.p_gui_commands = multiprocessing.Process(
-            target=self.gui_commands, name="gui_commands"
+            target=self.gui_commands, name="gui_commands",
         )
         # self.p_gui_commands.daemon = True # so that it can restart the runner and parser process
         self.p_gui_commands.start()
@@ -683,7 +676,7 @@ class ProcessManager:
         if self.results and self.pdf_output is not None:
             logger.info("Will export result in PDF file: %s", self.pdf_output)
             export_pdf(
-                self.pdf_output, self.suite, self.results, self.configs, self.naming
+                self.pdf_output, self.suite, self.results, self.configs, self.naming,
             )
             logger.warning("Done generating report: %s", self.pdf_output)
             self.queue_to_gui.put(REPORT_GENERATED + " " + self.pdf_output)
@@ -702,13 +695,13 @@ class ProcessManager:
             logger.warning(
                 "Pausing execution."
                 + "\n  - To continue press Ctrl+Z and enter `fg`."
-                + "\n  - To abort press Ctrl+C twice."
+                + "\n  - To abort press Ctrl+C twice.",
             )
         else:
             logger.warning(
                 "Pausing execution."
                 + "\n  - To continue, use GUI play button, or press Ctrl+Z and enter `fg`."
-                + "\n  - To abort, use GUI abort button, or press Ctrl+C twice."
+                + "\n  - To abort, use GUI abort button, or press Ctrl+C twice.",
             )
         os.kill(self.ns.pid_run_and_report, signal.SIGSTOP)
         logger.debug("Paused run_and_report (%d)", self.ns.pid_run_and_report)
@@ -784,7 +777,7 @@ class ProcessManager:
 
     @quiet_exception(KeyboardInterrupt)
     def parse_output(self):
-        """reads runner output and convert it to update data items
+        """Reads runner output and convert it to update data items
         in a new thread
         """
         self.p_parse_output_started.set()
@@ -799,11 +792,11 @@ class ProcessManager:
 
             # check for start of test
             match_running = re.search(
-                r"^Running\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$", new_str
+                r"^Running\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$", new_str,
             )
             # check for skipped test
             match_skipped = re.search(
-                r"^Skipping\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$", new_str
+                r"^Skipping\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$", new_str,
             )
             # check for retry of test
             match_rerun = re.search(
@@ -861,7 +854,6 @@ class ProcessManager:
             # check for test requested continue
             elif new_str == CONTINUE_FROM_TEST:
                 logger.debug("=> Continue from test")
-                pass
 
             # check for test requested pause
             elif new_str == PAUSE_FROM_TEST:

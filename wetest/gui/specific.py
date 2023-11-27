@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -21,44 +20,28 @@
 
 
 import logging
-import multiprocessing
-import re
-import subprocess
 import tkinter as tk
 import tkinter.ttk
 
-from multiprocessing import Queue
-from queue import Empty
-from PIL import ImageTk, Image
+from PIL import Image, ImageTk
 from pkg_resources import resource_filename
 
 from wetest.common.constants import (
-    SELECTION_FROM_GUI,
-    START_FROM_GUI,
-    RESUME_FROM_GUI,
-    PAUSE_FROM_GUI,
-    ABORT_FROM_GUI,
-    END_OF_TESTS,
-    REPORT_GENERATED,
-    PAUSE_FROM_MANAGER,
-    ABORT_FROM_MANAGER,
-    PLAY_FROM_MANAGER,
+    FILE_HANDLER,
+    VERBOSE_FORMATTER,
+    to_string,
 )
-from wetest.common.constants import VERBOSE_FORMATTER, FILE_HANDLER, to_string
-
-from wetest.pvs.core import PVData
-from wetest.pvs.naming import NamingError
-
 from wetest.gui.base import (
     BORDERWIDTH,
     INFO_WRAPLENGTH,
     ExistingTreeItem,
-    MyTreeview,
-    Tooltip,
     Icon,
+    MyTreeview,
     PopUpMenu,
+    Tooltip,
     clip_generator,
 )
+from wetest.pvs.naming import NamingError
 
 # enable or not DEBUG displays
 DEBUG_INFOS = False  # show all subtest data in subtests tooltip
@@ -125,7 +108,7 @@ class PVsTreeview(MyTreeview):
         self.pvs_refs = {}  # root parent is root
 
     def _update_pvs_status(self, item):
-        """method to call to populate or update self.pvs_refs"""
+        """Method to call to populate or update self.pvs_refs"""
         item_tags = list(self.item(item, option="tags"))
         if TAG_PV in item_tags:
             self.pvs_refs[item] = None
@@ -158,7 +141,7 @@ class PVsTreeview(MyTreeview):
                 pv
                 for pv, status in list(self.pvs_refs.items())
                 if status == TAG_CONNECTED
-            ]
+            ],
         )
 
     def disconnected_pvs_nb(self):
@@ -167,7 +150,7 @@ class PVsTreeview(MyTreeview):
                 pv
                 for pv, status in list(self.pvs_refs.items())
                 if status == TAG_DISCONNECTED
-            ]
+            ],
         )
 
     def unknown_pvs_nb(self):
@@ -223,25 +206,25 @@ class StatusIcon(Icon):
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-help-2-24.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-help-2-24.png",
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-help-2-24_OFF.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-help-2-24_OFF.png",
+                        ),
+                    ),
                 ),
             ],
             STATUS_NOT_SET: [
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-help-2-24_OFF.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-help-2-24_OFF.png",
+                        ),
+                    ),
                 ),
             ],
             STATUS_RUN: [
@@ -250,16 +233,16 @@ class StatusIcon(Icon):
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-3-24.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-3-24_OFF.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
             ],
             STATUS_RETRY: [
@@ -268,16 +251,16 @@ class StatusIcon(Icon):
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-3-24_RED.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-3-24_OFF.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
             ],
             STATUS_P_RETRY: [
@@ -286,16 +269,16 @@ class StatusIcon(Icon):
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-7-24_RED.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-7-24_OFF.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
             ],
             STATUS_PAUSE: [
@@ -304,26 +287,26 @@ class StatusIcon(Icon):
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-7-24_OFF.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-7-24.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
             ],
             STATUS_WAIT: [
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-time-18-24.png"
-                        )
-                    )
-                )
+                            "wetest", "resources/icons/iconmonstr-time-18-24.png",
+                        ),
+                    ),
+                ),
             ],
             STATUS_SKIP: [
                 ImageTk.PhotoImage(
@@ -331,9 +314,9 @@ class StatusIcon(Icon):
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-31-24.png",
-                        )
-                    )
-                )
+                        ),
+                    ),
+                ),
             ],
             STATUS_STOP: [
                 ImageTk.PhotoImage(
@@ -341,57 +324,57 @@ class StatusIcon(Icon):
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-media-control-11-24_OFF.png",
-                        )
-                    )
-                )
+                        ),
+                    ),
+                ),
             ],
             STATUS_ERROR: [
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-warning-7-24.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-warning-7-24.png",
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-warning-7-24_OFF.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-warning-7-24_OFF.png",
+                        ),
+                    ),
                 ),
             ],
             STATUS_FAIL: [
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-x-mark-4-24.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-x-mark-4-24.png",
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-x-mark-4-24_OFF.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-x-mark-4-24_OFF.png",
+                        ),
+                    ),
                 ),
             ],
             STATUS_SUCCESS: [
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
-                            "wetest", "resources/icons/iconmonstr-check-mark-7-24.png"
-                        )
-                    )
+                            "wetest", "resources/icons/iconmonstr-check-mark-7-24.png",
+                        ),
+                    ),
                 ),
                 ImageTk.PhotoImage(
                     Image.open(
                         resource_filename(
                             "wetest",
                             "resources/icons/iconmonstr-check-mark-7-24_OFF.png",
-                        )
-                    )
+                        ),
+                    ),
                 ),
             ],
         }
@@ -402,7 +385,7 @@ class StatusIcon(Icon):
         )
         self.images = self.status_images[self.status]
         Icon.__init__(
-            self, master=master, images=self.images, dynamic=dynamic, *args, **kargs
+            self, master=master, images=self.images, dynamic=dynamic, *args, **kargs,
         )
 
         self.tooltip = Tooltip(self, text=status)
@@ -410,7 +393,7 @@ class StatusIcon(Icon):
     def change_status(self, status=None, dynamic=None):
         """Can change status, and start or stop dynamic mode, updates tooltip."""
         self.tooltip.update_text(
-            self.tooltip_text if self.tooltip_text is not None else status
+            self.tooltip_text if self.tooltip_text is not None else status,
         )
         if dynamic is not None:
             if dynamic:
@@ -465,7 +448,7 @@ def duration_str(duration):
     return duration_text
 
 
-class InfosStatusFrame(tk.Frame, object):
+class InfosStatusFrame(tk.Frame):
     # object is required to use super on with tk.Frame "old-Style" class
     # https://stackoverflow.com/questions/1713038/super-fails-with-error-typeerror-argument-1-must-be-type-not-classobj-when
     """A Frame with a title, a StatusIcon and tooltip infos."""
@@ -495,68 +478,68 @@ class InfosStatusFrame(tk.Frame, object):
             "right_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-63-12.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-arrow-63-12.png",
+                    ),
+                ),
             ),
             "left_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-64-12.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-arrow-64-12.png",
+                    ),
+                ),
             ),
             "down_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-65-12.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-arrow-65-12.png",
+                    ),
+                ),
             ),
             "up_arrow": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-arrow-66-12.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-arrow-66-12.png",
+                    ),
+                ),
             ),
             # tooltip icons
             "info": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-speech-bubble-20-16.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-speech-bubble-20-16.png",
+                    ),
+                ),
             ),
             # selection icons
             SELECTED: ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-checkbox-9-16.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-checkbox-9-16.png",
+                    ),
+                ),
             ),
             PARTIAL: ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-checkbox-10-16.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-checkbox-10-16.png",
+                    ),
+                ),
             ),
             SKIPPED: ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-checkbox-11-16.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-checkbox-11-16.png",
+                    ),
+                ),
             ),
             # test type
             "random": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-media-control-55-16.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-media-control-55-16.png",
+                    ),
+                ),
             ),
         }
 
@@ -579,7 +562,7 @@ class InfosStatusFrame(tk.Frame, object):
         self.status_frame.pack(side="right")
         self.prev_status = None
         self.status_icon = StatusIcon(
-            master=self.status_frame, status=status, dynamic=False
+            master=self.status_frame, status=status, dynamic=False,
         )
         self.status_icon.pack(side="left", pady=1, padx=1)
 
@@ -589,10 +572,10 @@ class InfosStatusFrame(tk.Frame, object):
 
         # display title
         self.select_label = tk.Label(
-            self.infos_frame, text=self.indent, anchor="w", compound="right"
+            self.infos_frame, text=self.indent, anchor="w", compound="right",
         )  # , background="#FFFFFF")
         self.select_label.pack(
-            side="left", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0)
+            side="left", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
         )
         self.toogle_label = tk.Label(
             self.infos_frame,
@@ -602,11 +585,11 @@ class InfosStatusFrame(tk.Frame, object):
             compound="right",
         )
         self.toogle_label.pack(
-            side="left", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0)
+            side="left", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
         )
         self.title_label = tk.Label(self.infos_frame, text=title, anchor="w")
         self.title_label.pack(
-            side="left", fill="x", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0)
+            side="left", fill="x", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
         )
 
         # add infos to infos_frame
@@ -625,7 +608,7 @@ class InfosStatusFrame(tk.Frame, object):
 
         # show execution duration
         self.duration_label = tk.Label(
-            self.title_frame, text=" %s " % duration_str(None), anchor="w"
+            self.title_frame, text=" %s " % duration_str(None), anchor="w",
         )
         self.duration_label.pack(side="left")  # padding in text
         self.prev_duration = None  # store previous duration for duration colorization
@@ -634,7 +617,7 @@ class InfosStatusFrame(tk.Frame, object):
             BLACK  # change label foreground in case of significant (10%) change
         )
         self.duration_tooltip = Tooltip(
-            self.duration_label, text=self.prev_duration_str
+            self.duration_label, text=self.prev_duration_str,
         )
 
         # configure and collapsable frame
@@ -646,7 +629,7 @@ class InfosStatusFrame(tk.Frame, object):
             ]
         )
         self.sub_frame = tk.Frame(
-            self, relief="sunken", borderwidth=BORDERWIDTH, background=self.sub_frame_bg
+            self, relief="sunken", borderwidth=BORDERWIDTH, background=self.sub_frame_bg,
         )
 
         # call refresh icon status
@@ -689,7 +672,7 @@ class InfosStatusFrame(tk.Frame, object):
 
         # reset status
         self.status_icon = StatusIcon(
-            master=self.status_frame, status=status, dynamic=False
+            master=self.status_frame, status=status, dynamic=False,
         )
         self.status_icon.pack(side="left", pady=1, padx=1)
 
@@ -786,7 +769,7 @@ class InfosStatusFrame(tk.Frame, object):
                     self.selected = SKIPPED
                 else:
                     raise NotImplementedError(
-                        "Unexpected value for selected: %s" % children_selection
+                        "Unexpected value for selected: %s" % children_selection,
                     )
             elif len(children_selection) > 1:
                 self.selected = PARTIAL
@@ -863,12 +846,12 @@ class SubtestFrame(InfosStatusFrame):
             if self.test_data.setter is None or self.test_data.getter is None
             else "normal",
             command=clip_generator(
-                "%s %s" % (self.test_data.setter, self.test_data.getter)
+                "%s %s" % (self.test_data.setter, self.test_data.getter),
             ),
         )
         self.popup_menu.add_separator()
         self.popup_menu.add_command(
-            label="copy failure or error traceback", state="disabled"
+            label="copy failure or error traceback", state="disabled",
         )
         self.index_ref = {"setter": 0, "getter": 1, "all": 2, "sep": 3, "traceback": 4}
 
@@ -885,7 +868,7 @@ class SubtestFrame(InfosStatusFrame):
                 for i, x in enumerate(self.durations):
                     tooltip_text += "\n%d/%d: %.3fs" % (i + 1, len(self.durations), x)
                 self.duration_tooltip.update_text(
-                    self.prev_duration_str + "\n" + tooltip_text
+                    self.prev_duration_str + "\n" + tooltip_text,
                 )
                 self.duration_label.config(text="[%s]" % duration_str(total_duration))
             else:
@@ -929,11 +912,10 @@ class SubtestFrame(InfosStatusFrame):
         self.update_status()
 
     def set_traceback(self, traceback_text, tooltip_only=False):
-        """update status_icon tooltip, sub_frame content and parent traceback
+        """Update status_icon tooltip, sub_frame content and parent traceback
 
         Unless tooltip only is set to True, then only the tooltip is updated.
         """
-
         # change status icon tooltip
         self.update_icon_tooltip(traceback_text)
 
@@ -972,7 +954,7 @@ class SubtestFrame(InfosStatusFrame):
 
             # send traceback to parent
             self.parent_test.add_traceback(
-                self.status_icon.status, self.id, self.traceback
+                self.status_icon.status, self.id, self.traceback,
             )
 
     def traceback_click(self, event=None):
@@ -1037,7 +1019,7 @@ class TestFrame(InfosStatusFrame):
 
         # empty label for padding at sub_frame bottom
         self.padding_label = tk.Label(
-            self.sub_frame, text="", background=self.sub_frame_bg
+            self.sub_frame, text="", background=self.sub_frame_bg,
         )
         self.padding_label.pack(side="bottom", fill="x", pady=PADDING_Y_LABEL, expand=1)
         Tooltip(self.padding_label, text=title)
@@ -1190,7 +1172,7 @@ class ScenarioFrame(InfosStatusFrame):
             state="normal" if test_type == "unit" else "disabled",
         )
         self.test_type_widget.pack(
-            side="right", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0)
+            side="right", pady=PADDING_Y_LABEL, padx=(PADDING_X_LABEL, 0),
         )
         # self.infos_label.pack(side="right", padx=(PADDING_X_LABEL,0))
 
@@ -1207,7 +1189,7 @@ class ScenarioFrame(InfosStatusFrame):
 
         # empty label for padding at sub_frame bottom
         self.padding_label = tk.Label(
-            self.sub_frame, text="", background=self.sub_frame_bg
+            self.sub_frame, text="", background=self.sub_frame_bg,
         )
         self.padding_label.pack(side="bottom", fill="x", pady=PADDING_Y_LABEL, expand=1)
         Tooltip(self.padding_label, text=title)
@@ -1350,7 +1332,7 @@ class Suite(tk.Frame):
         ## frame are not nativelly scrollable, hence a canvas holding the frame
         self.canvas = tk.Canvas(self.parent)
         self.vsb = tkinter.ttk.Scrollbar(
-            self.parent, orient="vertical", command=self.canvas.yview
+            self.parent, orient="vertical", command=self.canvas.yview,
         )
         self.canvas.configure(yscrollcommand=self.vsb.set)
         self.vsb.pack(side="right", fill="y")
@@ -1378,14 +1360,14 @@ class Suite(tk.Frame):
         infos = infos if infos is not None else []
         for line in infos:
             tk.Label(self.frame, text=line, anchor="w").pack(
-                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2
+                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2,
             )
 
         # display suite warning text
         if warning is not None:
             self.warning_frame = tk.LabelFrame(self.frame, text=" Warning ", fg="red")
             self.warning_frame.pack(
-                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2
+                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2,
             )
             self.warning_frame.bind("<Button-1>", self.toogle_warnings)
             # mock label for space at the begining of the warning box
@@ -1396,7 +1378,7 @@ class Suite(tk.Frame):
             self.show_warning_widget = tk.Frame(self.warning_frame)
             for line in warning:
                 warn = tk.Label(
-                    self.show_warning_widget, text=line, anchor="w", justify="left"
+                    self.show_warning_widget, text=line, anchor="w", justify="left",
                 )
                 warn.pack(fill="x", anchor="nw", padx=PADDING_X_LABEL * 2)
             # mock label for space at the end of warning box
@@ -1413,39 +1395,39 @@ class Suite(tk.Frame):
             "connected": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-check-mark-2-12.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-check-mark-2-12.png",
+                    ),
+                ),
             ),
             "disconnected": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-x-mark-2-12.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-x-mark-2-12.png",
+                    ),
+                ),
             ),
             "connected_section": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
                         "wetest",
                         "resources/icons/iconmonstr-folder-open-thin-12_GREEN.png",
-                    )
-                )
+                    ),
+                ),
             ),
             "disconnected_section": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
                         "wetest",
                         "resources/icons/iconmonstr-folder-open-thin-12_RED.png",
-                    )
-                )
+                    ),
+                ),
             ),
             "mixed_section": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-folder-open-thin-12.png"
-                    )
-                )
+                        "wetest", "resources/icons/iconmonstr-folder-open-thin-12.png",
+                    ),
+                ),
             ),
         }
         self.pvs_updates = {}
@@ -1468,7 +1450,7 @@ class Suite(tk.Frame):
             columns=("col_status", "col_setter", "col_getter"),
         )
         self.pvs_tree.pack(
-            side="right", fill="x", expand=1, padx=(PADDING_X_LABEL * 2, 0)
+            side="right", fill="x", expand=1, padx=(PADDING_X_LABEL * 2, 0),
         )
 
         self.pvs_tree.column("#0", stretch=True)
@@ -1513,7 +1495,7 @@ class Suite(tk.Frame):
         # configure bindings
         ## canvas scroll region
         self.bind(
-            "<Configure>", self.on_frame_configure
+            "<Configure>", self.on_frame_configure,
         )  # based on main windows update
         self.frame.bind("<Configure>", self.on_frame_configure)  # based on frame update
         ## mouse scroll
@@ -1532,7 +1514,7 @@ class Suite(tk.Frame):
                 self.pvs_tree.winfo_class(),
                 self.pvs_tree.winfo_toplevel(),
                 # all
-            )
+            ),
         )
         ## maximise scenario width
         self.canvas.bind("<Configure>", self.scenario_width)
@@ -1596,7 +1578,7 @@ class Suite(tk.Frame):
         self.scroll(10**1)
 
     def mouse_scroll(self, event):
-        """scrolls if it helps to show more of the scenarios"""
+        """Scrolls if it helps to show more of the scenarios"""
         # workout scroll direction
         if event.num == 5 or event.delta == -120:  # for linux or windows
             move = 1
@@ -1681,7 +1663,7 @@ class Suite(tk.Frame):
             # create pv is new
             if pv_name not in self.pvs_tree.get_all():
                 self.pvs_tree.insert(
-                    parent, "end", iid=pv_name, open=True, tags=[TAG_PV]
+                    parent, "end", iid=pv_name, open=True, tags=[TAG_PV],
                 )
 
             # update pv
@@ -1742,7 +1724,7 @@ class Suite(tk.Frame):
             self.pvs_tree["height"] = min(30, len(self.pvs_tree.get_all()) - 1)
         else:
             self.pvs_tree["height"] = min(
-                10, len(self.pvs_tree.get_all(with_tag=TAG_DISCONNECTED))
+                10, len(self.pvs_tree.get_all(with_tag=TAG_DISCONNECTED)),
             )
             # force open
             self.pvs_tree.open_all(self.pvs_tree.tag_has(TAG_DISCONNECTED))
@@ -1769,7 +1751,7 @@ class Suite(tk.Frame):
             self.pvs_frame.forget()
         else:
             self.pvs_frame.pack(
-                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2
+                fill="x", expand=1, anchor="nw", padx=PADDING_X_LABEL * 2,
             )
 
         if nb_connected > 0:
@@ -1792,7 +1774,6 @@ class Suite(tk.Frame):
 
     def create_sections(self, pv_name):
         """Create the section of pv_name if necessary, return the parent to attach to."""
-
         # check if pv already exists
         try:
             return self.pvs_tree.get_parent(pv_name)
@@ -1893,7 +1874,8 @@ class Suite(tk.Frame):
 
     def apply_selection(self):
         """Change status icon based on selection
-        Return a dict with to lists, selected and skipped subtest_ids"""
+        Return a dict with to lists, selected and skipped subtest_ids
+        """
         output = {SELECTED: [], SKIPPED: []}
         for st_id, st in list(self.ids_handle.items()):
             # st.select_label.config(state="disable")
@@ -1905,7 +1887,7 @@ class Suite(tk.Frame):
                 st.reset(status=STATUS_SKIP)
             else:
                 raise NotImplementedError(
-                    "Unexpected selection value for a subtest: %s" % st.selected
+                    "Unexpected selection value for a subtest: %s" % st.selected,
                 )
 
         for sc in self.status_children:
@@ -1939,7 +1921,7 @@ def build_subtest_desc(st_id, subtest_infos):
             "set   "
             + str(subtest_infos.setter)
             + " to "
-            + to_string(subtest_infos.set_value)
+            + to_string(subtest_infos.set_value),
         )
 
     # add getter and margin if any
@@ -1948,7 +1930,7 @@ def build_subtest_desc(st_id, subtest_infos):
             "check "
             + str(subtest_infos.getter)
             + " is "
-            + to_string(subtest_infos.get_value)
+            + to_string(subtest_infos.get_value),
         )
         if subtest_infos.margin is not None and subtest_infos.margin != 0.0:
             subtest_desc[-1] += " +/- " + str(subtest_infos.margin * 100) + "%"

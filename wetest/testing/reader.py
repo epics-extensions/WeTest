@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -20,26 +19,26 @@
 
 import logging
 import os
-import pkg_resources
 import re
 import sys
 import time
 
+import pkg_resources
+import yaml
 from pkg_resources import resource_filename
 from pykwalify import errors
 from pykwalify.core import Core
-import yaml
 
 from wetest.common.constants import (
-    TERSE_FORMATTER,
     FILE_HANDLER,
     LVL_FORMAT_VAL,
+    TERSE_FORMATTER,
     WeTestError,
 )
 
 # configure logging
 logging.getLogger("pykwalify").setLevel(
-    logging.CRITICAL
+    logging.CRITICAL,
 )  # otherwise we get a No handler exception
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -59,7 +58,7 @@ fv_logger.addHandler(FILE_HANDLER)
 
 # Maximum file version supported
 VERSION = pkg_resources.require("WeTest")[0].version
-MAJOR, MINOR, BUGFIX = [int(x) for x in VERSION.split(".")]
+MAJOR, MINOR, BUGFIX = (int(x) for x in VERSION.split("."))
 
 CHANGELOG_WARN = {
     1: {
@@ -79,7 +78,6 @@ CONTINUE = "continue"
 class FileNotFound(WeTestError):
     """Unable to find file corresponding to provided path."""
 
-    pass
 
 
 class UnsupportedFileFormat(WeTestError):
@@ -89,7 +87,6 @@ class UnsupportedFileFormat(WeTestError):
     supported one.
     """
 
-    pass
 
 
 class InvalidFileContent(WeTestError):
@@ -98,18 +95,15 @@ class InvalidFileContent(WeTestError):
     Exception raised if post-schema YAML validation is not passed.
     """
 
-    pass
 
 
 class MacroError(WeTestError):
     """Something went wrong when parsing the macros"""
 
-    pass
 
 
 def display_changlog(file_version, wetest_version):
     """Displays the changelog warnings, only between the two versions."""
-
     if file_version > wetest_version:
         logger.warning("Some feature are not yet implemented in WeTest.")
         min_version = wetest_version
@@ -138,7 +132,7 @@ def display_changlog(file_version, wetest_version):
                     break  # too new
                 else:
                     logger.warning(
-                        "%d.%d.x:\n%s", major, minor, CHANGELOG_WARN[major][minor]
+                        "%d.%d.x:\n%s", major, minor, CHANGELOG_WARN[major][minor],
                     )
 
 
@@ -146,6 +140,7 @@ def query_yes_no(question, default=None):
     """Ask a yes/no question via raw_input() and return their answer.
 
     Args:
+    ----
     question (str): is a string that is presented to the user.
     default (str): is the presumed answer if the user just hits <Enter>.
         It must be "yes" (the default), "no" or None (meaning
@@ -232,7 +227,7 @@ class MacrosManager:
                     pass
                 else:
                     self.known_macros[str(k)] = self.substitue_macros(
-                        v, trace_unknown=False
+                        v, trace_unknown=False,
                     )
         else:
             raise MacroError("Input can not be read as a macro: %s", new_macros)
@@ -266,7 +261,7 @@ class MacrosManager:
         # and works with imbricated macros
         self._trace_unkown = trace_unknown
         new_str, nb_sub = re.subn(
-            r"\$[({]{1}[^${}()]*[)}]{1}", self.corresponding_macro, a_value
+            r"\$[({]{1}[^${}()]*[)}]{1}", self.corresponding_macro, a_value,
         )
         self._trace_unkown = True
 
@@ -319,15 +314,15 @@ class MacrosManager:
             if isinstance(output, str) and output != a_value:
                 try:
                     return self.substitue_macros(new_str, trace_unknown=trace_unknown)
-                except RuntimeError as e:
+                except RuntimeError:
                     self.read_errors.append(
-                        "- Recusivity issue with macros:\n%s" % output
+                        "- Recusivity issue with macros:\n%s" % output,
                     )
 
             return output
 
     def corresponding_macro(self, match):
-        """return the string to substitute for regex match
+        """Return the string to substitute for regex match
 
         :param match: substring match
         :returns: replacement string
@@ -364,10 +359,10 @@ class MacrosManager:
             logger.critical("Issue when dealing with macros:")
             for error_txt in self.read_errors:
                 logger.critical(error_txt)
-            raise MacroError()
+            raise MacroError
 
 
-class ScenarioReader(object):
+class ScenarioReader:
     """Read WeTest YAML Scenario file
 
     :param yaml_file: A YAML suite configuration file.
@@ -382,8 +377,8 @@ class ScenarioReader(object):
         """Initialize Reader."""
         self.file_path = os.path.abspath(yaml_file)
         try:
-            self.file = open(self.file_path, "r")
-        except IOError:
+            self.file = open(self.file_path)
+        except OSError:
             raise FileNotFound("Could not find file %s" % self.file_path)
 
         self.macros_mgr = macros_mgr if macros_mgr is not None else MacrosManager()
@@ -396,9 +391,7 @@ class ScenarioReader(object):
         self.major = self.deserialized["version"]["major"]
         self.minor = self.deserialized["version"]["minor"]
         self.bugfix = self.deserialized["version"]["bugfix"]
-        self.version = "{}.{}.{}".format(
-            str(self.major), str(self.minor), str(self.bugfix)
-        )
+        self.version = f"{self.major!s}.{self.minor!s}.{self.bugfix!s}"
 
         self.version_is_supported = self._version_is_supported()
 
@@ -467,7 +460,7 @@ class ScenarioReader(object):
             if isinstance(scenario, list):
                 if not isinstance(scenario[0], str):
                     raise InvalidFileContent(
-                        "First item of include should be a file path."
+                        "First item of include should be a file path.",
                     )
                 scenario_path = scenario[0]
                 # remains a list of one or several dicts
@@ -509,7 +502,7 @@ class ScenarioReader(object):
         :returns: absolute path or raise a FileNotFoundError if nothings match.
         """
         if os.path.isfile(
-            os.path.abspath(file_path)
+            os.path.abspath(file_path),
         ):  # absolute or relative to current location
             return os.path.abspath(file_path)
 
@@ -524,7 +517,7 @@ class ScenarioReader(object):
                 + "\n- "
                 + os.path.abspath(file_path)
                 + "\n- "
-                + abs_path
+                + abs_path,
             )
 
     def _validate_file(self, file_path=None):
@@ -539,7 +532,7 @@ class ScenarioReader(object):
         # we actually validate file_path and not self.filepath,
         # but self.file_path holds more useful information to display
         fv_logger.log(
-            LVL_FORMAT_VAL, "Validation of YAML scenario file: %s", self.file_path
+            LVL_FORMAT_VAL, "Validation of YAML scenario file: %s", self.file_path,
         )
 
         schema_path = resource_filename("wetest", "resources/scenario_schema.yaml")
@@ -580,7 +573,7 @@ class ScenarioReader(object):
             ]:
                 errors.append(
                     """'%s' requires unknown on_failure mode: %s"""
-                    % (test["name"], test["on_failure"])
+                    % (test["name"], test["on_failure"]),
                 )
 
         if "config" in self.deserialized:
@@ -591,43 +584,43 @@ class ScenarioReader(object):
             elif not isinstance(config["name"], str):
                 errors.append(
                     """`name` in `config` is supposed to be a string but got: %s"""
-                    % config["name"]
+                    % config["name"],
                 )
 
             if "type" in config and config["type"] not in ["unit", "functional"]:
                 errors.append(
                     """`type` in `config` is supposed to be either `unit` or `functional` but got: %s"""
-                    % config["type"]
+                    % config["type"],
                 )
 
             if "prefix" in config and not isinstance(config["prefix"], str):
                 errors.append(
                     """`prefix` in `config` is supposed to be a string but got: %s"""
-                    % config["prefix"]
+                    % config["prefix"],
                 )
 
             if "use_prefix" in config and not isinstance(config["use_prefix"], bool):
                 errors.append(
                     """`use_prefix` in `config` is supposed to be a boolean but got: %s"""
-                    % config["use_prefix"]
+                    % config["use_prefix"],
                 )
 
             if "delay" in config and not isinstance(config["delay"], (int, float)):
                 errors.append(
                     """`delay` in `config` is supposed to be a numerical value but got: %s"""
-                    % config["delay"]
+                    % config["delay"],
                 )
 
             if "ignore" in config and not isinstance(config["ignore"], bool):
                 errors.append(
                     """`ignore` in `config` is supposed to be a boolean but got: %s"""
-                    % config["ignore"]
+                    % config["ignore"],
                 )
 
             if "skip" in config and not isinstance(config["skip"], bool):
                 errors.append(
                     """`skip` in `config` is supposed to be a boolean but got: %s"""
-                    % config["skip"]
+                    % config["skip"],
                 )
 
             if "on_failure" in config and config["on_failure"] not in [
@@ -637,13 +630,13 @@ class ScenarioReader(object):
             ]:
                 errors.append(
                     """`on_failure` in `config` is supposed to be either `continue`, `pause` or `functional` but got: %s"""
-                    % config["on_failure"]
+                    % config["on_failure"],
                 )
 
             if "retry" in config and not isinstance(config["retry"], int):
                 errors.append(
                     """`retry` in `config` is supposed to be an integer but got: %s"""
-                    % config["retry"]
+                    % config["retry"],
                 )
 
         return errors
@@ -678,14 +671,14 @@ class ScenarioReader(object):
             if len(test_kind) == 0:
                 errors.append(
                     """'%s' should have a at least one of %s"""
-                    % (test["name"], ", ".join(kinds))
+                    % (test["name"], ", ".join(kinds)),
                 )
 
             # a test can be only of one kind (range, values and commands should be exclusive)
             if len(test_kind) > 1:
                 errors.append(
                     """'%s' should have a uniq kind but has %d (%s)"""
-                    % (test["name"], len(test_kind), test_kind)
+                    % (test["name"], len(test_kind), test_kind),
                 )
 
             # range and values tests require a setter or a getter field
@@ -696,7 +689,7 @@ class ScenarioReader(object):
             ):
                 errors.append(
                     """'%s' is of kind '%s' but has no setter or getter"""
-                    % (test["name"], test_kind[0])
+                    % (test["name"], test_kind[0]),
                 )
 
             # in commands value is not compatible with set_value or get_value
@@ -706,17 +699,17 @@ class ScenarioReader(object):
                     if "value" in cmd and "set_value" in cmd:
                         errors.append(
                             """'%s'>'%s' should not have a 'value' and a 'set_value'"""
-                            % (test["name"], cmd["name"])
+                            % (test["name"], cmd["name"]),
                         )
                     if "value" in cmd and "get_value" in cmd:
                         errors.append(
                             """'%s'>'%s' should not have a 'value' and a 'get_value'"""
-                            % (test["name"], cmd["name"])
+                            % (test["name"], cmd["name"]),
                         )
                     if not ("value" in cmd or "get_value" in cmd or "set_value" in cmd):
                         errors.append(
                             """'%s'>'%s' should have one of 'value', 'set_value' or 'get_value'"""
-                            % (test["name"], cmd["name"])
+                            % (test["name"], cmd["name"]),
                         )
 
         # all macros should have been used at least once
@@ -728,7 +721,7 @@ class ScenarioReader(object):
         for k, v in list(self.macros_mgr.unknown_macros.items()):
             errors.append(
                 """Unknown macro "%s" (%d occurence%s)"""
-                % (k, v, "" if v == 1 else "s")
+                % (k, v, "" if v == 1 else "s"),
             )
 
         return errors
@@ -765,14 +758,14 @@ class ScenarioReader(object):
             logger.error(
                 "File version (%s) too recent for installed WeTest (%s).",
                 self.version,
-                "{}.{}.{}".format(MAJOR, MINOR, BUGFIX),
+                f"{MAJOR}.{MINOR}.{BUGFIX}",
             )
         elif minor < MINOR:
             compatible_version = False
             logger.warning(
                 "File version (%s) for older version than the installed WeTest (%s).",
                 self.version,
-                "{}.{}.{}".format(MAJOR, MINOR, BUGFIX),
+                f"{MAJOR}.{MINOR}.{BUGFIX}",
             )
 
         if not compatible_version and try_continue:
@@ -783,7 +776,7 @@ class ScenarioReader(object):
         if not try_continue:
             logger.error(
                 "File format version is: %s, but wetest version is: %s"
-                % (self.version, "{}.{}.{}".format(MAJOR, MINOR, BUGFIX))
+                % (self.version, f"{MAJOR}.{MINOR}.{BUGFIX}"),
             )
             exit(5)
 
@@ -821,7 +814,7 @@ class ScenarioReader(object):
             self.macros_mgr.add_new_macros(deserialized["macros"])
 
         deserialized = self.macros_mgr.substitue_macros(
-            {k: v for k, v in list(deserialized.items()) if k != "macros"}
+            {k: v for k, v in list(deserialized.items()) if k != "macros"},
         )
 
         self.macros_mgr.raise_errors()
@@ -837,7 +830,6 @@ class ScenarioReader(object):
 
         :returns: wether or not all the validation succeeded.
         """
-
         if config is not None:
             fv_logger.info("Validating input file against schema.")
             try:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -19,10 +18,9 @@ import logging
 import tkinter as tk
 import tkinter.ttk
 
-from PIL import ImageTk, Image
-from pkg_resources import resource_filename
+from PIL import Image, ImageTk
 
-from wetest.common.constants import VERBOSE_FORMATTER, FILE_HANDLER, WeTestError
+from wetest.common.constants import FILE_HANDLER, VERBOSE_FORMATTER, WeTestError
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -45,7 +43,7 @@ class ExistingTreeItem(WeTestError):
 
 
 # class definitions
-class MyTreeview(tkinter.ttk.Treeview, object):
+class MyTreeview(tkinter.ttk.Treeview):
     """Adding convenience methods to Treeview
     Keep track of item last parent, useful for reattaching.
 
@@ -59,7 +57,7 @@ class MyTreeview(tkinter.ttk.Treeview, object):
         self._parent_ref = {"": ""}  # root parent is root
 
     def get_parent(self, item):
-        """return the item parent id"""
+        """Return the item parent id"""
         return self._parent_ref[item]
 
     def add_tag(self, item, tag):
@@ -181,7 +179,7 @@ class MyTreeview(tkinter.ttk.Treeview, object):
             pass
         else:
             raise ExistingTreeItem(
-                "Item with iid %s already exists: %s" % (iid, iid_exists)
+                "Item with iid %s already exists: %s" % (iid, iid_exists),
             )
         item = super(MyTreeview, self).insert(parent, index, iid, **kw)
         self._parent_ref[item] = parent
@@ -199,8 +197,7 @@ class MyTreeview(tkinter.ttk.Treeview, object):
 
 class Tooltip:
     # https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
-    """
-    It creates a tooltip for a given widget as the mouse goes on it.
+    """It creates a tooltip for a given widget as the mouse goes on it.
 
     see:
 
@@ -414,7 +411,7 @@ class Icon(tk.Label):
             self._already_updating = False
 
 
-class ImageGif(object):
+class ImageGif:
     """Usable as an object, will display the several images of the provided Gif
 
     master:    tkinter root or any object providing after method
@@ -523,7 +520,6 @@ class ImageGif(object):
 
     def _animate_GIF(self, idx=None):
         """Callback function for update with after"""
-
         self._loc = (self._loc + 1) % self._last_index
         self.update_attached(image=self._frames[self._loc])
 
@@ -540,13 +536,12 @@ class ImageGif(object):
 
 
 class PopUpMenu(tk.Menu):
-    """
-    It creates a floating menu near the mouse when right-clicking a widget.
+    """It creates a floating menu near the mouse when right-clicking a widget.
     http://effbot.org/zone/tkinter-popup-menu.htm
     """
 
     def __init__(
-        self, master, bound_widgets, bindings=["<Button-3>"], tearoff=0, **options
+        self, master, bound_widgets, bindings=["<Button-3>"], tearoff=0, **options,
     ):
         tk.Menu.__init__(self, master=master, tearoff=tearoff, **options)
 

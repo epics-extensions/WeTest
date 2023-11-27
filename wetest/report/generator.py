@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -14,20 +13,17 @@
 
 """Create a PDF report from testing results."""
 
-import logging
-
 import datetime
+import logging
 import re
-from pkg_resources import resource_filename
 
+from pkg_resources import resource_filename
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Paragraph
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image
+from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table, TableStyle
 
-from wetest.common.constants import VERBOSE_FORMATTER, FILE_HANDLER
-
+from wetest.common.constants import FILE_HANDLER, VERBOSE_FORMATTER
 from wetest.pvs.core import pvs_from_suite
 from wetest.pvs.naming import NamingError
 
@@ -42,7 +38,7 @@ INCH = 72
 
 
 def get_para_with_style(
-    text="", bold=False, italic=False, style="BodyText", align="left", color=None
+    text="", bold=False, italic=False, style="BodyText", align="left", color=None,
 ):
     """Get an initialized Paragraph object.
 
@@ -53,13 +49,15 @@ def get_para_with_style(
 
     :returns: An Initialized Paragraph.
 
-    NOTE:
+    Note:
+    ----
     SampleStyleSheet available styles:
         'BodyText', 'Title', 'Italic', 'Normal', 'Code', 'Definition',
         'Heading1', 'Heading2', 'Heading3', 'Heading4', 'Heading5', 'Heading6'
         'Bullet', 'OrderedList', 'UnorderedList,
 
-    SEE ALSO:
+    See Also:
+    --------
         - https://www.reportlab.com/documentation/
         - https://www.reportlab.com/docs/reportlab-userguide.pdf
     """
@@ -76,25 +74,25 @@ def get_para_with_style(
     paragraph_style.leftIndent += lspaces
     paragraph_style.rightIndent += rspaces
 
-    header = "<para align={} spaceb=3>".format(align)
+    header = f"<para align={align} spaceb=3>"
     footer = "</para>"
     body = text.replace("\n", "<br/>\n")
 
     if bold:
-        body = "<b>{}</b>".format(body)
+        body = f"<b>{body}</b>"
 
     if italic:
-        body = "<i>{}</i>".format(body)
+        body = f"<i>{body}</i>"
 
     if color:
-        body = "<font color={}>{}</font>".format(color, body)
+        body = f"<font color={color}>{body}</font>"
 
     html = header + body + footer
 
     return Paragraph(html, paragraph_style)
 
 
-class _TestInfo(object):
+class _TestInfo:
     """Combine information about tests success status."""
 
     def __init__(self, test_suite, test_results):
@@ -147,13 +145,13 @@ class _TestInfo(object):
                 logger.debug("test trace: %s", trace)
                 if test.id() == result.id():
                     self._append_to_combined(
-                        test, "Skipped", "grey", infos=test_suite.tests_infos[short_id]
+                        test, "Skipped", "grey", infos=test_suite.tests_infos[short_id],
                     )
                     success = False
 
             if success:
                 self._append_to_combined(
-                    test, "Success", "green", infos=test_suite.tests_infos[short_id]
+                    test, "Success", "green", infos=test_suite.tests_infos[short_id],
                 )
 
         # # Reorder results by their execution order
@@ -178,11 +176,11 @@ class _TestInfo(object):
                 "trace": shortenTrace(trace),
                 "color": color,
                 "infos": infos,
-            }
+            },
         )
 
 
-class ReportGenerator(object):
+class ReportGenerator:
     """Generates a PDF report from test unit results."""
 
     def __init__(self, test_suite, test_results, filename, scenario_data, naming):
@@ -204,7 +202,6 @@ class ReportGenerator(object):
 
     def _parse_id(self, test_id):
         """Return a scn_nb and test_nb from the id string."""
-
         pattern = r"test-(?P<scn_nb>\d+)-(?P<test_nb>\d+)-\d+"
 
         match = re.search(pattern, test_id)
@@ -233,7 +230,7 @@ class ReportGenerator(object):
         logo_table = Table(logo_array)
 
         title = get_para_with_style(
-            self.scenario_data[0]["name"], bold=True, style="Title", align="center"
+            self.scenario_data[0]["name"], bold=True, style="Title", align="center",
         )
 
         date = get_para_with_style(
@@ -256,7 +253,7 @@ class ReportGenerator(object):
                 get_para_with_style("Tested PVs", bold=True, align="left"),
                 get_para_with_style("as setter", bold=True, align="center"),
                 get_para_with_style("as getter", bold=True, align="center"),
-            ]
+            ],
         ]
 
         # work out column width
@@ -296,7 +293,7 @@ class ReportGenerator(object):
                             get_para_with_style(section_txt, align="left", bold=True),
                             "",
                             "",
-                        ]
+                        ],
                     )
 
             # show pv name
@@ -318,7 +315,7 @@ class ReportGenerator(object):
                     get_para_with_style(pv_name, align="left"),
                     get_para_with_style(setter_str, align="center"),
                     get_para_with_style(getter_str, align="center"),
-                ]
+                ],
             )
 
         # Create main table
@@ -327,7 +324,7 @@ class ReportGenerator(object):
                 get_para_with_style("Test", bold=True, align="center"),
                 get_para_with_style("Description", bold=True, align="center"),
                 get_para_with_style("Result", bold=True, align="center"),
-            ]
+            ],
         ]
 
         # File main table with tests results
@@ -346,7 +343,7 @@ class ReportGenerator(object):
                     else ""
                 )
                 array.append(
-                    ["", get_para_with_style(scn_title, style="h2", bold=True), ""]
+                    ["", get_para_with_style(scn_title, style="h2", bold=True), ""],
                 )
 
             # check for test change (then print test title and message)
@@ -358,7 +355,7 @@ class ReportGenerator(object):
                             "",
                             get_para_with_style(test["infos"].test_title, bold=True),
                             "",
-                        ]
+                        ],
                     )
                 else:
                     array.append(
@@ -366,7 +363,7 @@ class ReportGenerator(object):
                             "",
                             [
                                 get_para_with_style(
-                                    test["infos"].test_title, bold=True
+                                    test["infos"].test_title, bold=True,
                                 ),
                                 get_para_with_style(
                                     test["infos"].test_message,
@@ -375,26 +372,26 @@ class ReportGenerator(object):
                                 ),
                             ],
                             "",
-                        ]
+                        ],
                     )
 
             # Add message and trace if provided
             middle_cell = [
                 get_para_with_style(
-                    test["infos"].test_title + ": " + test["infos"].subtest_title
-                )
+                    test["infos"].test_title + ": " + test["infos"].subtest_title,
+                ),
             ]
             if test["infos"].subtest_message is not None:
                 middle_cell.append(
                     get_para_with_style(
-                        test["infos"].subtest_message, style="Definition", italic=True
-                    )
+                        test["infos"].subtest_message, style="Definition", italic=True,
+                    ),
                 )
             if test["trace"] is not None:
                 middle_cell.append(
                     get_para_with_style(
-                        test["trace"], align="left", color=test["color"], style="Italic"
-                    )
+                        test["trace"], align="left", color=test["color"], style="Italic",
+                    ),
                 )
 
             array.append(
@@ -402,9 +399,9 @@ class ReportGenerator(object):
                     get_para_with_style(str(test_count), align="center"),
                     middle_cell,
                     get_para_with_style(
-                        test["result"], align="center", color=test["color"]
+                        test["result"], align="center", color=test["color"],
                     ),
-                ]
+                ],
             )
 
             test_count = test_count + 1
@@ -419,7 +416,7 @@ class ReportGenerator(object):
                 ("LINEBELOW", (0, -1), (-1, -1), 2, colors.black),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("ALIGN", (1, 1), (-1, -1), "LEFT"),
-            ]
+            ],
         )
 
         pv_table = Table(

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -15,21 +14,30 @@
 """Generates tests from YAML file."""
 
 import logging
-import numpy
 import random
 import time
-import timeit
 import unittest
 
 import epics
+import numpy
 
-from wetest.common.constants import CONTINUE_FROM_TEST, PAUSE_FROM_TEST, ABORT_FROM_TEST
-from wetest.common.constants import LVL_TEST_ERRORED, LVL_TEST_FAILED, LVL_TEST_SKIPPED
-from wetest.common.constants import LVL_TEST_SUCCESS, LVL_TEST_RUNNING, LVL_RUN_CONTROL
-from wetest.common.constants import VERBOSE_FORMATTER, TERSE_FORMATTER, FILE_HANDLER
-from wetest.common.constants import WeTestError, to_string
-
-from wetest.testing.reader import ABORT, PAUSE, CONTINUE
+from wetest.common.constants import (
+    ABORT_FROM_TEST,
+    CONTINUE_FROM_TEST,
+    FILE_HANDLER,
+    LVL_RUN_CONTROL,
+    LVL_TEST_ERRORED,
+    LVL_TEST_FAILED,
+    LVL_TEST_RUNNING,
+    LVL_TEST_SKIPPED,
+    LVL_TEST_SUCCESS,
+    PAUSE_FROM_TEST,
+    TERSE_FORMATTER,
+    VERBOSE_FORMATTER,
+    WeTestError,
+    to_string,
+)
+from wetest.testing.reader import ABORT, CONTINUE, PAUSE
 
 NO_KIND = "Missing test kind (values, range or commands)"
 
@@ -57,7 +65,6 @@ class EmptyTest(WeTestError):
     Exception raised executing a test without getter nor setter.
     """
 
-    pass
 
 
 class InconsistantTest(WeTestError):
@@ -67,7 +74,6 @@ class InconsistantTest(WeTestError):
     for instance a setter was provided but not set_value.
     """
 
-    pass
 
 
 class InvalidTest(WeTestError):
@@ -78,7 +84,7 @@ class TestNotFound(WeTestError):
     """Test is not in the sequence."""
 
 
-class TestData(object):
+class TestData:
     """A generic test representation."""
 
     def __init__(
@@ -202,7 +208,7 @@ def skipped_test_factory(test_data, reason):
     def skipped_test(self):
         tr_logger.log(LVL_TEST_SKIPPED, "")
         tr_logger.log(
-            LVL_TEST_SKIPPED, "Skipping   %s    %s", test_data.id, test_data.desc
+            LVL_TEST_SKIPPED, "Skipping   %s    %s", test_data.id, test_data.desc,
         )
         raise unittest.SkipTest(reason)
 
@@ -366,7 +372,7 @@ def test_generator(test_data):
             on_failure = ABORT_FROM_TEST
         tr_logger.log(LVL_TEST_RUNNING, "")
         tr_logger.log(
-            LVL_TEST_RUNNING, "Running    %s    %s", test_data.id, test_data.desc
+            LVL_TEST_RUNNING, "Running    %s    %s", test_data.id, test_data.desc,
         )
 
         nb_exec = 0
@@ -385,22 +391,22 @@ def test_generator(test_data):
 
                 if test_data.setter is not None and test_data.set_value is None:
                     raise InconsistantTest(
-                        "[setter error] No value associated to setter."
+                        "[setter error] No value associated to setter.",
                     )
 
                 if test_data.getter is not None and test_data.get_value is None:
                     raise InconsistantTest(
-                        "[getter error] No value associated to getter."
+                        "[getter error] No value associated to getter.",
                     )
 
                 if test_data.set_value is not None and test_data.setter is None:
                     raise InconsistantTest(
-                        "[setter error] No setter associated to set value."
+                        "[setter error] No setter associated to set value.",
                     )
 
                 if test_data.get_value is not None and test_data.getter is None:
                     raise InconsistantTest(
-                        "[getter error] No getter associated to get value."
+                        "[getter error] No getter associated to get value.",
                     )
 
                 # Set PV if required
@@ -475,7 +481,7 @@ def test_generator(test_data):
                             else:
                                 raise ValueError(
                                     "Expected %s to be an array but got %s"
-                                    % (getter.pvname, to_string(measured_value))
+                                    % (getter.pvname, to_string(measured_value)),
                                 )
 
                         # pyepics expect single characters to be passed as integer
@@ -526,12 +532,12 @@ def test_generator(test_data):
                         isclose = numpy.equal(measured_value, expected_value)
                         if rtol is not None:
                             isclose_marging = numpy.isclose(
-                                measured_value, expected_value, rtol=rtol, atol=0
+                                measured_value, expected_value, rtol=rtol, atol=0,
                             )
                             isclose = numpy.logical_or(isclose, isclose_marging)
                         if atol is not None:
                             isclose_delta = numpy.isclose(
-                                measured_value, expected_value, rtol=0, atol=atol
+                                measured_value, expected_value, rtol=0, atol=atol,
                             )
                             isclose = numpy.logical_or(isclose, isclose_delta)
 
@@ -573,7 +579,7 @@ def test_generator(test_data):
                     else:
                         if test_data.margin is not None:
                             margin = abs(
-                                float(test_data.get_value) * float(test_data.margin)
+                                float(test_data.get_value) * float(test_data.margin),
                             )
                         else:
                             margin = 0
@@ -684,7 +690,7 @@ def test_generator(test_data):
     return test, test_data
 
 
-class TestsGenerator(object):
+class TestsGenerator:
     """TestGenerator generates unittest test cases from a YAML file."""
 
     def __init__(self, tests_data):
@@ -769,11 +775,11 @@ class TestsGenerator(object):
                     value_list.update(numpy.arange(start, stop, step))
                 if lin != 0:
                     value_list.update(
-                        numpy.linspace(start, stop, lin, endpoint=include_stop)
+                        numpy.linspace(start, stop, lin, endpoint=include_stop),
                     )
                 if geom != 0:
                     value_list.update(
-                        numpy.geomspace(start, stop, geom, endpoint=include_stop)
+                        numpy.geomspace(start, stop, geom, endpoint=include_stop),
                     )
 
                 # check if stop value should be tested or not
@@ -907,17 +913,17 @@ class TestsGenerator(object):
                         get_value = command.get("value", command.get("get_value"))
 
                     delay = command.get(
-                        "delay", test_raw_data.get("delay", self.get_config("delay"))
+                        "delay", test_raw_data.get("delay", self.get_config("delay")),
                     )
                     skip = command.get(
-                        "skip", test_raw_data.get("skip", self.get_config("skip"))
+                        "skip", test_raw_data.get("skip", self.get_config("skip")),
                     )
                     on_failure = command.get(
                         "on_failure",
                         test_raw_data.get("on_failure", self.get_config("on_failure")),
                     )
                     retry = command.get(
-                        "retry", test_raw_data.get("retry", self.get_config("retry"))
+                        "retry", test_raw_data.get("retry", self.get_config("retry")),
                     )
 
                     logger.debug("adding new command subtest")
@@ -1000,7 +1006,7 @@ class TestsGenerator(object):
         """
         logger.debug("Randomizing order…")
         count = len(self.tests_list)
-        random_list = [int(i) for i in range(0, count)]
+        random_list = [int(i) for i in range(count)]
 
         logger.info("Tests type: %s", self.get_config("type"))
         if self.get_config("type") == "unit":
@@ -1068,7 +1074,7 @@ class TestsGenerator(object):
                 # add test case to test suite
                 if skip:
                     tests_suite.add_skipped_test(
-                        Test_case, test_id, "Test skipped from file."
+                        Test_case, test_id, "Test skipped from file.",
                     )
                 else:
                     tests_suite.add_selected_test(Test_case, test_id)
