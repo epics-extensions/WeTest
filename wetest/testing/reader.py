@@ -17,6 +17,7 @@
 # check are not validated (aka safe run)
 # TODO margin should only be used with numbers
 
+import contextlib
 import logging
 import os
 import re
@@ -79,14 +80,12 @@ class FileNotFound(WeTestError):
     """Unable to find file corresponding to provided path."""
 
 
-
 class UnsupportedFileFormat(WeTestError):
     """Bad YAML file format exception.
 
     Exception raised if YAML configuration file format version is newer than
     supported one.
     """
-
 
 
 class InvalidFileContent(WeTestError):
@@ -96,13 +95,11 @@ class InvalidFileContent(WeTestError):
     """
 
 
-
 class MacroError(WeTestError):
-    """Something went wrong when parsing the macros"""
+    """Something went wrong when parsing the macros."""
 
 
-
-def display_changlog(file_version, wetest_version):
+def display_changlog(file_version, wetest_version) -> None:
     """Displays the changelog warnings, only between the two versions."""
     if file_version > wetest_version:
         logger.warning("Some feature are not yet implemented in WeTest.")
@@ -132,7 +129,10 @@ def display_changlog(file_version, wetest_version):
                     break  # too new
                 else:
                     logger.warning(
-                        "%d.%d.x:\n%s", major, minor, CHANGELOG_WARN[major][minor],
+                        "%d.%d.x:\n%s",
+                        major,
+                        minor,
+                        CHANGELOG_WARN[major][minor],
                     )
 
 
@@ -177,10 +177,12 @@ class MacrosManager:
     Giving these mutable to the constructor will not update them.
     """
 
-    def __init__(self, known_macros=None, used_macros=None, unknown_macros=None):
-        self.known_macros = dict()
+    def __init__(
+        self, known_macros=None, used_macros=None, unknown_macros=None
+    ) -> None:
+        self.known_macros = {}
         self.used_macros = set()
-        self.unknown_macros = dict()
+        self.unknown_macros = {}
 
         self._trace_unkown = True
         self.read_errors = []
@@ -192,7 +194,7 @@ class MacrosManager:
         if unknown_macros is not None:
             self.unknown_macros.update(unknown_macros)
 
-    def __str__(self):
+    def __str__(self) -> str:
         output = "MacrosManager:"
         output += "\nknown macros:\n" + str(sorted(self.known_macros))
         output += "\nused macros:\n" + str(sorted(self.used_macros))
@@ -200,7 +202,7 @@ class MacrosManager:
         return output
 
     def deep_copy(self):
-        """Return an independant copy of this instance"""
+        """Return an independant copy of this instance."""
         return MacrosManager(
             known_macros=self.known_macros,
             used_macros=self.used_macros,
@@ -208,13 +210,13 @@ class MacrosManager:
         )
 
     def mark_as_used(self, macros):
-        """Complete used_macros with the provided list"""
+        """Complete used_macros with the provided list."""
         if isinstance(macros, str):
             macros = [macros]
         self.used_macros.update(macros)
 
     def add_new_macros(self, new_macros, priority_to_known=True):
-        """Provided new_macros is a dict or a list of dict that are to be used as macros
+        """Provided new_macros is a dict or a list of dict that are to be used as macros.
 
         priority_to_known: is boolean stating whether knwon macros should be updated or kept
         """
@@ -227,10 +229,12 @@ class MacrosManager:
                     pass
                 else:
                     self.known_macros[str(k)] = self.substitue_macros(
-                        v, trace_unknown=False,
+                        v,
+                        trace_unknown=False,
                     )
         else:
-            raise MacroError("Input can not be read as a macro: %s", new_macros)
+            msg = "Input can not be read as a macro: %s"
+            raise MacroError(msg, new_macros)
 
     def substitue_macros(self, a_value, trace_unknown=True):
         """Return the substituted value using known_macros, and update used_macros and unknown_macros.
@@ -242,12 +246,12 @@ class MacrosManager:
         """
         # recurse for lists and dictionnaries
         if isinstance(a_value, list):
-            output = list()
+            output = []
             for x in a_value:
                 output.append(self.substitue_macros(x, trace_unknown=trace_unknown))
             return output
         elif isinstance(a_value, dict):
-            output = dict()
+            output = {}
             for k, v in list(a_value.items()):
                 output[k] = self.substitue_macros(v, trace_unknown=trace_unknown)
             return output
@@ -261,7 +265,9 @@ class MacrosManager:
         # and works with imbricated macros
         self._trace_unkown = trace_unknown
         new_str, nb_sub = re.subn(
-            r"\$[({]{1}[^${}()]*[)}]{1}", self.corresponding_macro, a_value,
+            r"\$[({]{1}[^${}()]*[)}]{1}",
+            self.corresponding_macro,
+            a_value,
         )
         self._trace_unkown = True
 
@@ -296,16 +302,12 @@ class MacrosManager:
                 output = new_str
 
                 # is it a float ?
-                try:
+                with contextlib.suppress(ValueError):
                     output = float(new_str)
-                except ValueError:
-                    pass
 
                 # or even better is it an integer ?
-                try:
+                with contextlib.suppress(ValueError):
                     output = int(new_str)
-                except ValueError:
-                    pass
 
             logger.debug("cast into %s (%s)", output, type(output))
 
@@ -322,7 +324,7 @@ class MacrosManager:
             return output
 
     def corresponding_macro(self, match):
-        """Return the string to substitute for regex match
+        """Return the string to substitute for regex match.
 
         :param match: substring match
         :returns: replacement string
@@ -354,7 +356,7 @@ class MacrosManager:
         return str(repl)
 
     def raise_errors(self):
-        """Raise a MacroError exception if self.read_errors is not empty"""
+        """Raise a MacroError exception if self.read_errors is not empty."""
         if self.read_errors:
             logger.critical("Issue when dealing with macros:")
             for error_txt in self.read_errors:
@@ -363,7 +365,7 @@ class MacrosManager:
 
 
 class ScenarioReader:
-    """Read WeTest YAML Scenario file
+    """Read WeTest YAML Scenario file.
 
     :param yaml_file: A YAML suite configuration file.
     :param macros_mgr: a MacrosManager of macros already defined before reading
@@ -373,7 +375,9 @@ class ScenarioReader:
     :param propagate: a boolean, whether or not to share all macros with included files
     """
 
-    def __init__(self, yaml_file, macros_mgr=None, suite_macros=None, propagate=False):
+    def __init__(
+        self, yaml_file, macros_mgr=None, suite_macros=None, propagate=False
+    ) -> None:
         """Initialize Reader."""
         self.file_path = os.path.abspath(yaml_file)
         try:
@@ -382,7 +386,7 @@ class ScenarioReader:
             raise FileNotFound("Could not find file %s" % self.file_path)
 
         self.macros_mgr = macros_mgr if macros_mgr is not None else MacrosManager()
-        self.suite_macros = suite_macros if suite_macros is not None else list()
+        self.suite_macros = suite_macros if suite_macros is not None else []
         self.propagate = propagate
 
         self.deserialized_scenarios = []
@@ -459,8 +463,9 @@ class ScenarioReader:
 
             if isinstance(scenario, list):
                 if not isinstance(scenario[0], str):
+                    msg = "First item of include should be a file path."
                     raise InvalidFileContent(
-                        "First item of include should be a file path.",
+                        msg,
                     )
                 scenario_path = scenario[0]
                 # remains a list of one or several dicts
@@ -495,7 +500,7 @@ class ScenarioReader:
         """Return the absolute path of a file, trying in this order:
         1- provided file_path is already absolute
         2- provided file_path is relative to current folder
-        3- provided file_path is relative to current file
+        3- provided file_path is relative to current file.
 
         :param file_path: absolute or relative file path.
 
@@ -532,7 +537,9 @@ class ScenarioReader:
         # we actually validate file_path and not self.filepath,
         # but self.file_path holds more useful information to display
         fv_logger.log(
-            LVL_FORMAT_VAL, "Validation of YAML scenario file: %s", self.file_path,
+            LVL_FORMAT_VAL,
+            "Validation of YAML scenario file: %s",
+            self.file_path,
         )
 
         schema_path = resource_filename("wetest", "resources/scenario_schema.yaml")
@@ -572,8 +579,9 @@ class ScenarioReader:
                 "abort",
             ]:
                 errors.append(
-                    """'%s' requires unknown on_failure mode: %s"""
-                    % (test["name"], test["on_failure"]),
+                    """'{}' requires unknown on_failure mode: {}""".format(
+                        test["name"], test["on_failure"]
+                    ),
                 )
 
         if "config" in self.deserialized:
@@ -670,8 +678,9 @@ class ScenarioReader:
             # a test should have at least one kind (range, values or commands)
             if len(test_kind) == 0:
                 errors.append(
-                    """'%s' should have a at least one of %s"""
-                    % (test["name"], ", ".join(kinds)),
+                    """'{}' should have a at least one of {}""".format(
+                        test["name"], ", ".join(kinds)
+                    ),
                 )
 
             # a test can be only of one kind (range, values and commands should be exclusive)
@@ -688,8 +697,9 @@ class ScenarioReader:
                 and "getter" not in test
             ):
                 errors.append(
-                    """'%s' is of kind '%s' but has no setter or getter"""
-                    % (test["name"], test_kind[0]),
+                    """'{}' is of kind '{}' but has no setter or getter""".format(
+                        test["name"], test_kind[0]
+                    ),
                 )
 
             # in commands value is not compatible with set_value or get_value
@@ -698,24 +708,27 @@ class ScenarioReader:
                 for cmd in test["commands"]:
                     if "value" in cmd and "set_value" in cmd:
                         errors.append(
-                            """'%s'>'%s' should not have a 'value' and a 'set_value'"""
-                            % (test["name"], cmd["name"]),
+                            """'{}'>'{}' should not have a 'value' and a 'set_value'""".format(
+                                test["name"], cmd["name"]
+                            ),
                         )
                     if "value" in cmd and "get_value" in cmd:
                         errors.append(
-                            """'%s'>'%s' should not have a 'value' and a 'get_value'"""
-                            % (test["name"], cmd["name"]),
+                            """'{}'>'{}' should not have a 'value' and a 'get_value'""".format(
+                                test["name"], cmd["name"]
+                            ),
                         )
                     if not ("value" in cmd or "get_value" in cmd or "set_value" in cmd):
                         errors.append(
-                            """'%s'>'%s' should have one of 'value', 'set_value' or 'get_value'"""
-                            % (test["name"], cmd["name"]),
+                            """'{}'>'{}' should have one of 'value', 'set_value' or 'get_value'""".format(
+                                test["name"], cmd["name"]
+                            ),
                         )
 
         # all macros should have been used at least once
         for k, v in list(self.macros_mgr.known_macros.items()):
             if k not in self.macros_mgr.used_macros and k not in self.suite_macros:
-                errors.append("""Unused macro "%s": %s""" % (k, v))
+                errors.append(f"""Unused macro "{k}": {v}""")
 
         # all macros should have been replaced
         for k, v in list(self.macros_mgr.unknown_macros.items()):
@@ -775,10 +788,11 @@ class ScenarioReader:
 
         if not try_continue:
             logger.error(
-                "File format version is: %s, but wetest version is: %s"
-                % (self.version, f"{MAJOR}.{MINOR}.{BUGFIX}"),
+                "File format version is: {}, but wetest version is: {}".format(
+                    self.version, f"{MAJOR}.{MINOR}.{BUGFIX}"
+                ),
             )
-            exit(5)
+            sys.exit(5)
 
         return compatible_version
 
@@ -804,7 +818,7 @@ class ScenarioReader:
         return self.deserialized
 
     def _substituteMacros(self, deserialized):
-        """ "Update the deserialized dictionnary with macros values
+        """ "Update the deserialized dictionnary with macros values.
 
         :param deserialized: yaml file content as a dict.
         :returns: The deserialized file.
@@ -822,7 +836,7 @@ class ScenarioReader:
         return deserialized
 
     def validate_file(self, config=None):
-        """Runs the schema, non-compulsory and compylsory validation
+        """Runs the schema, non-compulsory and compylsory validation.
 
         if compulsory validation fails, terminate the program with error code 1.
 

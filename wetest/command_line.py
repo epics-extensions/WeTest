@@ -18,6 +18,7 @@ It also enables to monitor PVs (extracted from the tests and from specified DB).
 """
 
 import argparse
+import contextlib
 import logging
 import multiprocessing
 import os
@@ -110,10 +111,8 @@ def quiet_exception(*args):
 
     def decorator(func):
         def wrapper(*args, **kwargs):
-            try:
+            with contextlib.suppress(exception_tuple):
                 func(*args, **kwargs)
-            except exception_tuple:
-                pass
 
         return wrapper
 
@@ -122,13 +121,13 @@ def quiet_exception(*args):
 
 class MultithreadedQueueStream:
     """Multiprocessing Queue implementing methodes of sys.stdout used by
-    logging.StreamHandler
+    logging.StreamHandler.
 
     Apparently there is no way to inherit from this object,
     so wrapping on it instead.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.queue = multiprocessing.Queue()
 
     def put(self, data):
@@ -145,7 +144,7 @@ class MultithreadedQueueStream:
 
 
 class ListStream(list):
-    """List implementing methodes of sys.stdout used by logging.StreamHandler
+    """List implementing methodes of sys.stdout used by logging.StreamHandler.
 
     Apparently there is no way to inherit from this object,
     so wrapping on it instead.
@@ -172,14 +171,18 @@ def generate_tests(scenarios, macros_mgr=None, propagate=False):
     # get data from scenarios
     ## read the first file
     tests_data = ScenarioReader(
-        scenarios.pop(0), macros_mgr=macros_mgr, propagate=propagate,
+        scenarios.pop(0),
+        macros_mgr=macros_mgr,
+        propagate=propagate,
     ).get_deserialized()
     if "scenarios" not in tests_data:
         tests_data["scenarios"] = []
     ## append scenario from remaining files
     for scenario in scenarios:
         new_tests_data = ScenarioReader(
-            scenario, macros_mgr=macros_mgr, propagate=propagate,
+            scenario,
+            macros_mgr=macros_mgr,
+            propagate=propagate,
         ).get_deserialized()
         tests_data["scenarios"] += new_tests_data["scenarios"]
 
@@ -202,7 +205,9 @@ def generate_tests(scenarios, macros_mgr=None, propagate=False):
 
     # display unit/functionnal info to user
     logger.warning(
-        "Loaded %s tests from `%s`:", suite.countTestCases(), configs[0]["name"],
+        "Loaded %s tests from `%s`:",
+        suite.countTestCases(),
+        configs[0]["name"],
     )
     for scenario in tests_data["scenarios"]:
         if str(scenario["config"]["type"]).lower() == "unit":
@@ -212,7 +217,9 @@ def generate_tests(scenarios, macros_mgr=None, propagate=False):
         else:
             type_str = str(scenario["config"]["type"]) + " (??)"
         logger.warning(
-            "\t- %s `%s`", type_str, scenario["config"].get("name", "Unnamed"),
+            "\t- %s `%s`",
+            type_str,
+            scenario["config"].get("name", "Unnamed"),
         )
 
     return suite, configs
@@ -309,7 +316,11 @@ def main():
 
     # run relative arguments
     parser.add_argument(
-        "-G", "--no-gui", action="store_true", default=False, help="Do not open a GUI.",
+        "-G",
+        "--no-gui",
+        action="store_true",
+        default=False,
+        help="Do not open a GUI.",
     )
     auto_play_group = parser.add_mutually_exclusive_group(required=False)
     auto_play_group.add_argument(
@@ -398,7 +409,7 @@ def main():
                     raise
         logger.info(
             "using CLI macros:\n%s",
-            "\n".join(["\t%s: %s" % (k, v) for k, v in list(cli_macros.items())]),
+            "\n".join([f"\t{k}: {v}" for k, v in list(cli_macros.items())]),
         )
     macros_mgr = MacrosManager(known_macros=cli_macros)
 
@@ -420,7 +431,7 @@ def main():
             )
         except FileNotFound as e:
             logger.error(e)
-            exit(4)
+            sys.exit(4)
 
     queue_to_gui = multiprocessing.Manager().Queue()
     queue_from_gui = multiprocessing.Manager().Queue()
@@ -435,11 +446,12 @@ def main():
         all_connected, pv_refs = True, {}
     else:
         all_connected, pv_refs = PVsTable(queue_to_gui).register_pvs(
-            pv_list=pvs_from_files, suite=suite,
+            pv_list=pvs_from_files,
+            suite=suite,
         )
 
     # show naming compatibility in CLI
-    for pv_name, pv in list(pv_refs.items()):
+    for pv_name, _pv in list(pv_refs.items()):
         try:
             naming.split(pv_name)
         except NamingError as e:
@@ -474,10 +486,7 @@ def main():
             file_validation=fv_list,
         )
 
-    if args.no_pdf_output:
-        pdf_output = None
-    else:
-        pdf_output = os.path.abspath(args.pdf_output)
+    pdf_output = None if args.no_pdf_output else os.path.abspath(args.pdf_output)
 
     # run tests
     data = {
@@ -531,7 +540,7 @@ def main():
 class ProcessManager:
     """Class that start/stop the runner and report process, and process their outputs."""
 
-    def __init__(self, args, no_gui, queue_to_gui, queue_from_gui):
+    def __init__(self, args, no_gui, queue_to_gui, queue_from_gui) -> None:
         self.queue_to_gui = queue_to_gui
         self.queue_from_gui = queue_from_gui
 
@@ -577,9 +586,10 @@ class ProcessManager:
         self.results = None
 
     def start_runner_process(self):
-        """Start runner in another process (also needs to be CA compatible)"""
+        """Start runner in another process (also needs to be CA compatible)."""
         self.p_run_and_report = epics.CAProcess(
-            target=self.run_and_report, name="run_and_report",
+            target=self.run_and_report,
+            name="run_and_report",
         )
         self.p_run_and_report.start()
         self.ns.pid_run_and_report = self.p_run_and_report.pid
@@ -587,9 +597,10 @@ class ProcessManager:
         self.p_run_and_report_started.wait()  # to be able to abort from p_parse_output
 
     def start_parser_process(self):
-        """Start parse_output in another process"""
+        """Start parse_output in another process."""
         self.p_parse_output = multiprocessing.Process(
-            target=self.parse_output, name="parse_output",
+            target=self.parse_output,
+            name="parse_output",
         )
         self.p_parse_output.start()
         self.ns.pid_p_parse_output = self.p_parse_output.pid
@@ -597,9 +608,10 @@ class ProcessManager:
         self.p_parse_output_started.wait()  # to be able to abort properly from p_gui_commands
 
     def start_gui_command_process(self):
-        """Sstart gui_commands in another process"""
+        """Sstart gui_commands in another process."""
         self.p_gui_commands = multiprocessing.Process(
-            target=self.gui_commands, name="gui_commands",
+            target=self.gui_commands,
+            name="gui_commands",
         )
         # self.p_gui_commands.daemon = True # so that it can restart the runner and parser process
         self.p_gui_commands.start()
@@ -608,7 +620,7 @@ class ProcessManager:
         self.p_gui_commands_started.wait()  # for homogeneity with other process start functions
 
     def run(self):
-        """Start the various subprocess"""
+        """Start the various subprocess."""
         self.start_runner_process()
         self.start_parser_process()
 
@@ -616,14 +628,14 @@ class ProcessManager:
             self.start_gui_command_process()
 
     def join(self):
-        """Joins on the multiple process running"""
+        """Joins on the multiple process running."""
         self.p_run_and_report.join()
         self.p_parse_output.join()
         if self.p_gui_commands is not None:
             self.p_gui_commands.join()
 
     def terminate(self):
-        """Terminates the multiple process running"""
+        """Terminates the multiple process running."""
         self.p_run_and_report.terminate()
         self.p_parse_output.terminate()
         if self.p_gui_commands is not None:
@@ -631,7 +643,7 @@ class ProcessManager:
 
     @quiet_exception(KeyboardInterrupt)
     def run_and_report(self):
-        """Runs the tests and generate the report"""
+        """Runs the tests and generate the report."""
         self.p_run_and_report_started.set()
         logger.debug("Enter run_and_report (%d)", multiprocessing.current_process().pid)
         logger.warning("-----------------------")
@@ -676,7 +688,11 @@ class ProcessManager:
         if self.results and self.pdf_output is not None:
             logger.info("Will export result in PDF file: %s", self.pdf_output)
             export_pdf(
-                self.pdf_output, self.suite, self.results, self.configs, self.naming,
+                self.pdf_output,
+                self.suite,
+                self.results,
+                self.configs,
+                self.naming,
             )
             logger.warning("Done generating report: %s", self.pdf_output)
             self.queue_to_gui.put(REPORT_GENERATED + " " + self.pdf_output)
@@ -707,12 +723,12 @@ class ProcessManager:
         logger.debug("Paused run_and_report (%d)", self.ns.pid_run_and_report)
 
     def start_play(self):
-        """Call play runner after setting evt_start"""
+        """Call play runner after setting evt_start."""
         self.evt_start.set()
         self.play_runner()
 
     def resume_play(self):
-        """Call play runner without setting evt_start"""
+        """Call play runner without setting evt_start."""
         self.play_runner()
 
     def play_runner(self):
@@ -733,7 +749,7 @@ class ProcessManager:
 
     @quiet_exception(KeyboardInterrupt)
     def gui_commands(self):
-        """Process instructions from self.queue_from_gui"""
+        """Process instructions from self.queue_from_gui."""
         self.p_gui_commands_started.set()
         logger.debug("Enter gui_commands (%d)", multiprocessing.current_process().pid)
         while True:
@@ -778,7 +794,7 @@ class ProcessManager:
     @quiet_exception(KeyboardInterrupt)
     def parse_output(self):
         """Reads runner output and convert it to update data items
-        in a new thread
+        in a new thread.
         """
         self.p_parse_output_started.set()
         logger.debug("Enter parse_output (%d)", multiprocessing.current_process().pid)
@@ -792,11 +808,13 @@ class ProcessManager:
 
             # check for start of test
             match_running = re.search(
-                r"^Running\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$", new_str,
+                r"^Running\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$",
+                new_str,
             )
             # check for skipped test
             match_skipped = re.search(
-                r"^Skipping\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$", new_str,
+                r"^Skipping\s*(?P<test_id>test-\d+-\d+-\d+)\s*.*$",
+                new_str,
             )
             # check for retry of test
             match_rerun = re.search(

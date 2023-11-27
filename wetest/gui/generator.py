@@ -78,8 +78,8 @@ BT_TXT_LEN = 6
 
 
 def reorganise_subtests(tests_infos):
-    """Return the tests_infos sorted by scneario and test numbers"""
-    output = dict()
+    """Return the tests_infos sorted by scneario and test numbers."""
+    output = {}
 
     # expected subtest id template
     regex = r"test-(?P<sc_id>\d+)-(?P<test_id>\d+)-\d+$"
@@ -92,9 +92,9 @@ def reorganise_subtests(tests_infos):
             sc_id = int(match.group("sc_id"))
             test_id = int(match.group("test_id"))
         if sc_id not in output:
-            output[sc_id] = dict()
+            output[sc_id] = {}
         if test_id not in output[sc_id]:
-            output[sc_id][test_id] = dict()
+            output[sc_id][test_id] = {}
         output[sc_id][test_id][st_id] = st_data
 
     for sc_id in output:
@@ -106,14 +106,21 @@ def reorganise_subtests(tests_infos):
 
 
 def value_from_subtest(
-    key, test_infos, scenario_id, test_id, subtest_id=None, fallback="VALUE NOT FOUND",
+    key,
+    test_infos,
+    scenario_id,
+    test_id,
+    subtest_id=None,
+    fallback="VALUE NOT FOUND",
 ):
     """Extract a value corresponding to key in the infos of the subtest.
     Use fallback value if it is not available.
     """
     if subtest_id is None:
         value = getattr(
-            list(test_infos[scenario_id][test_id].values())[0], key, fallback,
+            next(iter(test_infos[scenario_id][test_id].values())),
+            key,
+            fallback,
         )
     else:
         value = getattr(test_infos[scenario_id][test_id][subtest_id], key, fallback)
@@ -121,7 +128,7 @@ def value_from_subtest(
 
 
 def file_order_sort(subtest_id):
-    """Return the scenario, test and subtest id as a tuple for numerical sort"""
+    """Return the scenario, test and subtest id as a tuple for numerical sort."""
     text, sc_id, tt_id, st_id = subtest_id.split("-")
     return (int(sc_id), int(tt_id), int(st_id))
 
@@ -136,13 +143,13 @@ class GUIGenerator:
         update_queue,
         request_queue,
         file_validation,
-    ):
+    ) -> None:
         # initialise attributes
         self.master = master
         self.suite = suite
         self.configs = copy.deepcopy(configs)
         self.naming = naming
-        self.subtests_ref = dict()
+        self.subtests_ref = {}
         self.update_queue = update_queue
         self.request_queue = request_queue
 
@@ -206,7 +213,10 @@ class GUIGenerator:
             )
         else:
             self.suite_gui = Suite(
-                self.suite_frame, self.subtests_ref, naming=self.naming, warning=warning,
+                self.suite_frame,
+                self.subtests_ref,
+                naming=self.naming,
+                warning=warning,
             )
 
         # check same number of scenarios configs and scenario in tests_info
@@ -228,7 +238,10 @@ class GUIGenerator:
                 sc.add_traceback("UNEXPECTED", "", "No tests in this scenario.")
             for test_id in sorted(self.test_infos.get(sc_id, [])):
                 test_title = value_from_subtest(
-                    "test_title", self.test_infos, sc_id, test_id,
+                    "test_title",
+                    self.test_infos,
+                    sc_id,
+                    test_id,
                 )
                 test_desc = [
                     value_from_subtest("test_message", self.test_infos, sc_id, test_id),
@@ -237,13 +250,20 @@ class GUIGenerator:
                     test_desc.pop(0)
                 test = sc.add_test(test_title, test_desc)
                 for st_id in sorted(
-                    self.test_infos[sc_id][test_id], key=file_order_sort,
+                    self.test_infos[sc_id][test_id],
+                    key=file_order_sort,
                 ):
                     subtest_title = value_from_subtest(
-                        "desc", self.test_infos, sc_id, test_id, st_id,
+                        "desc",
+                        self.test_infos,
+                        sc_id,
+                        test_id,
+                        st_id,
                     )
                     test.add_subtest(
-                        st_id, subtest_title, self.test_infos[sc_id][test_id][st_id],
+                        st_id,
+                        subtest_title,
+                        self.test_infos[sc_id][test_id][st_id],
                     )
 
         # if only one scenario for expand it
@@ -263,42 +283,48 @@ class GUIGenerator:
             "play": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-media-control-48-24.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-media-control-48-24.png",
                     ),
                 ),
             ),
             "pause": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-media-control-49-24.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-media-control-49-24.png",
                     ),
                 ),
             ),
             "stop": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-media-control-50-24.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-media-control-50-24.png",
                     ),
                 ),
             ),
             "report": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-clipboard-6-24.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-clipboard-6-24.png",
                     ),
                 ),
             ),
             "quit": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-log-out-7-24.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-log-out-7-24.png",
                     ),
                 ),
             ),
             "ok": ImageTk.PhotoImage(
                 Image.open(
                     resource_filename(
-                        "wetest", "resources/icons/iconmonstr-speech-bubble-35-24.png",
+                        "wetest",
+                        "resources/icons/iconmonstr-speech-bubble-35-24.png",
                     ),
                 ),
             ),
@@ -307,7 +333,8 @@ class GUIGenerator:
             "processing": ImageGif(
                 self.master,
                 resource_filename(
-                    "wetest", "resources/icons/iconmonstr-time-15-24.gif",
+                    "wetest",
+                    "resources/icons/iconmonstr-time-15-24.gif",
                 ),
             ),
         }
@@ -379,7 +406,7 @@ class GUIGenerator:
         self.update_status()
 
     def enable(self, key):
-        """Enable all the buttons corresponding to key"""
+        """Enable all the buttons corresponding to key."""
         deprecated_widgets = []
         for b in self.buttons_refs[key]:
             try:
@@ -390,7 +417,7 @@ class GUIGenerator:
             self.buttons_refs[key].remove(b)
 
     def disable(self, key):
-        """Disable all the buttons corresponding to key"""
+        """Disable all the buttons corresponding to key."""
         deprecated_widgets = []
         for b in self.buttons_refs[key]:
             try:
@@ -422,8 +449,8 @@ class GUIGenerator:
         for b in deprecated_widgets:
             self.buttons_refs[key].remove(b)
 
-    def play(self):
-        """Start or resume tests execution"""
+    def play(self) -> None:
+        """Start or resume tests execution."""
         if self.playing:
             return
 
@@ -441,13 +468,13 @@ class GUIGenerator:
             self.request_queue.put(START_FROM_GUI)
 
     def pause(self):
-        """Pause tests execution"""
+        """Pause tests execution."""
         self.disable("pause")
         logger.debug("PAUSE !")
         self.request_queue.put(PAUSE_FROM_GUI)
 
     def abort(self):
-        """Abort tests execution"""
+        """Abort tests execution."""
         self.disable("pause")
         self.disable("stop")
         logger.debug("ABORT !")
@@ -488,7 +515,8 @@ class GUIGenerator:
                             self.current_test_id is not None
                         ):  # aborting in the middle of a test:
                             self.subtests_ref[self.current_test_id].update_status(
-                                STATUS_STOP, dynamic=False,
+                                STATUS_STOP,
+                                dynamic=False,
                             )
                             self.current_test_id = (
                                 None  # ignore this id in case of replay
@@ -506,11 +534,13 @@ class GUIGenerator:
                     ):  # pausing in the middle of a test:
                         if self.current_test_retrying:
                             self.subtests_ref[self.current_test_id].update_status(
-                                STATUS_P_RETRY, dynamic=True,
+                                STATUS_P_RETRY,
+                                dynamic=True,
                             )
                         else:
                             self.subtests_ref[self.current_test_id].update_status(
-                                STATUS_PAUSE, dynamic=True,
+                                STATUS_PAUSE,
+                                dynamic=True,
                             )
                     PausedPopUp(root=self.master, gui=self)
                     # update available controls
@@ -530,11 +560,13 @@ class GUIGenerator:
                     ):  # continuing in the middle of a test:
                         if self.current_test_retrying:
                             self.subtests_ref[self.current_test_id].update_status(
-                                STATUS_RETRY, dynamic=True,
+                                STATUS_RETRY,
+                                dynamic=True,
                             )
                         else:
                             self.subtests_ref[self.current_test_id].update_status(
-                                STATUS_RUN, dynamic=True,
+                                STATUS_RUN,
+                                dynamic=True,
                             )
 
                 elif str(update).startswith(REPORT_GENERATED):
@@ -553,7 +585,9 @@ class GUIGenerator:
                         self.update_queue.put(PLAY_FROM_GUI)
                     # update available controls
                     self.detach_key(
-                        "play", self.button_gif["processing"], self.button_img["play"],
+                        "play",
+                        self.button_gif["processing"],
+                        self.button_img["play"],
                     )
                     self.disable("play")
                     self.enable("pause")
@@ -577,11 +611,14 @@ class GUIGenerator:
                     else:
                         dynamic = test_status in [STATUS_RUN, STATUS_RETRY]
                         self.subtests_ref[test_id].update_status(
-                            test_status, dynamic, test_duration,
+                            test_status,
+                            dynamic,
+                            test_duration,
                         )
                         if test_status == STATUS_RETRY:
                             self.subtests_ref[test_id].set_traceback(
-                                test_trace, tooltip_only=True,
+                                test_trace,
+                                tooltip_only=True,
                             )
                         elif test_trace is not None:
                             self.subtests_ref[test_id].set_traceback(test_trace)
@@ -600,11 +637,18 @@ class GUIGenerator:
 
 
 class PopUp:
-    """A generic pop-up window"""
+    """A generic pop-up window."""
 
     def __init__(
-        self, root, gui, title, message, width=None, height=None, centered=True,
-    ):
+        self,
+        root,
+        gui,
+        title,
+        message,
+        width=None,
+        height=None,
+        centered=True,
+    ) -> None:
         self.root = root
         self.gui = gui
         self.top = tk.Toplevel()
@@ -665,7 +709,7 @@ class PopUp:
             tk.Label(one_status_frame, text=text).pack(side="left")
 
     def show_statuses(self):
-        """Displays the different substests status"""
+        """Displays the different substests status."""
         status_count = {}
         for subtest in list(self.gui.subtests_ref.values()):
             status = subtest.status_icon.status
@@ -684,9 +728,13 @@ class PopUp:
 class PausedPopUp(PopUp):
     """A popup to show when tests are paused."""
 
-    def __init__(self, root, gui, status=None):
+    def __init__(self, root, gui, status=None) -> None:
         PopUp.__init__(
-            self, root, gui, "Tests paused.", "Tests execution\nhas been paused.",
+            self,
+            root,
+            gui,
+            "Tests paused.",
+            "Tests execution\nhas been paused.",
         )
 
         play_button = tk.Button(
@@ -716,12 +764,12 @@ class PausedPopUp(PopUp):
         self.show_statuses()
 
     def play(self):
-        """Close pop-up and continue testing when clicking on play button"""
+        """Close pop-up and continue testing when clicking on play button."""
         self.gui.play()
         self.top.destroy()
 
     def abort(self):
-        """Close pop-up and abort tests"""
+        """Close pop-up and abort tests."""
         self.gui.abort()
         self.top.destroy()
 
@@ -729,7 +777,7 @@ class PausedPopUp(PopUp):
 class EndTestsPopUp(PopUp):
     """A popup to show when tests are finished."""
 
-    def __init__(self, root, gui, status=None):
+    def __init__(self, root, gui, status=None) -> None:
         PopUp.__init__(self, root, gui, "Tests finished.", "Done running tests.")
 
         report_button = tk.Button(
@@ -759,7 +807,7 @@ class EndTestsPopUp(PopUp):
         self.show_statuses()
 
     def report(self):
-        """Close pop-up and open report"""
+        """Close pop-up and open report."""
         self.gui.report()
         self.top.destroy()
 
@@ -769,7 +817,7 @@ class EndTestsPopUp(PopUp):
 
 
 class QueueDebug:
-    def __init__(self):
+    def __init__(self) -> None:
         top = tk.Toplevel()
         top.title("Queue Debug")
 

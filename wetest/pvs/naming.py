@@ -27,7 +27,7 @@ logger.addHandler(FILE_HANDLER)
 class NamingError(WeTestError):
     """Exception raise when a PV does not fit the naming."""
 
-    def __init__(self, message=None, pv_name=None, naming=None):
+    def __init__(self, message=None, pv_name=None, naming=None) -> None:
         msg = ""
         if pv_name is not None:
             msg += str(pv_name) + " "
@@ -35,7 +35,7 @@ class NamingError(WeTestError):
             msg += "incompatible with " + naming.name + " naming."
         if message is not None:
             msg += message
-        super(NamingError, self).__init__(msg)
+        super().__init__(msg)
 
 
 def generate_naming(identifier):
@@ -54,7 +54,7 @@ def generate_naming(identifier):
 
 
 class Naming:
-    def __init__(self, name="Abstract Naming"):
+    def __init__(self, name="Abstract Naming") -> None:
         self.name = name
 
     def sort(self, pv_name):
@@ -93,7 +93,7 @@ class NoNaming(Naming):
     Distance is always 0.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         Naming.__init__(self, "Undefined")
 
     def sort(self, pv_name):
@@ -113,7 +113,7 @@ class SARAFNaming(Naming):
     Determining distance based on ":" separated section.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         Naming.__init__(self, "SARAF")
 
     def sort(self, pv_name):
@@ -145,7 +145,7 @@ class RDS81346Naming(Naming):
     Determining distance based most common of  pre ":" part.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         Naming.__init__(self, "RDS-81346")
 
     def sort(self, pv_name):
