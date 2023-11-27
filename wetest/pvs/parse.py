@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -12,14 +11,11 @@
 # _NO_ RESPONSIBILITY FOR ANY CONSEQUENCE RESULTING FROM THE USE, MODIFICATION,
 # OR REDISTRIBUTION OF THIS SOFTWARE.
 
-import argparse
-import os
 import logging
+import os
 import re
-import sys
 
-from wetest.common.constants import TERSE_FORMATTER, FILE_HANDLER, WeTestError
-
+from wetest.common.constants import FILE_HANDLER, TERSE_FORMATTER, WeTestError
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -38,15 +34,17 @@ def parseDbFile(filepath):
     """Parse the given EPICS DB file to extract records.
 
     Args:
+    ----
         filepath (str): Path of the EPICS .db file
 
     Returns:
+    -------
         found_records (lsit): list of PV as a dictionnaries
 
     """
     found_records = list()
     current_record = None
-    with open(filepath, "r") as dbfile:
+    with open(filepath) as dbfile:
         for index, line in enumerate(dbfile):
             # make sure the line is in unicode
             line = line.decode("utf-8")
@@ -63,10 +61,10 @@ def parseDbFile(filepath):
 
             # looking for new record or new field
             new_record = re.search(
-                r"""record\(\s*(?P<type>\S+)\s*,\s*["'](?P<name>\S+)["']\s*\)""", line
+                r"""record\(\s*(?P<type>\S+)\s*,\s*["'](?P<name>\S+)["']\s*\)""", line,
             )
             new_field = re.search(
-                r"field\(\s*(?P<name>\S+)\s*,\s*(?P<value>.+)\s*\)", line
+                r"field\(\s*(?P<name>\S+)\s*,\s*(?P<value>.+)\s*\)", line,
             )
 
             # apparently the regex did not match
@@ -90,7 +88,7 @@ def parseDbFile(filepath):
                 current_field_value = new_field.group("value")
                 if current_record is None:
                     logger.error(
-                        "Field without record line %d in %s", index + 1, filepath
+                        "Field without record line %d in %s", index + 1, filepath,
                     )
                     raise ParsingError("Found a field but did not start a record yet.")
                 if current_field_name in current_record:
@@ -106,14 +104,15 @@ def parseDbFile(filepath):
 
 
 def dir2files(dirpath, prefix="", suffix=""):
-    """
-    Look for file in the given directory and subdirectories.
+    """Look for file in the given directory and subdirectories.
     If defined, only keep files starting by prefix and ending by suffix.
 
     Args:
+    ----
         dirpath (str): Path of the EPICS .db file
 
     Returns:
+    -------
         found_files (str): list of file path found in directory
     """
     logger.info("Looking for input files in " + dirpath)
@@ -124,7 +123,7 @@ def dir2files(dirpath, prefix="", suffix=""):
             for dp, dn, fn in os.walk(dirpath)
             for f in fn
             if f.endswith(suffix) and f.startswith(prefix)
-        ]
+        ],
     )
     return found_files
 

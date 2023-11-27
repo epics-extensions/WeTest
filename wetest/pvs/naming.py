@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -14,7 +13,7 @@
 
 import logging
 
-from wetest.common.constants import TERSE_FORMATTER, FILE_HANDLER, WeTestError
+from wetest.common.constants import FILE_HANDLER, TERSE_FORMATTER, WeTestError
 
 # configure logging
 logger = logging.getLogger(__name__)

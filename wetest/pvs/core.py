@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2019 by CEA
 #
@@ -17,8 +16,12 @@ import time
 
 import epics
 
-from wetest.common.constants import TERSE_FORMATTER, FILE_HANDLER
-from wetest.common.constants import LVL_PV_DISCONNECTED, LVL_PV_CONNECTED
+from wetest.common.constants import (
+    FILE_HANDLER,
+    LVL_PV_CONNECTED,
+    LVL_PV_DISCONNECTED,
+    TERSE_FORMATTER,
+)
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -79,7 +82,7 @@ class PVData:
         return len(self.setter_subtests) > 0 or len(self.getter_subtests) > 0
 
 
-class PVInfo(object):
+class PVInfo:
     """A convenience class to manage PVData()
 
     name:           full PV name
@@ -89,7 +92,7 @@ class PVInfo(object):
     """
 
     def __init__(
-        self, name, setter_subtests=None, getter_subtests=None, connection_callback=None
+        self, name, setter_subtests=None, getter_subtests=None, connection_callback=None,
     ):
         self.data = PVData(name)
 
@@ -228,9 +231,10 @@ def pvs_from_suite(suite, ref_dict=None, connection_callback=None):
     return pvs_refs
 
 
-class PVsTable(object):
+class PVsTable:
     """A class to reference PVs to be monitored,
-    a queue can be provided to forward connection status with PV data"""
+    a queue can be provided to forward connection status with PV data
+    """
 
     def __init__(self, queue=None):
         if queue is None:
@@ -248,7 +252,7 @@ class PVsTable(object):
         # collect all the PVs and initialize the callback
         for pv_name in set(pv_list if pv_list is not None else []):
             self.pvs_refs[pv_name] = PVInfo(
-                pv_name, connection_callback=self.connection_callback
+                pv_name, connection_callback=self.connection_callback,
             )
 
         if suite is not None:
