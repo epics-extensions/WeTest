@@ -22,6 +22,7 @@ It also enables to monitor PVs (extracted from the tests and from specified DB).
 import logging
 
 import argparse
+from copy import deepcopy
 import multiprocessing
 from multiprocessing import Queue
 import os
@@ -565,7 +566,7 @@ class ProcessManager:
                 self.results = []
             else:
                 logger.info("Running %d tests...", nbr_tests)
-                self.results = runner.run(self.suite)
+                self.results = runner.run(deepcopy(self.suite))
 
             logger.info("Ran tests suite.")
             self.runner_output.put(END_OF_TESTS)
