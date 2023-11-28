@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -13,6 +11,8 @@
 
 """Generic classes used in gui.specific and gui.generator."""
 
+# Lots of callbacks here
+# ruff: noqa: ARG002
 
 import contextlib
 import logging
@@ -39,18 +39,20 @@ INFO_WRAPLENGTH = 800
 
 
 # exception definition
-class ExistingTreeItem(WeTestError):
+class ExistingTreeItemError(WeTestError):
     """Item already exists in tree."""
 
 
 # class definitions
 class MyTreeview(tkinter.ttk.Treeview):
-    """Adding convenience methods to Treeview
+    """Adding convenience methods to Treeview.
+
     Keep track of item last parent, useful for reattaching.
 
     ttk.Treeview get_children method and MyTreeview get_all_attached_children
     return only the list of attached children.
-    MyTreeview get_direct_children and get_all_children also return the detached children.
+    MyTreeview get_direct_children and get_all_children
+    also return the detached children.
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -63,6 +65,7 @@ class MyTreeview(tkinter.ttk.Treeview):
 
     def add_tag(self, item, tag):
         """Add the given tag to item if not already present.
+
         Return true if the tag was added, false if it was already present.
         """
         logger.debug("add `%s` to %s", tag, item)
@@ -76,6 +79,7 @@ class MyTreeview(tkinter.ttk.Treeview):
 
     def remove_tag(self, item, tag):
         """Remove the given tag to item if present.
+
         Return true if the tag was removed, false if it was already absent.
         """
         logger.debug("remove `%s` from %s", tag, item)
@@ -123,7 +127,7 @@ class MyTreeview(tkinter.ttk.Treeview):
         return tuple(direct_children + deeper_children)
 
     def get_direct_children(self, item_id=""):
-        """Returns the children of an item (including detached)."""
+        """Return the children of an item (including detached)."""
         direct_children = []
         for child, parent in list(self._parent_ref.items()):
             if parent == item_id:
@@ -132,7 +136,8 @@ class MyTreeview(tkinter.ttk.Treeview):
         return tuple(direct_children)
 
     def get_all(self, with_tag=None):
-        """Returns all the item inserted in the Treeview, even if detached.
+        """Return all the item inserted in the Treeview, even if detached.
+
         If with_tag provided only return the item with one or more of the tags provided.
         """
         if with_tag is None:
@@ -172,6 +177,7 @@ class MyTreeview(tkinter.ttk.Treeview):
 
     def insert(self, parent, index, iid, **kw):
         """Same as ttk.Treeview insert, and reference the parent.
+
         Raise an ExistingTreeItem if iid is already used.
         """
         try:
@@ -180,7 +186,7 @@ class MyTreeview(tkinter.ttk.Treeview):
             pass
         else:
             msg = f"Item with iid {iid} already exists: {iid_exists}"
-            raise ExistingTreeItem(
+            raise ExistingTreeItemError(
                 msg,
             )
         item = super().insert(parent, index, iid, **kw)
@@ -237,22 +243,21 @@ class Tooltip:
         waittime=400,
         wraplength=INFO_WRAPLENGTH,
     ) -> None:
-        self.waittime = waittime  # in miliseconds, originally 500
+        self.waittime = waittime  # in milliseconds, originally 500
         self.wraplength = wraplength  # in pixels, originally 180
         self.widget = widget
         self.text = text
-        self.widget.bind("<Enter>", self.onEnter)
-        self.widget.bind("<Leave>", self.onLeave)
-        # self.widget.bind("<ButtonPress>", self.onLeave)
+        self.widget.bind("<Enter>", self.on_enter)
+        self.widget.bind("<Leave>", self.on_leave)
         self.bg = bg
         self.pad = pad
         self.id = None
         self.tw = None
 
-    def onEnter(self, event=None):
+    def on_enter(self, event=None):
         self.schedule()
 
-    def onLeave(self, event=None):
+    def on_leave(self, event=None):
         self.unschedule()
         self.hide()
 
@@ -267,9 +272,6 @@ class Tooltip:
             self.widget.after_cancel(id_)
 
     def show(self):
-        # if self.text == "":
-        #     return
-
         def tip_pos_calculator(widget, label, tip_delta=(10, 5), pad=(5, 3, 5, 3)):
             w = widget
 
@@ -355,12 +357,13 @@ class Tooltip:
 
 class Icon(tk.Label):
     """An image used as an icon.
+
     The icon can be dynamic, going through the images list.
     Images are expected to be PIL.ImageTk objects.
     """
 
     def __init__(self, master, images, dynamic=False, *args, **kargs) -> None:
-        tk.Label.__init__(self, master=master, *args, **kargs)
+        tk.Label.__init__(self, *args, **kargs, master=master)
 
         # make images a list
         if isinstance(images, list):
@@ -396,7 +399,7 @@ class Icon(tk.Label):
         self.update()
 
     def update(self):
-        """Updates image and increase image index if dynamic."""
+        """Update the image and increase image index if dynamic."""
         self.configure(image=self.images[self.cur_img % len(self.images)])
         if not self._already_updating:  # only update dynamic if not already on
             self._update_dynamic()
@@ -420,7 +423,7 @@ class ImageGif:
     filepath:  the gif filepath
     delay:     enable to override the delay defined in the gif
     repeat:    number of time the gif should be played, 0 for forever
-    start:     whether to start gif as soon as the ImageGif is instanciated
+    start:     whether to start gif as soon as the ImageGif is instantiated
     """
 
     def __init__(self, master, filepath, delay=None, repeat=0, start=True) -> None:
@@ -463,7 +466,7 @@ class ImageGif:
             self.start_animation()
 
     def attach(self, widget, show=True):
-        """Use gif on widget `image` porperty."""
+        """Use gif on widget `image` property."""
         self.attached.add(widget)
         if show:
             self.update_attached(image=self._frames[self._loc])
@@ -501,7 +504,7 @@ class ImageGif:
         if frame is not None:
             self.set_frame(frame)
 
-        self._master.after(self._delay, self._animate_GIF)
+        self._master.after(self._delay, self._animate_gif)
         self._is_running = True
 
     def stop_animation(self, frame=None) -> None:
@@ -518,7 +521,7 @@ class ImageGif:
 
         self._is_running = False
 
-    def _animate_GIF(self, idx=None):
+    def _animate_gif(self, idx=None):
         """Callback function for update with after."""
         self._loc = (self._loc + 1) % self._last_index
         self.update_attached(image=self._frames[self._loc])
@@ -527,16 +530,17 @@ class ImageGif:
             if self._repeat <= 0 or self._count < self._repeat:
                 if self._repeat > 0:
                     self._count += 1
-                self._callback_id = self._master.after(self._delay, self._animate_GIF)
+                self._callback_id = self._master.after(self._delay, self._animate_gif)
             else:
                 self._callback_id = None
                 self._is_running = False
         else:
-            self._callback_id = self._master.after(self._delay, self._animate_GIF)
+            self._callback_id = self._master.after(self._delay, self._animate_gif)
 
 
 class PopUpMenu(tk.Menu):
-    """It creates a floating menu near the mouse when right-clicking a widget.
+    """Create a floating menu near the mouse when right-clicking a widget.
+
     http://effbot.org/zone/tkinter-popup-menu.htm.
     """
 
@@ -584,10 +588,11 @@ class PopUpMenu(tk.Menu):
 
 def clip_generator(to_clip):
     """Return a function that will write text to clipboard when called.
+
     https://stackoverflow.com/questions/579687/how-do-i-copy-a-string-to-the-clipboard-on-windows-using-python.
     """
 
-    def clip(event=None):
+    def clip(event=None):  # noqa: ARG001
         r = tk.Tk()
         r.withdraw()
         r.clipboard_clear()

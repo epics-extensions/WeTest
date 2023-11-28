@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -48,7 +46,7 @@ def get_para_with_style(
     """Get an initialized Paragraph object.
 
     :param text: The text to be rendered.
-    :param bold: A boolean on wether the text must be bold or not.
+    :param bold: A boolean on whether the text must be bold or not.
     :param style: The text style (from SampleStyleSheet object).
     :param align: The text alignment.
 
@@ -176,7 +174,7 @@ class _TestInfo:
         :param status: A string describing the result status.
         :param color:  The text color.
         :param trace:  In case of failure, the stacktrace.
-        :param infos:  A dictionnary of original test attributes.
+        :param infos:  A dictionary of original test attributes.
         """
         logger.debug("test info: %s#####################", infos)
 
@@ -184,7 +182,7 @@ class _TestInfo:
             {
                 "id": test.id(),
                 "result": status,
-                "trace": shortenTrace(trace),
+                "trace": shorten_trace(trace),
                 "color": color,
                 "infos": infos,
             },
@@ -195,7 +193,12 @@ class ReportGenerator:
     """Generates a PDF report from test unit results."""
 
     def __init__(
-        self, test_suite, test_results, filename, scenario_data, naming
+        self,
+        test_suite,
+        test_results,
+        filename,
+        scenario_data,
+        naming,
     ) -> None:
         """Initialize ReportGenerator.
 
@@ -467,26 +470,26 @@ class ReportGenerator:
         doc.build(elements)
 
 
-def shortenTrace(trace):
+def shorten_trace(trace):
     """Reduce trace text for specific expected exceptions.
 
     Expected exceptions are:
     - AssertionError
-    - InconsistantTest
+    - InconsistentTestError
     - EmptyTest exceptions
     """
     if trace is None:
         return None
 
     failed_test = trace.find("AssertionError: ")
-    inconsistant_test = trace.find("InconsistantTest: ")
+    inconsistent_test = trace.find("InconsistentTestError: ")
     empty_test = trace.find("EmptyTest: ")
 
     if failed_test != -1:
         return trace[failed_test + 16 :]
-    elif inconsistant_test != -1:
-        return trace[inconsistant_test:]
-    elif empty_test != -1:
+    if inconsistent_test != -1:
+        return trace[inconsistent_test:]
+    if empty_test != -1:
         return trace[empty_test:]
-    else:
-        return trace
+
+    return trace

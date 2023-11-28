@@ -15,6 +15,9 @@
 # icons from https://iconmonstr.com/
 # gifs from https://ezgif.com/
 
+# Lots of callbacks here
+# ruff: noqa: ARG002
+
 import copy
 import logging
 import multiprocessing
@@ -78,7 +81,7 @@ BT_TXT_LEN = 6
 
 
 def reorganise_subtests(tests_infos):
-    """Return the tests_infos sorted by scneario and test numbers."""
+    """Return the tests_infos sorted by scenario and test numbers."""
     output = {}
 
     # expected subtest id template
@@ -87,7 +90,7 @@ def reorganise_subtests(tests_infos):
     for st_id, st_data in list(tests_infos.items()):
         match = re.match(regex, st_id)
         if match is None:
-            logger.error("unexpected id format: %s" % st_id)
+            logger.error("unexpected id format: %s", st_id)
         else:
             sc_id = int(match.group("sc_id"))
             test_id = int(match.group("test_id"))
@@ -114,6 +117,7 @@ def value_from_subtest(
     fallback="VALUE NOT FOUND",
 ):
     """Extract a value corresponding to key in the infos of the subtest.
+
     Use fallback value if it is not available.
     """
     if subtest_id is None:
@@ -227,8 +231,9 @@ class GUIGenerator:
 
         if len(self.test_infos) != len(self.configs):
             logger.info(
-                "Not the same number of configs(%d) and scenarios(%d)"
-                % (len(self.configs), len(self.test_infos)),
+                "Not the same number of configs(%d) and scenarios(%d)",
+                len(self.configs),
+                len(self.test_infos),
             )
 
         # add scenario, tests and subtests
@@ -389,7 +394,7 @@ class GUIGenerator:
         close_button = tk.Button(
             self.buttons_frame,
             text="Quit".center(BT_TXT_LEN),
-            command=self.quit,
+            command=self.quit_,
             compound="left",
             image=self.button_img["quit"],
             state="normal",
@@ -486,7 +491,7 @@ class GUIGenerator:
         logger.debug("report_path: %s", self.report_path)
         subprocess.Popen([self.report_software, self.report_path])
 
-    def quit(self):
+    def quit_(self):
         logger.debug("QUIT !")
         self.master.destroy()
 
@@ -607,7 +612,7 @@ class GUIGenerator:
 
                     # update tests status
                     if test_id not in self.subtests_ref:
-                        logger.error("No %s in GUI" % test_id)
+                        logger.error("No %s in GUI", test_id)
                     else:
                         dynamic = test_status in [STATUS_RUN, STATUS_RETRY]
                         self.subtests_ref[test_id].update_status(
@@ -668,7 +673,6 @@ class PopUp:
 
         # prepare for status
         self.status_frame = tk.Frame(self.top)
-        # self.status_frame.pack(fill="both", expand=1)
         self.status_frame.pack(expand=1)
 
         # display buttons
@@ -690,7 +694,6 @@ class PopUp:
         Tooltip(self.ok_button, text="Close PopUp")
 
         # place window
-        # self.top.minsize(200, 140)
         top_x = self.top.winfo_rootx()
         if centered:
             root_x = self.root.winfo_rootx()
@@ -699,7 +702,6 @@ class PopUp:
             root_w = self.root.winfo_width()
             position = "+%d+%d" % (root_x + root_w / 2 - top_x / 2, root_y + root_h / 3)
             self.top.geometry(position)
-        # msg.config(wraplength=top_x*0.9)
 
     def add_status(self, status, text=None):
         one_status_frame = tk.Frame(self.status_frame)
@@ -709,7 +711,7 @@ class PopUp:
             tk.Label(one_status_frame, text=text).pack(side="left")
 
     def show_statuses(self):
-        """Displays the different substests status."""
+        """Display the different substests status."""
         status_count = {}
         for subtest in list(self.gui.subtests_ref.values()):
             status = subtest.status_icon.status
@@ -795,7 +797,7 @@ class EndTestsPopUp(PopUp):
         close_button = tk.Button(
             self.buttons_frame,
             text="Quit".center(BT_TXT_LEN),
-            command=self.quit,
+            command=self.quit_,
             compound="left",
             image=self.gui.button_img["quit"],
         )
@@ -811,7 +813,7 @@ class EndTestsPopUp(PopUp):
         self.gui.report()
         self.top.destroy()
 
-    def quit(self):
+    def quit_(self):
         """Close GUI when clicking on close button."""
         self.gui.master.destroy()
 
@@ -894,8 +896,6 @@ if __name__ == "__main__":  # tests
         "setter": None,
         "getter": None,
     }
-
-    # app = GUIGenerator(suite=None, configs=[{'name': "scenario title"}])
 
     GUIGenerator(
         master=root,

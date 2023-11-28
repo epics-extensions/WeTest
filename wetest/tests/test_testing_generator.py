@@ -1,6 +1,7 @@
-#!/usr/bin/env python
 """Test testing.generator module."""
 
+# Asserts are used here,
+# ruff: noqa: S101
 
 import unittest
 

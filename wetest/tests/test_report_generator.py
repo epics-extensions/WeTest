@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Test report.generator module."""
 
 import unittest
@@ -23,7 +22,6 @@ class TestReportGenerator(unittest.TestCase):
             ".test-report.pdf",
             title="ReportGenerator Test",
         ).save()
-        # os.remove('.test-report.pdf')
 
     def test_generates_another_report_without_error(self):
         """Check a report can be generated with many commands."""
@@ -38,7 +36,6 @@ class TestReportGenerator(unittest.TestCase):
             ".test-report2.pdf",
             title="ReportGenerator Test with many commands",
         ).save()
-        # os.remove('.test-report2.pdf')
 
     def test_generates_unit_testing_report_without_error(self):
         """Check a report can be generated with many commands."""
@@ -53,4 +50,3 @@ class TestReportGenerator(unittest.TestCase):
             ".test-report3.pdf",
             title="ReportGenerator Test with many commands",
         ).save()
-        # os.remove('.test-report3.pdf')

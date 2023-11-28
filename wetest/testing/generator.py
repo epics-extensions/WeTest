@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -12,6 +10,10 @@
 # OR REDISTRIBUTION OF THIS SOFTWARE.
 
 """Generates tests from YAML file."""
+
+# Asserts are used here,
+# TODO(minijackson): maybe in the future we'll migrate to raising exceptions
+# ruff: noqa: S101
 
 import logging
 import random
@@ -59,14 +61,14 @@ tr_logger.addHandler(stream_handler)
 tr_logger.addHandler(FILE_HANDLER)
 
 
-class EmptyTest(WeTestError):
+class EmptyTestError(WeTestError):
     """Test does not do anything.
 
     Exception raised executing a test without getter nor setter.
     """
 
 
-class InconsistantTest(WeTestError):
+class InconsistentTestError(WeTestError):
     """Test filed missing with regards to other fields.
 
     Exception raised executing a test that misses a field,
@@ -74,11 +76,11 @@ class InconsistantTest(WeTestError):
     """
 
 
-class InvalidTest(WeTestError):
+class InvalidTestError(WeTestError):
     """Something is wrong with test data."""
 
 
-class TestNotFound(WeTestError):
+class TestNotFoundError(WeTestError):
     """Test is not in the sequence."""
 
 
@@ -123,7 +125,7 @@ class TestData:
         :param subtest_message: If any a subtest message.
         """
         if on_failure.lower() not in [ABORT, PAUSE, CONTINUE]:
-            logger.critical("Unexpected on_failure value: %s" % on_failure)
+            logger.critical("Unexpected on_failure value: %s", on_failure)
             self.on_failure = ABORT
         else:
             self.on_failure = on_failure.lower()
@@ -187,7 +189,7 @@ class TestData:
 
 
 def add_doc(value):
-    """Add docstring programatically to a function via a decorator.
+    """Add docstring programmatically to a function via a decorator.
 
     :param value: Docstring value.
 
@@ -203,7 +205,7 @@ def add_doc(value):
 
 
 def skipped_test_factory(test_data, reason):
-    def skipped_test(self):
+    def skipped_test(self):  # noqa: ARG001
         tr_logger.log(LVL_TEST_SKIPPED, "")
         tr_logger.log(
             LVL_TEST_SKIPPED,
@@ -217,14 +219,14 @@ def skipped_test_factory(test_data, reason):
 
 
 class SelectableTestCase(unittest.TestCase):
-    """A unittest.TestCase to be filled with test methods, which can be skipped and unskipped."""
+    """A unittest.TestCase to be filled with skippable test methods."""
 
     test_data = {}
     func_backup = {}
 
     @classmethod
     def add_test(cls, test_data, func):
-        """Adds a test method, mark the test as selected."""
+        """Add a test method, mark the test as selected."""
         cls.test_data[test_data.id] = test_data
         cls.func_backup[test_data.id] = func
         cls.select(test_data.id)
@@ -254,19 +256,19 @@ class SelectableTestSuite(unittest.TestSuite):
         """Keep test data available for later."""
         return self._tests_data
 
-    def add_skipped_test(self, Test_case, test_id, reason):
+    def add_skipped_test(self, test_case, test_id, reason):
         """Add a test to and its data to the suite and reference it as skipped."""
-        self._skipped_tests[test_id] = Test_case
-        Test_case.skip(test_id, reason)
-        self.addTest(Test_case(test_id))
-        self._tests_data[test_id] = Test_case.test_data[test_id]
+        self._skipped_tests[test_id] = test_case
+        test_case.skip(test_id, reason)
+        self.addTest(test_case(test_id))
+        self._tests_data[test_id] = test_case.test_data[test_id]
 
-    def add_selected_test(self, Test_case, test_id):
+    def add_selected_test(self, test_case, test_id):
         """Add a test to and its data to the suite and reference it as selected."""
-        self._selected_tests[test_id] = Test_case
-        Test_case.select(test_id)
-        self.addTest(Test_case(test_id))
-        self._tests_data[test_id] = Test_case.test_data[test_id]
+        self._selected_tests[test_id] = test_case
+        test_case.select(test_id)
+        self.addTest(test_case(test_id))
+        self._tests_data[test_id] = test_case.test_data[test_id]
 
     def select(self, test_id):
         """Ensure test is selected."""
@@ -283,7 +285,7 @@ class SelectableTestSuite(unittest.TestSuite):
             self._skipped_tests[test_id] = test_case
 
     def apply_selection(self, selection, reason):
-        """Tests and skip tests, based on test ids in selection list."""
+        """Test and skip tests, based on test ids in selection list."""
         already_selected = dict(self._selected_tests)
         already_skipped = dict(self._skipped_tests)
         for test_id in already_selected:
@@ -293,16 +295,8 @@ class SelectableTestSuite(unittest.TestSuite):
             if test_id in already_skipped:
                 self.select(test_id)
 
-    # def __str__(self):
-    #     """Debug display for the suite."""
-    #     output = ""
-    #     output += "selected tests:\n"+" ".join(self._selected_tests)
-    #     output += "\n"
-    #     output += "skipped tests:\n"+" ".join(self._skipped_tests)
-    #     return output
 
-
-# TODO: Move this method to TestData
+# TODO(gohierf): Move this method to TestData
 def get_margin(data):
     """Get allowed margin between setter and getter values.
 
@@ -312,7 +306,7 @@ def get_margin(data):
     """
     if "margin" in data:
         margin = float(data["margin"]) / 100
-        logger.debug("Margin will be: " + str(margin * 100) + "%")
+        logger.debug("Margin will be: %d%", margin * 100)
     else:
         logger.debug("No margin")
         margin = None
@@ -330,19 +324,19 @@ def get_delta(data):
     return data.get("delta", None)
 
 
-def get_key(prefered, backup, key):
+def get_key(preferred, backup, key):
     """Get key by priority.
 
-    If the `key` exists in `prefered`, it value will be returned, or the `key`
+    If the `key` exists in `preferred`, it value will be returned, or the `key`
     will be searched in `backup` instead. If it fails, returns None.
 
-    :param prefered: Prefered source.
+    :param preferred: Preferred source.
     :param backup:   Backup source.
     :param key:      Key name.
 
     :returns: value found for key, or None.
     """
-    return prefered.get(key, backup.get(key))
+    return preferred.get(key, backup.get(key))
 
 
 def test_generator(test_data):
@@ -354,6 +348,32 @@ def test_generator(test_data):
     :returns: a test function, to be add to a unittest.TestCase.
     """
     logger.info("Generating test: %s", test_data.desc)
+
+    def _check_test_consistency(test_data):
+        # Check for empty or inconsistent test
+        if test_data.subtest_title == NO_KIND:
+            msg = "Test has no range, values nor commands."
+            raise EmptyTestError(msg)
+
+        if test_data.setter is None and test_data.getter is None:
+            msg = "No setter nor getter set for this test."
+            raise EmptyTestError(msg)
+
+        if test_data.setter is not None and test_data.set_value is None:
+            msg = "[setter error] No value associated to setter."
+            raise InconsistentTestError(msg)
+
+        if test_data.getter is not None and test_data.get_value is None:
+            msg = "[getter error] No value associated to getter."
+            raise InconsistentTestError(msg)
+
+        if test_data.set_value is not None and test_data.setter is None:
+            msg = "[setter error] No setter associated to set value."
+            raise InconsistentTestError(msg)
+
+        if test_data.get_value is not None and test_data.getter is None:
+            msg = "[getter error] No getter associated to get value."
+            raise InconsistentTestError(msg)
 
     @add_doc(test_data.desc)
     def test(self):
@@ -386,30 +406,7 @@ def test_generator(test_data):
             start_time = time.time()
             nb_exec += 1
             try:
-                # Check for empty or inconsistant test
-                if test_data.subtest_title == NO_KIND:
-                    msg = "Test has no range, values nor commands."
-                    raise EmptyTest(msg)
-
-                if test_data.setter is None and test_data.getter is None:
-                    msg = "No setter nor getter set for this test."
-                    raise EmptyTest(msg)
-
-                if test_data.setter is not None and test_data.set_value is None:
-                    msg = "[setter error] No value associated to setter."
-                    raise InconsistantTest(msg)
-
-                if test_data.getter is not None and test_data.get_value is None:
-                    msg = "[getter error] No value associated to getter."
-                    raise InconsistantTest(msg)
-
-                if test_data.set_value is not None and test_data.setter is None:
-                    msg = "[setter error] No setter associated to set value."
-                    raise InconsistantTest(msg)
-
-                if test_data.get_value is not None and test_data.getter is None:
-                    msg = "[getter error] No getter associated to get value."
-                    raise InconsistantTest(msg)
+                _check_test_consistency(test_data)
 
                 # Set PV if required
 
@@ -464,7 +461,7 @@ def test_generator(test_data):
 
                     # check a table of values
                     elif isinstance(test_data.get_value, list):
-                        # get the measured value to know the lenght of the table to compare
+                        # get the measured value to know the length of the table to compare
                         measured_value = getter.get()
                         if not isinstance(measured_value, np.ndarray):
                             if len(test_data.get_value) == 1:
@@ -496,9 +493,12 @@ def test_generator(test_data):
                             len(measured_value) - len(test_data.get_value)
                         )
 
-                        assert (
-                            len(expected_value) == len(measured_value)
-                        ), f"Expected {getter.pvname} to be {len(expected_value)} elements long, and not {len(measured_value)}: {to_string(measured_value)}"
+                        assert len(expected_value) == len(measured_value), (
+                            f"Expected {getter.pvname} to be "
+                            f"{len(expected_value)} elements long, "
+                            f"and not {len(measured_value)}: "
+                            f"{to_string(measured_value)}"
+                        )
 
                         # recover margin and delta
                         margin_delta_str = ""
@@ -516,13 +516,13 @@ def test_generator(test_data):
                         # compare and allow margin and delta
                         isclose = np.equal(measured_value, expected_value)
                         if rtol is not None:
-                            isclose_marging = np.isclose(
+                            isclose_margin = np.isclose(
                                 measured_value,
                                 expected_value,
                                 rtol=rtol,
                                 atol=0,
                             )
-                            isclose = np.logical_or(isclose, isclose_marging)
+                            isclose = np.logical_or(isclose, isclose_margin)
                         if atol is not None:
                             isclose_delta = np.isclose(
                                 measured_value,
@@ -539,15 +539,22 @@ def test_generator(test_data):
                             diff[isclose is True] = 0
                             diff_str = ["OK" if x == 0 else x for x in diff]
 
-                            assert all_close, f"Expected {getter.pvname} to be {to_string(expected_value)}{margin_delta_str},\nbut got {to_string(measured_value)},\ndifference is {to_string(diff_str)}"
+                            assert all_close, (
+                                f"Expected {getter.pvname} to be "
+                                f"{to_string(expected_value)}{margin_delta_str},\n"
+                                f"but got {to_string(measured_value)},\n"
+                                f"difference is {to_string(diff_str)}"
+                            )
 
                     # check a number or boolean without margin or delta
                     elif not test_data.margin and not test_data.delta:
                         expected_value = test_data.get_value
                         measured_value = getter.get()
-                        assert (
-                            expected_value == measured_value
-                        ), f"Expected {getter.pvname} to be {to_string(expected_value)}, but got {to_string(measured_value)}"
+                        assert expected_value == measured_value, (
+                            f"Expected {getter.pvname} "
+                            f"to be {to_string(expected_value)}, "
+                            f"but got {to_string(measured_value)}"
+                        )
 
                     # check a number or boolean with margin or delta
                     else:
@@ -584,7 +591,9 @@ def test_generator(test_data):
                             test_data.get_value,
                             measured_value,
                             delta=max_delta,
-                            msg="Expected {} to be {:.3G} {} (ie. within [{:.3G},{:.3G}]), but got {:.3G}".format(
+                            msg="Expected {} to be {:.3G} {} "
+                            "(ie. within [{:.3G},{:.3G}]), "
+                            "but got {:.3G}".format(
                                 getter.pvname,
                                 expected_value,
                                 margin_delta_str,
@@ -643,7 +652,7 @@ def test_generator(test_data):
                 raise
 
             # something is not right with this test (ignore retry)
-            except (EmptyTest, InconsistantTest, Exception) as e:
+            except (EmptyTestError, InconsistentTestError, Exception) as e:
                 elapsed = time.time() - start_time
                 tr_logger.log(
                     LVL_TEST_ERRORED,
@@ -681,7 +690,7 @@ class TestsGenerator:
 
     def _create_tests_list(self):
         """Create a list of TestData objects from deserialized file."""
-        # TODO: use functions that return a subtestlist instead.
+        # TODO(gohierf): use functions that return a subtestlist instead.
         logger.info("Test list initialization...")
         self.tests_list = []
 
@@ -812,7 +821,6 @@ class TestsGenerator:
                     subtests_list.append(test_data)
 
             elif "values" in test_raw_data:
-                # subtests_list = []
                 try:
                     setter = test_raw_data["setter"]
                 except KeyError:
@@ -923,18 +931,18 @@ class TestsGenerator:
 
                     subtests_list.append(test_data)
 
-            else:  # missing test kind (range, values or command)
-                if "finally" in test_raw_data:
-                    pass  # finally only test are acceptatble
-                else:  # show an error "NO_KIND"
-                    test_data = TestData(
-                        on_failure=on_failure,
-                        test_title=test_raw_data["name"],
-                        subtest_title=NO_KIND,
-                        skip=skip,
-                    )
+            # missing test kind (range, values or command)
+            elif "finally" in test_raw_data:
+                pass  # finally only test are acceptatble
+            else:  # show an error "NO_KIND"
+                test_data = TestData(
+                    on_failure=on_failure,
+                    test_title=test_raw_data["name"],
+                    subtest_title=NO_KIND,
+                    skip=skip,
+                )
 
-                    subtests_list.append(test_data)
+                subtests_list.append(test_data)
 
             if "finally" in test_raw_data and not ignore:
                 logger.debug("Found finally statement in %s", test_raw_data)
@@ -949,14 +957,14 @@ class TestsGenerator:
                     command = test_raw_data["setter"]
                 else:
                     msg = "Undefined setter for finally block"
-                    raise InvalidTest(msg)
+                    raise InvalidTestError(msg)
 
                 value = None
                 if "value" in test_raw_data["finally"]:
                     value = test_raw_data["finally"]["value"]
                 else:
                     msg = "Undefined value in finally block"
-                    raise InvalidTest(msg)
+                    raise InvalidTestError(msg)
 
                 logger.debug("adding new finally subtest")
                 finally_data = TestData(
@@ -994,7 +1002,8 @@ class TestsGenerator:
         return random_list
 
     def get_test_id(self, scenario, test, subtest) -> str:
-        """Generate test id
+        """Generate test id.
+
         The test id are not sortable in alphabetical order anymore.
         """
         return "test-%d-%d-%d" % (scenario, test, subtest)
@@ -1004,12 +1013,12 @@ class TestsGenerator:
 
         :param field:  config field name
 
-        :returns: The config.field value or whole config dictionnary if field is None
+        :returns: The config.field value or whole config dictionary if field is None
         """
         if field is None:
             return self.data["config"]
-        else:
-            return self.data["config"][field]
+
+        return self.data["config"][field]
 
     def append_to_suite(self, tests_suite, scenario_index=0):
         """Generate `unittest` tests from configuration file.
@@ -1021,7 +1030,7 @@ class TestsGenerator:
         order = self._randomize_order()
 
         # add each test with the new id to define the order
-        Test_case = SelectableTestCase
+        test_case = SelectableTestCase
 
         for idx in order:
             if self.tests_list[idx] is None:
@@ -1046,15 +1055,14 @@ class TestsGenerator:
                     test_func,
                 )
 
-                # test_case = SelectableTestCase(test_data, test_func)
-                Test_case.add_test(test_data, test_func)
+                test_case.add_test(test_data, test_func)
 
                 # add test case to test suite
                 if skip:
                     tests_suite.add_skipped_test(
-                        Test_case,
+                        test_case,
                         test_id,
                         "Test skipped from file.",
                     )
                 else:
-                    tests_suite.add_selected_test(Test_case, test_id)
+                    tests_suite.add_selected_test(test_case, test_id)

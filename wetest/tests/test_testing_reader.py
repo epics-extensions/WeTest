@@ -1,6 +1,7 @@
-#!/usr/bin/env python
 """Test testing.reader module."""
 
+# Asserts are used here,
+# ruff: noqa: S101
 
 import unittest
 
@@ -10,7 +11,7 @@ from wetest.testing.reader import (
     Reader,
     ScenarioReader,
     SuiteReader,
-    UnsupportedFileFormat,
+    UnsupportedFileFormatError,
 )
 
 
@@ -22,11 +23,11 @@ class TestYAMLReading(unittest.TestCase):
         assert True is Reader()._version_is_supported(major=1, minor=0, bugfix=0)
         assert True is Reader()._version_is_supported(major=0, minor=1, bugfix=0)
         assert True is Reader()._version_is_supported(major=0, minor=0, bugfix=1)
-        with pytest.raises(UnsupportedFileFormat):
+        with pytest.raises(UnsupportedFileFormatError):
             Reader()._version_is_supported(major=2, minor=0, bugfix=0)
-        with pytest.raises(UnsupportedFileFormat):
+        with pytest.raises(UnsupportedFileFormatError):
             Reader()._version_is_supported(major=1, minor=1, bugfix=0)
-        with pytest.raises(UnsupportedFileFormat):
+        with pytest.raises(UnsupportedFileFormatError):
             Reader()._version_is_supported(major=1, minor=0, bugfix=1)
 
     def test_scenario_example01_syntax(self):
@@ -60,6 +61,6 @@ class TestYAMLReading(unittest.TestCase):
         suite = SuiteReader("wetest/tests/suite_example01.yaml").get_deserialized()
         assert len(suite["scenarios"]) == 2
 
-    # TODO: Issue 10 - Bad parsing should fail
+    # TODO(gohierf): Issue 10 - Bad parsing should fail
     # def test_bad_syntax(self):
     # self.assertEqual(False,     "wetest/tests/bad.yml"))
