@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -108,10 +106,10 @@ FILE_HANDLER.setFormatter(TIME_FORMATTER)
 FILE_HANDLER.setLevel(logging.INFO)
 
 
-# convertion function
+# conversion function
 def to_string(a_value):
     """Return a string representation of the value, with quote if it's already a string."""
     if isinstance(a_value, str):
         return "`" + a_value + "`"
-    else:
-        return str(a_value)
+
+    return str(a_value)

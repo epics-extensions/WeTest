@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 """Test testing.reader module."""
-
 
 import unittest
 
@@ -10,7 +8,7 @@ from wetest.testing.reader import (
     Reader,
     ScenarioReader,
     SuiteReader,
-    UnsupportedFileFormat,
+    UnsupportedFileFormatError,
 )
 
 
@@ -22,11 +20,11 @@ class TestYAMLReading(unittest.TestCase):
         assert True is Reader()._version_is_supported(major=1, minor=0, bugfix=0)
         assert True is Reader()._version_is_supported(major=0, minor=1, bugfix=0)
         assert True is Reader()._version_is_supported(major=0, minor=0, bugfix=1)
-        with pytest.raises(UnsupportedFileFormat):
+        with pytest.raises(UnsupportedFileFormatError):
             Reader()._version_is_supported(major=2, minor=0, bugfix=0)
-        with pytest.raises(UnsupportedFileFormat):
+        with pytest.raises(UnsupportedFileFormatError):
             Reader()._version_is_supported(major=1, minor=1, bugfix=0)
-        with pytest.raises(UnsupportedFileFormat):
+        with pytest.raises(UnsupportedFileFormatError):
             Reader()._version_is_supported(major=1, minor=0, bugfix=1)
 
     def test_scenario_example01_syntax(self):

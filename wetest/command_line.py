@@ -11,12 +11,6 @@
 # _NO_ RESPONSIBILITY FOR ANY CONSEQUENCE RESULTING FROM THE USE, MODIFICATION,
 # OR REDISTRIBUTION OF THIS SOFTWARE.
 
-DESCRIPTION = """WeTest is a testing facility for EPICS modules. Tests are described in a
-YAML file, and executed over the Channel Access using pyepics library.
-A PDF report is generated with the tests results.
-It also enables to monitor PVs (extracted from the tests and from specified DB).
-"""
-
 import argparse
 import contextlib
 import logging
@@ -29,6 +23,7 @@ import time
 import tkinter as tk
 import unittest
 from copy import deepcopy
+from pathlib import Path
 
 import epics
 import pkg_resources
@@ -74,8 +69,15 @@ from wetest.testing.reader import (
     FileNotFound,
     MacrosManager,
     ScenarioReader,
-    display_changlog,
+    display_changelog,
 )
+
+DESCRIPTION = """WeTest is a testing facility for EPICS modules.
+Tests are described in a YAML file,
+and executed over the Channel Access using pyepics library.
+A PDF report is generated with the tests results.
+It also enables to monitor PVs (extracted from the tests and from specified DB).
+"""
 
 # logger setup
 logger = logging.getLogger(__name__)
@@ -260,7 +262,8 @@ def main():
         type=str,
         nargs="*",
         default=[],
-        help="One or several scenario files (executed before scenarios from --scenario).",
+        help="One or several scenario files "
+        "(executed before scenarios from --scenario).",
     )
     parser.add_argument(
         "-s",
@@ -284,7 +287,9 @@ def main():
         "--propagate-macros",
         action="store_true",
         default=False,
-        help="Macros defined in a file are given to included files. Default behavior is that only macros set on the include line are given to the included file.",
+        help="Macros defined in a file are given to included files. "
+        "Default behavior is that only macros set on the include line "
+        "are given to the included file.",
     )
 
     # PVs relative arguments
@@ -328,7 +333,7 @@ def main():
         "--force-play",
         action="store_true",
         default=False,
-        help="Start runnning tests automatically even with disconnected PV.",
+        help="Start running tests automatically even with disconnected PV.",
     )
     auto_play_group.add_argument(
         "-P",
@@ -344,7 +349,7 @@ def main():
         "-o",
         "--pdf-output",
         metavar="OUTPUT_FILE",
-        type=str,
+        type=Path,
         default="wetest-results.pdf",
         help="Specify PDF output file name (otherwise defaults to wetest-results.pdf).",
     )
@@ -365,7 +370,7 @@ def main():
         major, minor, bugfix = (int(x) for x in version.split("."))
         logger.warning("Installed WeTest is of version %d.%d.%d", major, minor, bugfix)
         if args.version > 1:
-            display_changlog((major, 0, 0), (major, minor, bugfix))
+            display_changelog((major, 0, 0), (major, minor, bugfix))
         sys.exit(0)
 
     with_gui = not args.no_gui
@@ -375,7 +380,8 @@ def main():
     if len(scenarios) == 0 and len(args.db) == 0:
         parser.print_usage()
         logger.error(
-            "A test scenario (--scenario) or a directory from which to extact PVs (--db) is required",
+            "A test scenario (--scenario) or a directory "
+            "from which to extract PVs (--db) is required",
         )
         sys.exit(2)
 
@@ -392,9 +398,9 @@ def main():
     cli_macros = {}
     if args.macros:
         # we get a list of list because we enable "append" action mode
-        for macros_list in args.macros:
-            for macro in macros_list:
-                try:
+        try:
+            for macros_list in args.macros:
+                for macro in macros_list:
                     k, v = macro.split("=", 1)
                     if k in cli_macros:
                         logger.error(
@@ -404,9 +410,9 @@ def main():
                         )
                     else:
                         cli_macros[k] = v
-                except ValueError:
-                    logger.critical("Could not parse a MACRO=VALUE in %s", macro)
-                    raise
+        except ValueError:
+            logger.critical("Could not parse a MACRO=VALUE in %s", macro)
+            raise
         logger.info(
             "using CLI macros:\n%s",
             "\n".join([f"\t{k}: {v}" for k, v in list(cli_macros.items())]),
@@ -429,8 +435,8 @@ def main():
                 macros_mgr=macros_mgr,
                 propagate=args.propagate_macros,
             )
-        except FileNotFound as e:
-            logger.error(e)
+        except FileNotFound:
+            logger.exception("Could not open scenario file")
             sys.exit(4)
 
     queue_to_gui = multiprocessing.Manager().Queue()
@@ -451,26 +457,23 @@ def main():
         )
 
     # show naming compatibility in CLI
-    for pv_name, _pv in list(pv_refs.items()):
-        try:
+    try:
+        for pv_name, _pv in list(pv_refs.items()):
             naming.split(pv_name)
-        except NamingError as e:
-            logger.error(e)
+    except NamingError:
+        logger.exception()
 
     # decide whether to run tests or not
     autoplay = (all_connected or args.force_play) and not args.no_auto_play
     if args.no_auto_play:
         logger.error("Not starting tests as required.")
-    else:
-        if not all_connected:
-            if not args.force_play:
-                logger.error(
-                    "Not starting tests as some PVs are currently not reachable.",
-                )
-            else:
-                logger.error(
-                    "Starting tests even though some PVs are currently not reachable.",
-                )
+    elif not all_connected:
+        if not args.force_play:
+            logger.error("Not starting tests as some PVs are currently not reachable.")
+        else:
+            logger.error(
+                "Starting tests even though some PVs are currently not reachable.",
+            )
 
     # generate GUI
     if with_gui:
@@ -486,7 +489,7 @@ def main():
             file_validation=fv_list,
         )
 
-    pdf_output = None if args.no_pdf_output else os.path.abspath(args.pdf_output)
+    pdf_output = None if args.no_pdf_output else str(args.pdf_output.resolve())
 
     # run tests
     data = {
@@ -505,14 +508,15 @@ def main():
             if not with_gui:  # no GUI with a play button
                 pm.start_play()
             else:
-                gui.play()  # drawback: apply selection, although it is the same as from file
+                # drawback: apply selection, although it is the same as from file
+                gui.play()
                 # advantage: reset the test and therefore set prev_status correctly
         else:
             logger.warning("Waiting for user.")
             if not with_gui:  # no GUI with a play button
                 logger.warning(
                     "  - To start testing, press Ctrl+D then ENTER.\n"
-                    + "  - To abort, press Ctrl+C.",
+                    "  - To abort, press Ctrl+C.",
                 )
                 sys.stdin.readlines()  # to flush previous inputs, requires Ctrl+D
                 sys.stdin.readline()  # ENTER to return from this one
@@ -520,7 +524,7 @@ def main():
             else:
                 logger.warning(
                     "  - To start testing, use GUI play button.\n"
-                    + "  - To abort, use GUI abort button, or press Ctrl+C.",
+                    "  - To abort, use GUI abort button, or press Ctrl+C.",
                 )
 
         if with_gui:
@@ -531,14 +535,14 @@ def main():
         pm.join()
     except (KeyboardInterrupt, SystemExit):
         pm.terminate()
-        logger.error("Aborting WeTest.")
+        logger.exception("Aborting WeTest.")
     else:
         # clean ending
         logger.warning("Exiting WeTest.")
 
 
 class ProcessManager:
-    """Class that start/stop the runner and report process, and process their outputs."""
+    """Start/stop the runner and report process, and process their outputs."""
 
     def __init__(self, args, no_gui, queue_to_gui, queue_from_gui) -> None:
         self.queue_to_gui = queue_to_gui
@@ -605,7 +609,8 @@ class ProcessManager:
         self.p_parse_output.start()
         self.ns.pid_p_parse_output = self.p_parse_output.pid
         logger.debug("pid_p_parse_output: %s", self.ns.pid_p_parse_output)
-        self.p_parse_output_started.wait()  # to be able to abort properly from p_gui_commands
+        # to be able to abort properly from p_gui_commands
+        self.p_parse_output_started.wait()
 
     def start_gui_command_process(self):
         """Sstart gui_commands in another process."""
@@ -613,11 +618,13 @@ class ProcessManager:
             target=self.gui_commands,
             name="gui_commands",
         )
-        # self.p_gui_commands.daemon = True # so that it can restart the runner and parser process
+        # so that it can restart the runner and parser process
+        # self.p_gui_commands.daemon = True
         self.p_gui_commands.start()
         self.ns.pid_p_gui_commands = self.p_gui_commands.pid
         logger.debug("pid_p_gui_commands: %s", self.ns.pid_p_gui_commands)
-        self.p_gui_commands_started.wait()  # for homogeneity with other process start functions
+        # for homogeneity with other process start functions
+        self.p_gui_commands_started.wait()
 
     def run(self):
         """Start the various subprocess."""
@@ -628,7 +635,7 @@ class ProcessManager:
             self.start_gui_command_process()
 
     def join(self):
-        """Joins on the multiple process running."""
+        """Join on the multiple process running."""
         self.p_run_and_report.join()
         self.p_parse_output.join()
         if self.p_gui_commands is not None:
@@ -643,7 +650,7 @@ class ProcessManager:
 
     @quiet_exception(KeyboardInterrupt)
     def run_and_report(self):
-        """Runs the tests and generate the report."""
+        """Run the tests and generate the report."""
         self.p_run_and_report_started.set()
         logger.debug("Enter run_and_report (%d)", multiprocessing.current_process().pid)
         logger.warning("-----------------------")
@@ -709,15 +716,15 @@ class ProcessManager:
         self.queue_to_gui.put(PAUSE_FROM_MANAGER)
         if self.ns.no_gui:
             logger.warning(
-                "Pausing execution."
-                + "\n  - To continue press Ctrl+Z and enter `fg`."
-                + "\n  - To abort press Ctrl+C twice.",
+                "Pausing execution.\n"
+                "  - To continue press Ctrl+Z and enter `fg`.\n"
+                "  - To abort press Ctrl+C twice.",
             )
         else:
             logger.warning(
-                "Pausing execution."
-                + "\n  - To continue, use GUI play button, or press Ctrl+Z and enter `fg`."
-                + "\n  - To abort, use GUI abort button, or press Ctrl+C twice.",
+                "Pausing execution.\n"
+                "  - To continue, use GUI play button or press Ctrl+Z and enter `fg`.\n"
+                "  - To abort, use GUI abort button or press Ctrl+C twice.",
             )
         os.kill(self.ns.pid_run_and_report, signal.SIGSTOP)
         logger.debug("Paused run_and_report (%d)", self.ns.pid_run_and_report)
@@ -754,7 +761,7 @@ class ProcessManager:
         logger.debug("Enter gui_commands (%d)", multiprocessing.current_process().pid)
         while True:
             cmd = self.queue_from_gui.get()
-            logger.debug("command from gui: %s" % cmd)
+            logger.debug("command from gui: %s", cmd)
 
             if str(cmd).startswith(SELECTION_FROM_GUI):
                 # use an imutable type to ensure namespace update
@@ -793,15 +800,13 @@ class ProcessManager:
 
     @quiet_exception(KeyboardInterrupt)
     def parse_output(self):
-        """Reads runner output and convert it to update data items
-        in a new thread.
-        """
+        """Read runner output and convert it to update data items in a new thread."""
         self.p_parse_output_started.set()
         logger.debug("Enter parse_output (%d)", multiprocessing.current_process().pid)
         while True:
             # get next output to parse
             new_str = self.runner_output.get().rstrip("\n")
-            logger.debug("from tests runner:>%s<" % new_str)
+            logger.debug("from tests runner:>%s<", new_str)
             # ignore empty lines
             if new_str == "":
                 continue
@@ -863,7 +868,7 @@ class ProcessManager:
                 elif status.startswith("Success "):
                     status = STATUS_SUCCESS
                 else:
-                    logger.error("Unexpected status " + status)
+                    logger.error("Unexpected status %s", status)
                     status = STATUS_UNKNOWN
 
                 # finish running test
@@ -898,7 +903,7 @@ class ProcessManager:
 
             # we should not reach here
             else:
-                logger.critical("Unexpected test output:\n%s" % new_str)
+                logger.critical("Unexpected test output:\n%s", new_str)
 
         logger.debug("Leave parse_output (%d)", multiprocessing.current_process().pid)
 

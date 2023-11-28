@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 """Test testing.generator module."""
-
 
 import unittest
 

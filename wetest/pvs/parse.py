@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -39,21 +37,15 @@ def parseDbFile(filepath):
 
     Returns:
     -------
-        found_records (lsit): list of PV as a dictionnaries
+        found_records (list): list of PV as a dictionaries
 
     """
     found_records = []
     current_record = None
     with open(filepath) as dbfile:
-        for index, line in enumerate(dbfile):
+        for index, rline in enumerate(dbfile):
             # make sure the line is in unicode
-            line = line.decode("utf-8")
-            # try:
-            # except UnicodeDecodeError as e:
-            #         logger.error(
-            #             "Could not decode line %d, from %s, ignoring it:"
-            #             % (index+1, filepath))
-            #         logger.error(line)
+            line = rline.decode("utf-8")
 
             # ignore comment lines
             if line.strip().startswith("#"):
@@ -77,7 +69,7 @@ def parseDbFile(filepath):
 
             # start a new record in content_dict
             if new_record:
-                # instanciate a new record assuming previous one is finished
+                # instantiate a new record assuming previous one is finished
                 current_record = {}
                 current_record["name"] = new_record.group("name")
                 current_record["type"] = new_record.group("type")
@@ -110,6 +102,7 @@ def parseDbFile(filepath):
 
 def dir2files(dirpath, prefix="", suffix=""):
     """Look for file in the given directory and subdirectories.
+
     If defined, only keep files starting by prefix and ending by suffix.
 
     Args:
@@ -120,7 +113,7 @@ def dir2files(dirpath, prefix="", suffix=""):
     -------
         found_files (str): list of file path found in directory
     """
-    logger.info("Looking for input files in " + dirpath)
+    logger.info("Looking for input files in %s", dirpath)
     found_files = []
     found_files.extend(
         [
@@ -134,7 +127,7 @@ def dir2files(dirpath, prefix="", suffix=""):
 
 
 def prettyDict(input_dict, indent=0, print_function=print):
-    """Prints a directory."""
+    """Print a directory."""
     for key, value in list(input_dict.items()):
         print_function("\t" * indent + str(key) + " :\t" + str(value))
 
@@ -154,13 +147,13 @@ def pvs_from_path(path_list):
     if not db_files:
         logger.error("No DB file found with provided paths.")
 
-    logger.debug("DB files found:\n" + "\n".join(db_files))
+    logger.debug("DB files found:\n%s", "\n".join(db_files))
 
     logger.info("Extracting PVs from DB files.")
     for a_file in db_files:
-        logger.info("Processing file " + a_file)
+        logger.info("Processing file %s", a_file)
         pvs_from_db += parseDbFile(a_file)
 
-    logger.info("Number of records found: %d" % len(pvs_from_db))
+    logger.info("Number of records found: %d", len(pvs_from_db))
 
     return pvs_from_db

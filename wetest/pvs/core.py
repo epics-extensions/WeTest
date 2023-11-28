@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -33,8 +31,7 @@ logger.addHandler(FILE_HANDLER)
 
 
 class PVData:
-    """A class pikelable class to store PV connection status
-    as well as trace all the subtests associated.
+    """A picklable class to store PV connection status as well as trace all the subtests associated.
 
     name:           full PV name
     setter_subtests:   a set of the subtest id using this PV as setter
@@ -157,7 +154,7 @@ class PVInfo:
         self.data.tests_titles[test_id] = title
 
     def remove_subtest(self, subtest):
-        """Removes subtest from PV getter_subtests and setter_subtests.
+        """Remove subtest from PV getter_subtests and setter_subtests.
 
         subtest may be a string (subtest_id) or a subtestData instance
         """
@@ -202,7 +199,7 @@ def test_id_sort(test_id):
 
 
 def pvs_from_suite(suite, ref_dict=None, connection_callback=None):
-    """Determines all the PVs declared in suite."""
+    """Determine all the PVs declared in suite."""
     pvs_refs = {} if ref_dict is None else ref_dict
 
     for test_data in list(suite.tests_infos.values()):
@@ -229,8 +226,9 @@ def pvs_from_suite(suite, ref_dict=None, connection_callback=None):
 
 
 class PVsTable:
-    """A class to reference PVs to be monitored,
-    a queue can be provided to forward connection status with PV data.
+    """A class to reference PVs to be monitored.
+
+    A queue can be provided to forward connection status with PV data.
     """
 
     def __init__(self, queue=None) -> None:
@@ -270,17 +268,17 @@ class PVsTable:
             # make sure that unreachable PV are displayed in stdout at least once
             if not pv.check_connection():
                 all_connected = False
-                logger.log(LVL_PV_DISCONNECTED, "PV is unreachable: %s" % pv.name)
+                logger.log(LVL_PV_DISCONNECTED, "PV is unreachable: %s", pv.name)
                 self.queue.put(pv.data)
 
         return all_connected, self.pvs_refs
 
     def connection_callback(self, pvname=None, conn=None, **kws):
-        """Updates PV status in pvs_refs and put data in queue."""
+        """Update PV status in pvs_refs and put data in queue."""
         if not conn:
-            logger.log(LVL_PV_DISCONNECTED, "PV changed to unreachable: %s" % pvname)
+            logger.log(LVL_PV_DISCONNECTED, "PV changed to unreachable: %s", pvname)
         else:
-            logger.log(LVL_PV_CONNECTED, "PV changed to connected: %s" % pvname)
+            logger.log(LVL_PV_CONNECTED, "PV changed to connected: %s", pvname)
 
         try:
             pv = self.pvs_refs[pvname]
@@ -288,7 +286,8 @@ class PVsTable:
             self.queue.put(pv.data)
         except KeyError:
             logger.critical(
-                "connection_callback called on %s which is not referenced in PVsTable %s yet",
+                "connection_callback called on %s "
+                "which is not referenced in PVsTable %s yet",
                 pvname,
                 self,
             )

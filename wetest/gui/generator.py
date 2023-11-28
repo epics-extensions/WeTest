@@ -78,7 +78,7 @@ BT_TXT_LEN = 6
 
 
 def reorganise_subtests(tests_infos):
-    """Return the tests_infos sorted by scneario and test numbers."""
+    """Return the tests_infos sorted by scenario and test numbers."""
     output = {}
 
     # expected subtest id template
@@ -87,7 +87,7 @@ def reorganise_subtests(tests_infos):
     for st_id, st_data in list(tests_infos.items()):
         match = re.match(regex, st_id)
         if match is None:
-            logger.error("unexpected id format: %s" % st_id)
+            logger.error("unexpected id format: %s", st_id)
         else:
             sc_id = int(match.group("sc_id"))
             test_id = int(match.group("test_id"))
@@ -114,6 +114,7 @@ def value_from_subtest(
     fallback="VALUE NOT FOUND",
 ):
     """Extract a value corresponding to key in the infos of the subtest.
+
     Use fallback value if it is not available.
     """
     if subtest_id is None:
@@ -227,8 +228,9 @@ class GUIGenerator:
 
         if len(self.test_infos) != len(self.configs):
             logger.info(
-                "Not the same number of configs(%d) and scenarios(%d)"
-                % (len(self.configs), len(self.test_infos)),
+                "Not the same number of configs(%d) and scenarios(%d)",
+                len(self.configs),
+                len(self.test_infos),
             )
 
         # add scenario, tests and subtests
@@ -607,7 +609,7 @@ class GUIGenerator:
 
                     # update tests status
                     if test_id not in self.subtests_ref:
-                        logger.error("No %s in GUI" % test_id)
+                        logger.error("No %s in GUI", test_id)
                     else:
                         dynamic = test_status in [STATUS_RUN, STATUS_RETRY]
                         self.subtests_ref[test_id].update_status(
@@ -709,7 +711,7 @@ class PopUp:
             tk.Label(one_status_frame, text=text).pack(side="left")
 
     def show_statuses(self):
-        """Displays the different substests status."""
+        """Display the different substests status."""
         status_count = {}
         for subtest in list(self.gui.subtests_ref.values()):
             status = subtest.status_icon.status
