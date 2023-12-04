@@ -52,6 +52,13 @@
         '';
 
         doCheck = true;
+
+        meta = {
+          description = "Tests automation utility for EPICS";
+          mainProgram = "wetest";
+          license = epnix.lib.licenses.epics;
+          maintainers = with epnix.lib.maintainers; [minijackson];
+        };
       };
 
       devShells.default = pkgs.mkShell {
