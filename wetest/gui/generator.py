@@ -16,18 +16,16 @@
 # icons from https://iconmonstr.com/
 # gifs from https://ezgif.com/
 
-from __future__ import print_function
-
 import copy
 import logging
 import multiprocessing
 import re
 import subprocess
-import Tkinter as tk
-import ttk
+import tkinter as tk
+import tkinter.ttk
 
 from multiprocessing import Queue
-from Queue import Empty
+from queue import Empty
 from PIL import ImageTk, Image
 from pkg_resources import resource_filename
 
@@ -75,7 +73,7 @@ def reorganise_subtests(tests_infos):
     # expected subtest id template
     regex = r"test-(?P<sc_id>\d+)-(?P<test_id>\d+)-\d+$"
 
-    for st_id, st_data in tests_infos.items():
+    for st_id, st_data in list(tests_infos.items()):
         match = re.match(regex, st_id)
         if match is None:
             logger.error("unexpected id format: %s"%st_id)
@@ -102,7 +100,7 @@ def value_from_subtest(key, test_infos, scenario_id, test_id,
     Use fallback value if it is not available.
     """
     if subtest_id is None:
-        value = getattr(test_infos[scenario_id][test_id].values()[0], key, fallback)
+        value = getattr(list(test_infos[scenario_id][test_id].values())[0], key, fallback)
     else:
         value = getattr(test_infos[scenario_id][test_id][subtest_id], key, fallback)
     return value
@@ -538,7 +536,7 @@ class PopUp:
     def show_statuses(self):
         """Displays the different substests status"""
         status_count={}
-        for subtest in self.gui.subtests_ref.values():
+        for subtest in list(self.gui.subtests_ref.values()):
             status = subtest.status_icon.status
             if status in status_count:
                 status_count[status] += 1

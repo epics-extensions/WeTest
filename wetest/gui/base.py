@@ -14,11 +14,11 @@
 
 """Generic classes used in gui.specific and gui.generator."""
 
-from __future__ import print_function
+
 
 import logging
-import Tkinter as tk
-import ttk
+import tkinter as tk
+import tkinter.ttk
 
 from PIL import ImageTk, Image
 from pkg_resources import resource_filename
@@ -45,7 +45,7 @@ class ExistingTreeItem(WeTestError):
 
 
 # class definitions
-class MyTreeview(ttk.Treeview, object):
+class MyTreeview(tkinter.ttk.Treeview, object):
     """Adding convenience methods to Treeview
     Keep track of item last parent, useful for reattaching.
 
@@ -55,7 +55,7 @@ class MyTreeview(ttk.Treeview, object):
     """
 
     def __init__(self, *args, **kwargs):
-        ttk.Treeview.__init__(self, *args, **kwargs)
+        tkinter.ttk.Treeview.__init__(self, *args, **kwargs)
         self._parent_ref = {"":""}  # root parent is root
 
     def get_parent(self, item):
@@ -126,7 +126,7 @@ class MyTreeview(ttk.Treeview, object):
     def get_direct_children(self, item_id=""):
         """Returns the children of an item (including detached)"""
         direct_children = []
-        for child,parent in self._parent_ref.items():
+        for child,parent in list(self._parent_ref.items()):
             if parent == item_id:
                 direct_children.append(child)
 
@@ -137,13 +137,13 @@ class MyTreeview(ttk.Treeview, object):
         If with_tag provided only return the item with one or more of the tags provided
         """
         if with_tag is None:
-            output = self._parent_ref.keys()
+            output = list(self._parent_ref.keys())
         else:
             output = []
             if not isinstance(with_tag, list):
                 with_tag = [with_tag]
 
-            for item in self._parent_ref.keys():
+            for item in list(self._parent_ref.keys()):
                 for tag in with_tag:
                     if tag in self.item(item, option="tags"):
                         output.append(item)
