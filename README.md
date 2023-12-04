@@ -7,23 +7,24 @@ WeTest reads YAML files describing tests targeting EPICS PV,
 executes these tests in CLI with or without a GUI,
 and generates a report in PDF.
 
-Installation
-------------
+## Installation
 
 ### Python and Tkinter
 
-WeTest is implemented in Python 2.7, which therefore needs to be installed
-on your machine (support for Python 3.x is planned but not yet available).
+WeTest is implemented in Python 3, which needs to be installed.
 
-Usually the `Tkinter` module should be included in your python installation,
-if it is not the case you will also need to install the corresponding package.
+The `Tkinter` module should be included in your python installation.
+If not, you need to also install the corresponding package.
 This module is needed for the graphical interface.
 
 For example in Ubuntu:
+
 ```bash
 sudo apt-get install python-tk
 ```
+
 For example in CentOS:
+
 ```bash
 sudo yum install tkinter
 ```
@@ -31,77 +32,73 @@ sudo yum install tkinter
 WeTest is currently successfully running on CentOS 7 and Ubuntu 18.04
 (support for Windows is planned but not yet available).
 
-### Install using virtualenv
+### Build using Nix
 
-To install virtualenv, if it's not already installed:
+First, install Nix.
+Refer to the [Download Nix] page for instructions.
 
-```bash
-sudo pip install virtualenv
+Then, run:
+
+``` bash
+nix-build
 ```
 
-And to use virtualenv, first go in the clone repository:
+This builds WeTest and its dependencies,
+and puts the compilation result under `./result`.
 
-```bash
-cd WeTest
-virtualenv --python=<path-to-pyton-version> venv # creates the virtual environment in the folder ./venv
-eg: $ virtualenv --python=/usr/bin/python2.7 venv
-source ./venv/bin/activate # activates the environment
+After running the build, you can run WeTest by running:
+
+``` bash
+./result/bin/wetest
 ```
 
-To install WeTest go inside the cloned repository folder and type:
+If you want WeTest available in your global user environment,
+then you can run:
 
-```bash
-pip install .
+``` bash
+nix-env -i -f default.nix
 ```
 
-You can use `wetest` as a regular command line utility after that.
+  [Download Nix]: https://nixos.org/download#download-nix
 
-To deactivate the environment:
+### Build using Poetry
 
-```bash
-deactivate
+First, install Poetry.
+Refer to the [Poetry documentation] for instructions.
+
+To build the project,
+you can run:
+
+``` bash
+poetry install
+poetry build
 ```
 
+Running WeTest can be done with:
 
-### Install using conda
-
-To install conda if it's not already installed see:
-https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
-
-Once installed, create a python 2.7 environment for WeTest and activate it:
-
-```bash
-conda create -yn wetest python=2.7
-conda activate wetest
+``` bash
+poetry run wetest [other arguments]
 ```
 
-To install WeTest go inside the cloned repository folder and type:
+  [Poetry documentation]: https://python-poetry.org/docs/
 
-```bash
-cd WeTest
-python setup.py install
-```
+### Set up pyepics
 
-You can use `wetest` as a regular command line utility after that.
+Setting up pyepics is *not* needed for the Nix build.
 
-To deactivate the environment:
-
-```bash
-conda deactivate
-```
-
-### Setup pyepics
-
-WeTest relies on the `pyepics` module, and therefore depending on your EPICS installation
+WeTest relies on the `pyepics` module,
+and depending on your EPICS installation
 you might need to set up the `PYEPICS_LIBCA` environment variable manually.
 
 For instance:
-```bash
+
+``` bash
 export PYEPICS_LIBCA=/opt/epics/bases/base-3.14.12.5/lib/centos7-x86_64/libca.so
 ```
 
-You can find full explanation [here](http://cars9.uchicago.edu/software/python/pyepics3/installation.html#getting-started-setting-up-the-epics-environment).
+You can find full explanation in the [pyepics installation] page.
 
+  [pyepics installation]: http://cars9.uchicago.edu/software/python/pyepics3/installation.html#getting-started-setting-up-the-epics-environment
 
 Run WeTest
 ----------
