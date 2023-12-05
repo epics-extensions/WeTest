@@ -615,14 +615,14 @@ class InfosStatusFrame(tk.Frame):
             pady=PADDING_Y_LABEL,
             padx=(PADDING_X_LABEL, 0),
         )
-        self.toogle_label = tk.Label(
+        self.toggle_label = tk.Label(
             self.infos_frame,
             anchor="w",
             state="disabled",
             image=self.icons["right_arrow"],
             compound="right",
         )
-        self.toogle_label.pack(
+        self.toggle_label.pack(
             side="left",
             pady=PADDING_Y_LABEL,
             padx=(PADDING_X_LABEL, 0),
@@ -684,11 +684,11 @@ class InfosStatusFrame(tk.Frame):
         self.update_status()
 
         # apply initial select
-        self.toogle_select(selected=select)
+        self.toggle_select(selected=select)
 
         # bindings
         # see also bind_title_frame
-        self.select_label.bind("<Button-1>", self.toogle_select)
+        self.select_label.bind("<Button-1>", self.toggle_select)
 
     def reset(self, status=None) -> None:
         """Reinitialize for replay, keep previous result but empty traceback."""
@@ -742,11 +742,11 @@ class InfosStatusFrame(tk.Frame):
         self.status_icon.change_status(status, dynamic)
 
     def bind_title_frame(self, event, callback=None):
-        """Bind the event and callback to info_frame, title_label and toogle_label to unbind set callback to None."""
+        """Bind the event and callback to info_frame, title_label and toggle_label to unbind set callback to None."""
         if callback is None:
             self.infos_frame.bind(event, lambda _e: None)
             self.title_label.bind(event, lambda _e: None)
-            self.toogle_label.bind(event, lambda _e: None)
+            self.toggle_label.bind(event, lambda _e: None)
             if hasattr(self, "test_type_widget"):
                 self.test_type_widget.bind(event, lambda _e: None)
             self.infos_label.bind(event, lambda _e: None)
@@ -754,7 +754,7 @@ class InfosStatusFrame(tk.Frame):
         else:
             self.infos_frame.bind(event, callback)
             self.title_label.bind(event, callback)
-            self.toogle_label.bind(event, callback)
+            self.toggle_label.bind(event, callback)
             if hasattr(self, "test_type_widget"):
                 self.test_type_widget.bind(event, callback)
             self.infos_label.bind(event, callback)
@@ -778,7 +778,7 @@ class InfosStatusFrame(tk.Frame):
             child.set_children_status(status, dynamic)
         self.update_status()
 
-    def toogle_select(self, event=None, selected=None):
+    def toggle_select(self, event=None, selected=None):
         """Change select value and icon."""
         if selected is None:
             if self.selected in [SELECTED]:
@@ -794,7 +794,7 @@ class InfosStatusFrame(tk.Frame):
 
         select = SKIPPED if self.selected == SKIPPED else SELECTED
         for child in self.status_children:
-            child.toogle_select(selected=select)
+            child.toggle_select(selected=select)
 
         self.check_selection()
 
@@ -859,7 +859,7 @@ class SubtestFrame(InfosStatusFrame):
             select=select,
         )
 
-        # initalise toogle
+        # initalise toggle
         self.traceback_show = tk.IntVar()
         self.traceback_show.set(COLLAPSED)
         self.traceback_label = None
@@ -936,7 +936,7 @@ class SubtestFrame(InfosStatusFrame):
             # close traceback display
             self.traceback_show.set(COLLAPSED)
             self.traceback_toggle()
-            self.toogle_label.config(state="disabled")
+            self.toggle_label.config(state="disabled")
             self.popup_menu.entryconfig(self.index_ref["traceback"], state="disabled")
             # clear traceback
             self.traceback_label.forget()
@@ -995,7 +995,7 @@ class SubtestFrame(InfosStatusFrame):
             # enable click on subtest
             self.bind_status_icon("<Button-1>", self.traceback_click)
             self.bind_title_frame("<Button-1>", self.traceback_click)
-            self.toogle_label.config(state="normal")
+            self.toggle_label.config(state="normal")
 
             # send traceback to parent
             self.parent_test.add_traceback(
@@ -1012,13 +1012,13 @@ class SubtestFrame(InfosStatusFrame):
         self.traceback_toggle()
 
     def traceback_toggle(self):
-        """Toogle sub_frame visibility and toggle_button displayed character."""
+        """Toggle sub_frame visibility and toggle_button displayed character."""
         if self.traceback_show.get() == EXPANDED:
             self.sub_frame.pack(side="bottom", fill="x", expand=1)
-            self.toogle_label.config(image=self.icons["down_arrow"])
+            self.toggle_label.config(image=self.icons["down_arrow"])
         else:
             self.sub_frame.forget()
-            self.toogle_label.config(image=self.icons["right_arrow"])
+            self.toggle_label.config(image=self.icons["right_arrow"])
 
 
 class TestFrame(InfosStatusFrame):
@@ -1054,14 +1054,14 @@ class TestFrame(InfosStatusFrame):
             dynamic=dynamic,
         )
 
-        # initalise toogle
+        # initalise toggle
         self.subtests_show = tk.IntVar()
         self.subtests_show.set(COLLAPSED)
 
         # configure title_frame click
         self.bind_status_icon("<Button-1>", self.subtests_click)
         self.bind_title_frame("<Button-1>", self.subtests_click)
-        self.toogle_label.config(state="normal")
+        self.toggle_label.config(state="normal")
 
         # empty label for padding at sub_frame bottom
         self.padding_label = tk.Label(
@@ -1080,13 +1080,13 @@ class TestFrame(InfosStatusFrame):
         self.subtests_toggle()
 
     def subtests_toggle(self):
-        """Toogle sub_frame visibility and toggle_button displayed character."""
+        """Toggle sub_frame visibility and toggle_button displayed character."""
         if self.subtests_show.get() == EXPANDED:
             self.sub_frame.pack(side="bottom", fill="x", expand=1)
-            self.toogle_label.config(image=self.icons["down_arrow"])
+            self.toggle_label.config(image=self.icons["down_arrow"])
         else:
             self.sub_frame.forget()
-            self.toogle_label.config(image=self.icons["right_arrow"])
+            self.toggle_label.config(image=self.icons["right_arrow"])
 
     def subtests_expand(self):
         """Call toggle method if not already expanded."""
@@ -1222,7 +1222,7 @@ class ScenarioFrame(InfosStatusFrame):
             padx=(PADDING_X_LABEL, 0),
         )
 
-        # initalise toogle
+        # initalise toggle
         self.subtests_show = tk.IntVar()
         self.subtests_show.set(COLLAPSED)
         self.tests_show = tk.IntVar()
@@ -1231,7 +1231,7 @@ class ScenarioFrame(InfosStatusFrame):
         # configure toggle on title_frame click
         self.bind_status_icon("<Button-1>", self.subtests_click)
         self.bind_title_frame("<Button-1>", self.tests_click)
-        self.toogle_label.config(state="normal")
+        self.toggle_label.config(state="normal")
 
         # empty label for padding at sub_frame bottom
         self.padding_label = tk.Label(
@@ -1257,7 +1257,7 @@ class ScenarioFrame(InfosStatusFrame):
         self.tests_toggle()
 
     def subtests_toggle(self, event=None):
-        """Toogle sub_frame visibility and toggle_button displayed character."""
+        """Toggle sub_frame visibility and toggle_button displayed character."""
         if self.subtests_show.get() == EXPANDED:
             self.tests_expand()
             for test in self.status_children:
@@ -1267,13 +1267,13 @@ class ScenarioFrame(InfosStatusFrame):
                 test.subtests_collapse()
 
     def tests_toggle(self, event=None):
-        """Toogle sub_frame visibility and toggle_button displayed character."""
+        """Toggle sub_frame visibility and toggle_button displayed character."""
         if self.tests_show.get() == EXPANDED:
             self.sub_frame.pack(side="bottom", fill="x", expand=1)
-            self.toogle_label.config(image=self.icons["down_arrow"])
+            self.toggle_label.config(image=self.icons["down_arrow"])
         else:
             self.sub_frame.forget()
-            self.toogle_label.config(image=self.icons["right_arrow"])
+            self.toggle_label.config(image=self.icons["right_arrow"])
 
     def tests_expand(self):
         """Call toggle method if not already expanded."""
@@ -1423,7 +1423,7 @@ class Suite(tk.Frame):
                 anchor="nw",
                 padx=PADDING_X_LABEL * 2,
             )
-            self.warning_frame.bind("<Button-1>", self.toogle_warnings)
+            self.warning_frame.bind("<Button-1>", self.toggle_warnings)
             # mock label for space at the beginning of the warning box
             tk.Label(self.warning_frame).pack()
             # mock label for space after the warning box
@@ -1441,11 +1441,11 @@ class Suite(tk.Frame):
             # mock label for space at the end of warning box
             mock_label = tk.Label(self.show_warning_widget)
             mock_label.pack(fill="both")
-            mock_label.bind("<Button-1>", self.toogle_warnings)
+            mock_label.bind("<Button-1>", self.toggle_warnings)
 
-            # toogle logic
+            # toggle logic
             self.show_warning = True
-            self.toogle_warnings(show=True)
+            self.toggle_warnings(show=True)
 
         # display PVs status
         self.images = {
@@ -1496,7 +1496,7 @@ class Suite(tk.Frame):
         self.pvs_frame_placeholder = tk.Frame(self.frame)
         self.pvs_frame_placeholder.pack(fill="x")
         self.pvs_frame = tk.LabelFrame(self.pvs_frame_placeholder, text=PVS_FRAME_TEXT)
-        self.pvs_frame.bind("<Button-1>", self.toogle_pvs)
+        self.pvs_frame.bind("<Button-1>", self.toggle_pvs)
         # mock label for space at the beginning of the pvs box
         tk.Label(self.pvs_frame).pack()
         # frame to hold tree and scrollbar
@@ -1521,7 +1521,7 @@ class Suite(tk.Frame):
         self.pvs_tree.column("col_setter", width=100, stretch=False, anchor="c")
         self.pvs_tree.column("col_getter", width=100, stretch=False, anchor="c")
 
-        self.pvs_tree.heading("#0", command=self.pvs_tree_collapse_toogle)
+        self.pvs_tree.heading("#0", command=self.pvs_tree_collapse_toggle)
         self.pvs_tree.heading("col_status", command=self.pvs_tree_show_connected)
         self.pvs_tree.heading("col_setter", command=self.pvs_tree_show_not_setter)
         self.pvs_tree.heading("col_getter", command=self.pvs_tree_show_not_getter)
@@ -1533,18 +1533,18 @@ class Suite(tk.Frame):
 
         # mock label for space at the end of the pvs box
         self.pv_status_mock = tk.Label(self.pvs_frame)
-        self.pv_status_mock.bind("<Button-1>", self.toogle_pvs)
+        self.pv_status_mock.bind("<Button-1>", self.toggle_pvs)
         # mock label for space after the pvs box
         tk.Label(self.frame).pack()
-        # toogle logic
+        # toggle logic
         self.pvs_show_connected = True
         self.pvs_show_not_setter = True
         self.pvs_show_not_getter = True
         self.show_pvs = True
-        self.toogle_pvs(show=False)
+        self.toggle_pvs(show=False)
         self.show_hide_pvs()  # initialise column titles
         self.pvs_collapsed = True
-        self.pvs_tree_collapse_toogle()
+        self.pvs_tree_collapse_toggle()
         # start updating PVs
         self.check_pvs_needs_refreshing()
 
@@ -1656,7 +1656,7 @@ class Suite(tk.Frame):
         if self.canvas.winfo_height() < self.frame.winfo_height():
             self.canvas.yview_scroll(step, what)
 
-    def toogle_warnings(self, event=None, show=None):
+    def toggle_warnings(self, event=None, show=None):
         """Show or hides the warning frame."""
         if show is None:
             self.show_warning = not self.show_warning
@@ -1672,7 +1672,7 @@ class Suite(tk.Frame):
         self.update_idletasks()
         self.on_frame_configure()
 
-    def toogle_pvs(self, event=None, show=None):
+    def toggle_pvs(self, event=None, show=None):
         """Change between show all or hide some pvs."""
         if show is None:
             self.show_pvs = not self.show_pvs
@@ -1784,7 +1784,7 @@ class Suite(tk.Frame):
         # they will might not be displayed
         self.pvs_tree_show_connected(show=self.show_pvs)
 
-        # change tree size based on show toogle and number of elements
+        # change tree size based on show toggle and number of elements
         self.pvs_tree.remove_tag("", TAG_CONNECTED)
         self.pvs_tree.remove_tag("", TAG_DISCONNECTED)
         if self.show_pvs:
@@ -1875,7 +1875,7 @@ class Suite(tk.Frame):
 
         return parent
 
-    def pvs_tree_collapse_toogle(self, event=None):
+    def pvs_tree_collapse_toggle(self, event=None):
         if self.pvs_collapsed:
             self.pvs_collapsed = False
             self.pvs_tree.open_all()

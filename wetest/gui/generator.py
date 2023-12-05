@@ -275,7 +275,7 @@ class GUIGenerator:
         if len(self.configs) == 1:
             sc.tests_expand()
             sc.bind_title_frame("<Button-1>", sc.subtests_click)
-            sc.toogle_label.config(state="disable")
+            sc.toggle_label.config(state="disable")
 
         # Add play/pause and stop buttons
         self.footer_frame = tk.Frame(self.master, borderwidth=1, relief="raised")
@@ -405,7 +405,7 @@ class GUIGenerator:
         # if no tests disable play button and enlarge PV frame
         if self.suite is None:
             self.disable("play")
-            self.suite_gui.toogle_pvs(show=True)
+            self.suite_gui.toggle_pvs(show=True)
 
         # run update function
         self.update_status()
