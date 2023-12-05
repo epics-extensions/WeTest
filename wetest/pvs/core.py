@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -17,8 +14,12 @@ import time
 
 import epics
 
-from wetest.common.constants import TERSE_FORMATTER, FILE_HANDLER
-from wetest.common.constants import LVL_PV_DISCONNECTED, LVL_PV_CONNECTED
+from wetest.common.constants import (
+    FILE_HANDLER,
+    LVL_PV_CONNECTED,
+    LVL_PV_DISCONNECTED,
+    TERSE_FORMATTER,
+)
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -28,9 +29,9 @@ stream_handler.setFormatter(TERSE_FORMATTER)
 logger.addHandler(stream_handler)
 logger.addHandler(FILE_HANDLER)
 
-class PVData():
-    """A class pikelable class to store PV connection status
-    as well as trace all the subtests associated
+
+class PVData:
+    """A picklable class to store PV connection status as well as trace all the subtests associated.
 
     name:           full PV name
     setter_subtests:   a set of the subtest id using this PV as setter
@@ -39,14 +40,14 @@ class PVData():
     connected:      whether last check showed PV as connected
     """
 
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         self.name = name
         self.tests_titles = {}
         self.setter_subtests = set()
         self.getter_subtests = set()
         self.connected = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         output = "PV %s : " % self.name
         if self.connected is None:
             output += "connection not tested"
@@ -58,10 +59,10 @@ class PVData():
             return output
 
         if len(self.setter_subtests) > 0:
-            output += " -- tested as setter (%s)"%len(self.setter_subtests)
+            output += " -- tested as setter (%s)" % len(self.setter_subtests)
         if len(self.getter_subtests) > 0:
-            output += " -- tested as getter (%s)"%len(self.getter_subtests)
-        output += "\n"+len(output)*"-"
+            output += " -- tested as getter (%s)" % len(self.getter_subtests)
+        output += "\n" + len(output) * "-"
 
         sc_id = -1
         for test_id in sorted(self.tests_titles, key=test_id_sort):
@@ -78,8 +79,8 @@ class PVData():
         return len(self.setter_subtests) > 0 or len(self.getter_subtests) > 0
 
 
-class PVInfo(object):
-    """A convenience class to manage PVData()
+class PVInfo:
+    """A convenience class to manage PVData().
 
     name:           full PV name
     setter_subtests:   a set of the subtest id using this PV as setter
@@ -87,14 +88,23 @@ class PVInfo(object):
     connected:          whether last check showed PV as connected
     """
 
-    def __init__(self, name, setter_subtests=None, getter_subtests=None, connection_callback=None):
-
+    def __init__(
+        self,
+        name,
+        setter_subtests=None,
+        getter_subtests=None,
+        connection_callback=None,
+    ) -> None:
         self.data = PVData(name)
 
-        self.pv = epics.PV(self.data.name, connection_timeout=0, connection_callback=connection_callback)
+        self.pv = epics.PV(
+            self.data.name,
+            connection_timeout=0,
+            connection_callback=connection_callback,
+        )
 
-        setter_subtests = set([setter_subtests]) if setter_subtests is not None else set()
-        getter_subtests = set([getter_subtests]) if getter_subtests is not None else set()
+        setter_subtests = {setter_subtests} if setter_subtests is not None else set()
+        getter_subtests = {getter_subtests} if getter_subtests is not None else set()
         for subtest in setter_subtests | getter_subtests:
             self.add_subtest(subtest)
 
@@ -123,7 +133,7 @@ class PVInfo(object):
         return len(self.setter_subtests) > 0 or len(self.getter_subtests) > 0
 
     def check_connection(self):
-        """Is the PV accessible on the CA, update self.connected"""
+        """Is the PV accessible on the CA, update self.connected."""
         self.data.connected = self.pv.connect(0)
         return self.data.connected
 
@@ -138,13 +148,13 @@ class PVInfo(object):
             self.add_title(subtest_info)
 
     def add_title(self, subtest_info):
-        """Add title in self.data.tests_titles"""
+        """Add title in self.data.tests_titles."""
         test_id = subtest_info.id.split("_")[-1]
         title = subtest_info.test_title
         self.data.tests_titles[test_id] = title
 
     def remove_subtest(self, subtest):
-        """Removes subtest from PV getter_subtests and setter_subtests.
+        """Remove subtest from PV getter_subtests and setter_subtests.
 
         subtest may be a string (subtest_id) or a subtestData instance
         """
@@ -161,7 +171,7 @@ class PVInfo(object):
         self.clean_titles()
 
     def clean_titles(self):
-        """Remove test title if test not on PV anymore"""
+        """Remove test title if test not on PV anymore."""
         obsolete = []
         for test_id in self.data.tests_titles:
             found = False
@@ -174,10 +184,12 @@ class PVInfo(object):
 
         if len(obsolete) >= 0:
             self.data.tests_titles = {
-                k:v for k,v in list(self.data.tests_titles.items()) if k not in obsolete
-                }
+                k: v
+                for k, v in list(self.data.tests_titles.items())
+                if k not in obsolete
+            }
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.data)
 
 
@@ -185,85 +197,97 @@ def test_id_sort(test_id):
     noise, sc_id, tt_id, st_id = test_id.split("-")
     return (int(sc_id), int(tt_id), int(st_id))
 
+
 def pvs_from_suite(suite, ref_dict=None, connection_callback=None):
-    """Determines all the PVs declared in suite"""
-    if ref_dict is None:
-        pvs_refs = dict()
-    else:
-        pvs_refs = ref_dict
+    """Determine all the PVs declared in suite."""
+    pvs_refs = {} if ref_dict is None else ref_dict
 
     for test_data in list(suite.tests_infos.values()):
-
         if test_data.setter is not None:
             if test_data.setter in pvs_refs:
                 pvs_refs[test_data.setter].add_subtest(test_data)
             else:
                 pvs_refs[test_data.setter] = PVInfo(
-                    test_data.setter, setter_subtests=test_data,
-                        connection_callback=connection_callback)
+                    test_data.setter,
+                    setter_subtests=test_data,
+                    connection_callback=connection_callback,
+                )
 
         if test_data.getter is not None:
             if test_data.getter in pvs_refs:
                 pvs_refs[test_data.getter].add_subtest(test_data)
             else:
                 pvs_refs[test_data.getter] = PVInfo(
-                    test_data.getter, getter_subtests=test_data,
-                    connection_callback=connection_callback)
+                    test_data.getter,
+                    getter_subtests=test_data,
+                    connection_callback=connection_callback,
+                )
     return pvs_refs
 
 
-class PVsTable(object):
-    """A class to reference PVs to be monitored,
-    a queue can be provided to forward connection status with PV data"""
+class PVsTable:
+    """A class to reference PVs to be monitored.
 
-    def __init__(self, queue=None):
+    A queue can be provided to forward connection status with PV data.
+    """
+
+    def __init__(self, queue=None) -> None:
         if queue is None:
             import queue
+
             self.queue = queue.Queue()
         else:
             self.queue = queue
         self.pvs_refs = {}
 
     def register_pvs(self, suite=None, pv_list=None):
-        """Check connection of all the PVs declared in suite"""
+        """Check connection of all the PVs declared in suite."""
         if suite is None and pv_list is None:
-            raise NotImplementedError("Expecting pv_list or suite to be provided")
+            msg = "Expecting pv_list or suite to be provided"
+            raise NotImplementedError(msg)
         # collect all the PVs and initialize the callback
         for pv_name in set(pv_list if pv_list is not None else []):
-                self.pvs_refs[pv_name] = PVInfo(pv_name, connection_callback=self.connection_callback)
+            self.pvs_refs[pv_name] = PVInfo(
+                pv_name,
+                connection_callback=self.connection_callback,
+            )
 
         if suite is not None:
-                pvs_from_suite(
-                    suite,
-                    ref_dict=self.pvs_refs,
-                    connection_callback=self.connection_callback
-                    )
-
+            pvs_from_suite(
+                suite,
+                ref_dict=self.pvs_refs,
+                connection_callback=self.connection_callback,
+            )
 
         all_connected = True
 
         # send PV status to GUI at least once per PV
-        time.sleep(1) # give some time to PV connection to settle
+        time.sleep(1)  # give some time to PV connection to settle
 
         for pv in list(self.pvs_refs.values()):
-        # make sure that unreachable PV are displayed in stdout at least once
+            # make sure that unreachable PV are displayed in stdout at least once
             if not pv.check_connection():
                 all_connected = False
-                logger.log(LVL_PV_DISCONNECTED, "PV is unreachable: %s"%pv.name)
+                logger.log(LVL_PV_DISCONNECTED, "PV is unreachable: %s", pv.name)
                 self.queue.put(pv.data)
 
         return all_connected, self.pvs_refs
 
-    def connection_callback(self, pvname = None, conn=None, **kws):
-        """Updates PV status in pvs_refs and put data in queue"""
+    def connection_callback(self, pvname=None, conn=None, **_kws):
+        """Update PV status in pvs_refs and put data in queue."""
         if not conn:
-            logger.log(LVL_PV_DISCONNECTED, "PV changed to unreachable: %s"%pvname)
+            logger.log(LVL_PV_DISCONNECTED, "PV changed to unreachable: %s", pvname)
         else:
-            logger.log(LVL_PV_CONNECTED, "PV changed to connected: %s"%pvname)
+            logger.log(LVL_PV_CONNECTED, "PV changed to connected: %s", pvname)
 
         try:
             pv = self.pvs_refs[pvname]
             pv.connected = conn
             self.queue.put(pv.data)
         except KeyError:
-            logger.critical("connection_callback called on %s which is not referenced in PVsTable %s yet", pvname, self)
+            logger.critical(
+                "connection_callback called on %s "
+                "which is not referenced in PVsTable %s yet",
+                pvname,
+                self,
+            )

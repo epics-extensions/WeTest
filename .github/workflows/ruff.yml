@@ -1,0 +1,16 @@
+name: "Check Formatting"
+
+permissions: read-all
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v20
+    - name: "Check Ruff lints"
+      run: nix run 'nixpkgs#ruff' -- check . --output-format=github

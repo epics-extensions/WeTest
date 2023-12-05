@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Test testing.generator module."""
 
+# Asserts are used here,
+# ruff: noqa: S101
 
 import unittest
 
@@ -28,7 +28,7 @@ class TestTestsGenerator(unittest.TestCase):
         """Prefix is correctly assembled from prefix fields."""
         scenario = ScenarioReader("wetest/tests/scenario_example03.yaml")
         tests = TestsGenerator(scenario.get_deserialized())
-        self.assertEqual("LOCATION:DEVICE:", tests.tests_list[0][0].prefix)
+        assert tests.tests_list[0][0].prefix == "LOCATION:DEVICE:"
 
     def test_get_setter(self):
         """Setter is correctly defined."""
@@ -37,10 +37,12 @@ class TestTestsGenerator(unittest.TestCase):
         setter = get_key(
             tests.data["tests"][0]["commands"][0],
             tests.data["tests"][0],
-            "setter")
-        self.assertEqual("LockS", setter)
+            "setter",
+        )
+        assert setter == "LockS"
         getter = get_key(
             tests.data["tests"][0]["commands"][0],
             tests.data["tests"][0],
-            "getter")
-        self.assertEqual("LockR", getter)
+            "getter",
+        )
+        assert getter == "LockR"

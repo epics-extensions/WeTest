@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2019 by CEA
 #
 # The full license specifying the redistribution, modification, usage and other
@@ -12,14 +9,11 @@
 # _NO_ RESPONSIBILITY FOR ANY CONSEQUENCE RESULTING FROM THE USE, MODIFICATION,
 # OR REDISTRIBUTION OF THIS SOFTWARE.
 
-import argparse
-import os
 import logging
+import os
 import re
-import sys
 
-from wetest.common.constants import TERSE_FORMATTER, FILE_HANDLER, WeTestError
-
+from wetest.common.constants import FILE_HANDLER, TERSE_FORMATTER, WeTestError
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -31,34 +25,27 @@ logger.addHandler(FILE_HANDLER)
 
 
 class ParsingError(WeTestError):
-    """Failed to parse DB file"""
+    """Failed to parse DB file."""
 
 
-def parseDbFile(filepath):
+def parse_db_file(filepath):
     """Parse the given EPICS DB file to extract records.
 
     Args:
+    ----
         filepath (str): Path of the EPICS .db file
 
     Returns:
-        found_records (lsit): list of PV as a dictionnaries
+    -------
+        found_records (list): list of PV as a dictionaries
 
     """
-    found_records = list()
+    found_records = []
     current_record = None
-    with open(filepath, 'r') as dbfile:
-
-        for index, line in enumerate(dbfile):
-
+    with open(filepath) as dbfile:
+        for index, rline in enumerate(dbfile):
             # make sure the line is in unicode
-            line = line.decode('utf-8')
-            # try:
-            # except UnicodeDecodeError as e:
-            #         logger.error(
-            #             "Could not decode line %d, from %s, ignoring it:"
-            #             % (index+1, filepath))
-            #         logger.error(line)
-
+            line = rline.decode("utf-8")
 
             # ignore comment lines
             if line.strip().startswith("#"):
@@ -66,22 +53,24 @@ def parseDbFile(filepath):
 
             # looking for new record or new field
             new_record = re.search(
-                r"""record\(\s*(?P<type>\S+)\s*,\s*["'](?P<name>\S+)["']\s*\)""", line)
+                r"""record\(\s*(?P<type>\S+)\s*,\s*["'](?P<name>\S+)["']\s*\)""",
+                line,
+            )
             new_field = re.search(
-                r'field\(\s*(?P<name>\S+)\s*,\s*(?P<value>.+)\s*\)', line)
+                r"field\(\s*(?P<name>\S+)\s*,\s*(?P<value>.+)\s*\)",
+                line,
+            )
 
             # apparently the regex did not match
             if not new_record and line.strip().startswith("record("):
-                raise ParsingError(
-                    "Did not find the new record in line:\n"+line)
+                raise ParsingError("Did not find the new record in line:\n" + line)
             if not new_field and line.strip().startswith("field("):
-                raise ParsingError(
-                    "Did not find the new field in line:\n"+line)
+                raise ParsingError("Did not find the new field in line:\n" + line)
 
             # start a new record in content_dict
             if new_record:
-                # instanciate a new record assuming previous one is finished
-                current_record = dict()
+                # instantiate a new record assuming previous one is finished
+                current_record = {}
                 current_record["name"] = new_record.group("name")
                 current_record["type"] = new_record.group("type")
                 # add to record list
@@ -94,13 +83,17 @@ def parseDbFile(filepath):
                 if current_record is None:
                     logger.error(
                         "Field without record line %d in %s",
-                        index+1, filepath)
-                    raise ParsingError(
-                        "Found a field but did not start a record yet.")
+                        index + 1,
+                        filepath,
+                    )
+                    msg = "Found a field but did not start a record yet."
+                    raise ParsingError(msg)
                 if current_field_name in current_record:
                     logger.warning(
                         "Field redefined in same record line %d in %s",
-                        index+1, filepath)
+                        index + 1,
+                        filepath,
+                    )
 
                 current_record[current_field_name] = current_field_value
 
@@ -108,29 +101,35 @@ def parseDbFile(filepath):
 
 
 def dir2files(dirpath, prefix="", suffix=""):
-    """
-    Look for file in the given directory and subdirectories.
+    """Look for file in the given directory and subdirectories.
+
     If defined, only keep files starting by prefix and ending by suffix.
 
     Args:
+    ----
         dirpath (str): Path of the EPICS .db file
 
     Returns:
+    -------
         found_files (str): list of file path found in directory
     """
-    logger.info("Looking for input files in "+dirpath)
-    found_files = list()
-    found_files.extend([os.path.join(dp, f)
-                        for dp, dn, fn in os.walk(dirpath)
-                        for f in fn
-                        if f.endswith(suffix) and f.startswith(prefix)])
+    logger.info("Looking for input files in %s", dirpath)
+    found_files = []
+    found_files.extend(
+        [
+            os.path.join(dp, f)
+            for dp, dn, fn in os.walk(dirpath)
+            for f in fn
+            if f.endswith(suffix) and f.startswith(prefix)
+        ],
+    )
     return found_files
 
 
-def prettyDict(input_dict, indent=0, print_function=print):
-    """Prints a directory."""
+def pretty_dict(input_dict, indent=0, print_function=print):
+    """Print a directory."""
     for key, value in list(input_dict.items()):
-        print_function('\t' * indent + str(key)+' :\t' + str(value))
+        print_function("\t" * indent + str(key) + " :\t" + str(value))
 
 
 def pvs_from_path(path_list):
@@ -148,13 +147,13 @@ def pvs_from_path(path_list):
     if not db_files:
         logger.error("No DB file found with provided paths.")
 
-    logger.debug("DB files found:\n" + "\n".join(db_files))
+    logger.debug("DB files found:\n%s", "\n".join(db_files))
 
     logger.info("Extracting PVs from DB files.")
     for a_file in db_files:
-        logger.info("Processing file "+a_file)
-        pvs_from_db += parseDbFile(a_file)
+        logger.info("Processing file %s", a_file)
+        pvs_from_db += parse_db_file(a_file)
 
-    logger.info("Number of records found: %d" % len(pvs_from_db))
+    logger.info("Number of records found: %d", len(pvs_from_db))
 
     return pvs_from_db
