@@ -5,22 +5,22 @@ name: "${TEST_TITLE}"
 macros:
     - TEST_TITLE:     "functional test of CAENels fast PS 1K5"
       P:              "Sec-Sub(x):Dis-Dev-Idx:"
-      DELAY:          1 
-      RETRY:          5 
+      DELAY:          1
+      RETRY:          5
       ## not specific to power supply (user inputs)
       # current
       CURRENT:        0.1 # A
       # ramp
-      RAMP_UP:        0.1 # A/s  
+      RAMP_UP:        0.1 # A/s
       DELAY_RAMP_UP:  5   # sec
 
       ## specific to power supply (won't change)
       # ramp
       SET_RAMP_UP:    "IRampSet"
-      GET_RAMP_UP:    "IRampRb"     
+      GET_RAMP_UP:    "IRampRb"
       # regulation mode (current or voltage)
-      SET_REGULATION: "RegModeSet"     
-      GET_REGULATION: "RegModeRb"    
+      SET_REGULATION: "RegModeSet"
+      GET_REGULATION: "RegModeRb"
       # on/off
       SET_ON_OFF:     "EnaCmd"
       GET_ON_OFF:     "EnaRb"
@@ -84,7 +84,7 @@ include:
       SET_ON_OFF:         ${SET_ON_OFF}
       GET_ON_OFF:         ${GET_ON_OFF}
       ON_STATE:           1
-      DELAY_RAMP_UP:      ${DELAY} # no ramp up here, waintoing for user setpoint (next move) 
+      DELAY_RAMP_UP:      ${DELAY} # no ramp up here, waintoing for user setpoint (next move)
 
 
     # config current

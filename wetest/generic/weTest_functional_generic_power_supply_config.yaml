@@ -15,7 +15,7 @@ macros:
       DELAY:              0.2   # sec: defaut delay (timeout between setter and checking getter)
       RETRY:              2
       # remote mode
-      IGNORE_REMOTE:      True 
+      IGNORE_REMOTE:      True
       SET_REMOTE:         "LocRemSet"
       REMOTE:             1
       # set interclock
@@ -33,7 +33,7 @@ macros:
       SET_RAMP_DOWN :     "RDwnSet"
       GET_RAMP_DOWN :     "RDwnRb"
       RAMP_DOWN:          50  # volt/sec or ms
-      # polarity    
+      # polarity
       IGNORE_POLARITY:    True
       SET_POLARITY:       "BPosSet"
       GET_POLARITY:       "BPosRb"
@@ -43,7 +43,7 @@ macros:
       SET_REGULATION:     "RegModeSet"
       GET_REGULATION:     "RegModeRb"
       REGULATION_STATE:   0   # 0:CV, 1:CC
-      # voltage   
+      # voltage
       IGNORE_VOLTAGE:     True    # by default, voltage tests are skipped
       SET_VOLTAGE:        "USet"
       GET_VOLTAGE:        "UMes"   # should it be RBV or measure value her? TBD
@@ -51,25 +51,25 @@ macros:
       MARGIN_VOLTAGE:     0   # %
       # voltage min
       IGNORE_VOLTAGE_MIN: True
-      SET_VOLTAGE_MIN:    "UNVThrSet"    
+      SET_VOLTAGE_MIN:    "UNVThrSet"
       GET_VOLTAGE_MIN:    "UNVThrRb"
       MARGIN_VOLTAGE_MIN: 0 # %
       VOLTAGE_MIN:        5 # volts
       # voltage max
       IGNORE_VOLTAGE_MAX: True
-      SET_VOLTAGE_MAX:    "OVVThrSet"    
+      SET_VOLTAGE_MAX:    "OVVThrSet"
       GET_VOLTAGE_MAX:    "OVVThrRb"
       MARGIN_VOLTAGE_MAX: 0   # %
       VOLTAGE_MAX:        15  # volts
       # current min
       IGNORE_CURRENT_MIN: True
-      SET_CURRENT_MIN:    "UNCThrSet"    
+      SET_CURRENT_MIN:    "UNCThrSet"
       GET_CURRENT_MIN:    "UNCThrRb"
       MARGIN_CURRENT_MIN: 0 # %
       CURRENT_MIN:        5 # A
       # current max
       IGNORE_CURRENT_MAX: True
-      SET_CURRENT_MAX:    "OVCThrSet"    
+      SET_CURRENT_MAX:    "OVCThrSet"
       GET_CURRENT_MAX:    "OVCThrRb"
       MARGIN_CURRENT_MAX: 0   # %
       CURRENT_MAX:        15  # A

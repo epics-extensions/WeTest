@@ -16,8 +16,8 @@ name: "${TEST_TITLE}"
 macros:
     - TEST_TITLE:       "functional test of DeltaESxxx"
       P:                "CEA:"
-      DELAY:            1 
-      RETRY:            2 
+      DELAY:            1
+      RETRY:            2
       ## not specific to power supply (user inputs)
       # config
       VOLTAGE:          2 # Volts
@@ -27,12 +27,12 @@ macros:
       POLARITY:         "Positive field"
       DELAY_RAMP_UP:    1 # sec
       # check desired output (measured value)
-      GET_DESIRED_OUTPUT:     "IMes"  
-      DESIRED_OUTPUT:         ${CURRENT}  
-      DESIRED_OUTPUT_MARGIN:  1 #%  
+      GET_DESIRED_OUTPUT:     "IMes"
+      DESIRED_OUTPUT:         ${CURRENT}
+      DESIRED_OUTPUT_MARGIN:  1 #%
 
 
-      ## specific to power supply (won't change)  
+      ## specific to power supply (won't change)
       ## but user can still change them if needed
       # on/off
       SET_ON_OFF:       "PwrEnaCmd"
@@ -42,17 +42,17 @@ macros:
       DELAY_RAMP_DOWN:  1 # sec
       # voltage
       SET_VOLTAGE:      "USet"
-      GET_VOLTAGE:      "URb"   
+      GET_VOLTAGE:      "URb"
       # current
       SET_CURRENT:      "ISet"
       GET_CURRENT:      "IRb"
       # UVL
       SET_POLARITY:     "BPosSet"
-      GET_POLARITY:     "BPosRb" 
-      # check CC/CV mode    
+      GET_POLARITY:     "BPosRb"
+      # check CC/CV mode
       GET_OPERATION_MODE: "CcStat"
       OPERATION_MODE:     "CC"
-     
+
 
 
 include:
@@ -60,7 +60,7 @@ include:
     - path: 'wetest/generic/weTest_functional_generic_power_supply_init.yaml'
       TEST_TITLE:         "init power supply ${P}"
       P:                  ${P}
-      DELAY:              ${DELAY} 
+      DELAY:              ${DELAY}
       RETRY:              ${RETRY}
       # init
       IGNORE_CLEAR:     True
@@ -80,16 +80,16 @@ include:
       RETRY:                "${RETRY}"
 
       # set target voltage
-      IGNORE_VOLTAGE:     False   
+      IGNORE_VOLTAGE:     False
       SET_VOLTAGE:        "${SET_VOLTAGE}"
-      GET_VOLTAGE:        "${GET_VOLTAGE}"  
+      GET_VOLTAGE:        "${GET_VOLTAGE}"
       VOLTAGE:            "${VOLTAGE}"
       MARGIN_VOLTAGE:     0 # %
 
       # set current
       IGNORE_CURRENT:     False
       SET_CURRENT:        "${SET_CURRENT}"
-      GET_CURRENT:        "${GET_CURRENT}" 
+      GET_CURRENT:        "${GET_CURRENT}"
       CURRENT:            ${CURRENT}
       MARGIN_CURRENT:     0 # %
 
@@ -97,7 +97,7 @@ include:
       IGNORE_POLARITY:    $(IGNORE_POLARITY)
       SET_POLARITY:       ${SET_POLARITY}
       GET_POLARITY:       ${GET_POLARITY}
-      POLARITY:           ${POLARITY}         
+      POLARITY:           ${POLARITY}
 
 
     # check desired output
@@ -106,20 +106,20 @@ include:
       P:                  "${P}"
       DELAY:              "${DELAY}"
       RETRY:              "${RETRY}"
-      # on/off   
+      # on/off
       IGNORE_ON_OFF:          False
       SET_ON_OFF:             ${SET_ON_OFF}
       GET_ON_OFF:             ${GET_ON_OFF}
       ON_STATE:               ${ON_STATE}
-      DELAY_RAMP_UP:          ${DELAY_RAMP_UP} 
-      # check CC/CV mode    
+      DELAY_RAMP_UP:          ${DELAY_RAMP_UP}
+      # check CC/CV mode
       IGNORE_CH_STATUS:       ${IGNORE_CH_STATUS}
       GET_CH_STATUS:          ${GET_OPERATION_MODE}
       CH_STATUS:              ${OPERATION_MODE}
       # check desired output (measured value)
-      IGNORE_MEASURED_VALUE:  False  
-      GET_MEASURED_VALUE:     ${GET_DESIRED_OUTPUT} 
+      IGNORE_MEASURED_VALUE:  False
+      GET_MEASURED_VALUE:     ${GET_DESIRED_OUTPUT}
       MARGIN_MEASURED_VALUE:  ${DESIRED_OUTPUT_MARGIN}
       MEASURED_VALUE:         ${DESIRED_OUTPUT}
 
-      
+

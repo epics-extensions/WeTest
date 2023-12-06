@@ -152,7 +152,7 @@ tests:
           value: []
 
     - name: 'single-value waveform issue'
-      message: pyepics get returns a float rather than a waveform, is that true for regular EPICS records as well ? 
+      message: pyepics get returns a float rather than a waveform, is that true for regular EPICS records as well ?
       commands:
         - name: "single-value waveform"
           setter: :UIncPwrMes-BPTR
