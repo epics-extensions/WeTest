@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "wetest"
 version = "1.2.2"
-description = "WeTest allows you to test EPICS modules"
+description = "WeTest enables you to test EPICS modules"
 license = "EPICS"
 authors = [
   "Francis GOHIER <francis.gohier@cea.fr>",
@@ -9,10 +9,18 @@ authors = [
   "Rémi NICOLE <remi.nicole@cea.fr>",
   "Victor NADOT <victor.nadot@cea.fr>",
 ]
+maintainers = ["Rémi NICOLE <remi.nicole@cea.fr>"]
 readme = "README.md"
 repository = "https://github.com/epics-extensions/WeTest"
 keywords = ["epics", "testing"]
-classifiers = ["Development Status :: 3 - Alpha"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Testing :: Acceptance",
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/epics-extensions/WeTest/issues"
 
 [tool.poetry.scripts]
 wetest = "wetest.command_line:main"
