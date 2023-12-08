@@ -26,7 +26,7 @@ See ```specific/weTest_functional_CAENels_PS_FAST_1K5_current.yaml``` to get an 
 
 As you can see in the above script, it is sometimes necessary to call several times the ```config``` (or an other part) to fit the power supply behavior. Here you have to first power on the channel and then set the setpoint (current command).
 
-## Specific models 
+## Specific models
 
 Files in ```specific``` folder can be seen as example but you can also use them if it is the power suplly you want to control.
 
