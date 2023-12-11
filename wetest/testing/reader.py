@@ -26,6 +26,7 @@ import yaml
 from pkg_resources import resource_filename
 from pykwalify import errors
 from pykwalify.core import Core
+from semver import Version
 
 from wetest.common.constants import (
     FILE_HANDLER,
@@ -57,8 +58,7 @@ fv_logger.addHandler(FILE_HANDLER)
 WETEST_METADATA = importlib.metadata.metadata("WeTest")
 
 # Maximum file version supported
-VERSION = importlib.metadata.version("WeTest")
-MAJOR, MINOR, BUGFIX = (int(x) for x in VERSION.split("."))
+VERSION = Version.parse(importlib.metadata.version("WeTest"))
 
 REPOSITORY = WETEST_METADATA["Home-page"]
 
@@ -78,6 +78,13 @@ class UnsupportedFileFormatError(WeTestError):
     Exception raised if YAML configuration file format version is newer than
     supported one.
     """
+
+    def __init__(self, version):
+        super().__init__(
+            f"Scenario version '{version}' not supported. "
+            f"Current WeTest version: '{VERSION}'.\n"
+            f"Look at the WeTest repository for the CHANGELOG:\n{REPOSITORY}"
+        )
 
 
 class InvalidFileContentError(WeTestError):
@@ -327,7 +334,7 @@ class ScenarioReader:
         self.version = f"{self.major!s}.{self.minor!s}.{self.bugfix!s}"
 
         self.version_is_supported = ScenarioReader.supports_version(
-            self.major, self.minor, self.bugfix
+            int(self.major), int(self.minor), int(self.bugfix)
         )
 
         # Check YAML file schema and other validation
@@ -683,7 +690,7 @@ class ScenarioReader:
         return errors
 
     @staticmethod
-    def supports_version(major: str, minor: str, bugfix: str) -> bool:
+    def supports_version(major: int, minor: int, bugfix: int) -> bool:
         """Check if configuration file format version is supported.
 
         :param major:  major version
@@ -691,56 +698,27 @@ class ScenarioReader:
         :param bugfix: patch version
 
         :returns: True if version is supported,
-        otherwise prompt the user for continue or abort.
+        otherwise raises an UnsupportedFileFormatError
 
         """
-        # get file version
-        major = int(major)
-        minor = int(minor)
-        bugfix = int(bugfix)
+        file_version = Version(major, minor, bugfix)
 
-        version = f"{major}.{minor}.{bugfix}"
+        logger.debug("scenario file version is: %s", file_version)
 
-        logger.info("Configuration file format version: %i.%i.%i", major, minor, bugfix)
+        if not file_version.is_compatible(VERSION):
+            raise UnsupportedFileFormatError(file_version)
 
-        compatible_version = True
-        try_continue = True
-
-        if major != MAJOR:
-            compatible_version = False
-            try_continue = False
-            logger.critical("File incompatible with reader of installed WeTest.")
-        elif minor > MINOR:
-            compatible_version = False
-            logger.error(
-                "File version (%s) too recent for installed WeTest (%s).",
-                version,
-                f"{MAJOR}.{MINOR}.{BUGFIX}",
-            )
-        elif minor < MINOR:
-            compatible_version = False
+        if file_version.minor < VERSION.minor:
             logger.warning(
-                "File version (%s) for older version than the installed WeTest (%s).",
-                version,
-                f"{MAJOR}.{MINOR}.{BUGFIX}",
+                "A new file version is available: '%s'. "
+                "Current scenario file version: '%s'",
+                VERSION,
+                file_version,
             )
-
-        if not compatible_version:
             logger.warning(
                 "Look at the WeTest repository for the CHANGELOG:\n%s", REPOSITORY
             )
-
-        if not try_continue:
-            logger.error(
-                "File format version is: %s, but wetest version is: %s.%s.%s",
-                version,
-                MAJOR,
-                MINOR,
-                BUGFIX,
-            )
-            sys.exit(5)
-
-        return compatible_version
+        return True
 
     def is_valid(self):
         """YAML file format is valid.

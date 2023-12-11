@@ -37,6 +37,7 @@ numpy = "^1.19.5, <1.20.0"
 pyepics = "^3.5.1"
 pykwalify = "^1.8.0"
 reportlab = "^3.6.8"
+semver = "^3.0.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
