@@ -1,7 +1,7 @@
 version:
-    major: 0
-    minor: 1
-    bugfix: 0
+    major: 1
+    minor: 2
+    bugfix: 2
 
 config:
     type: "unit"

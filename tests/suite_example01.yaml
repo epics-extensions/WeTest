@@ -1,11 +1,11 @@
 version:
     major: 1
-    minor: 0
-    bugfix: 0
+    minor: 2
+    bugfix: 2
 
 name: "ExampleSuite01"
 
 include:
-    - 'wetest/tests/scenario_example01.yaml'
-    - 'wetest/tests/scenario_example02.yaml'
-    - 'wetest/tests/scenario_example03.yaml'
+    - 'tests/scenario_example01.yaml'
+    - 'tests/scenario_example02.yaml'
+    - 'tests/scenario_example03.yaml'
