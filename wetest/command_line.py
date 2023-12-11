@@ -13,6 +13,7 @@
 
 import argparse
 import contextlib
+import importlib.metadata
 import logging
 import multiprocessing
 import os
@@ -26,7 +27,6 @@ from copy import deepcopy
 from pathlib import Path
 
 import epics
-import pkg_resources
 
 from wetest.common.constants import (
     ABORT_FROM_GUI,
@@ -361,10 +361,9 @@ def main():
 
     logger.info("Processing arguments...")
 
-    version = pkg_resources.require("WeTest")[0].version
     if args.version:
-        major, minor, bugfix = (int(x) for x in version.split("."))
-        logger.warning("Installed WeTest is of version %d.%d.%d", major, minor, bugfix)
+        version = importlib.metadata.version("WeTest")
+        logger.warning("WeTest %s", version)
         sys.exit(0)
 
     with_gui = not args.no_gui
