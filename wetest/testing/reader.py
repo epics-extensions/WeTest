@@ -854,7 +854,7 @@ class ScenarioReader:
 
         return deserialized
 
-    def validate_file(self, config=None):
+    def validate_file(self: "ScenarioReader", config: Core) -> bool:
         """Run the schema, non-compulsory and compylsory validation.
 
         if compulsory validation fails, terminate the program with error code 1.
@@ -863,14 +863,13 @@ class ScenarioReader:
 
         :returns: wrether or not all the validation succeeded.
         """
-        if config is not None:
-            fv_logger.info("Validating input file against schema.")
-            try:
-                config.validate()
-                schema_valid = True
-            except errors.SchemaError as err:
-                fv_logger.log(LVL_FORMAT_VAL, "%s", err.msg)
-                schema_valid = False
+        fv_logger.info("Validating input file against schema.")
+        try:
+            config.validate()
+            schema_valid = True
+        except errors.SchemaError as err:
+            fv_logger.log(LVL_FORMAT_VAL, "%s", err.msg)
+            schema_valid = False
 
         ncmp_valid = self.noncompulsory_validation()
         if len(ncmp_valid) != 0:
@@ -887,4 +886,4 @@ class ScenarioReader:
         else:
             fv_logger.info("Validated mandatory rules.")
 
-        return schema_valid and ncmp_valid and mand_valid
+        return schema_valid and ncmp_valid == [] and mand_valid == []
