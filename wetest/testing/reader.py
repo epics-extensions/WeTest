@@ -402,7 +402,9 @@ class ScenarioReader:
         self.bugfix = self.deserialized["version"]["bugfix"]
         self.version = f"{self.major!s}.{self.minor!s}.{self.bugfix!s}"
 
-        self.version_is_supported = self._version_is_supported()
+        self.version_is_supported = ScenarioReader.supports_version(
+            self.major, self.minor, self.bugfix
+        )
 
         # Check YAML file schema and other validation
         tempo_file_path = "/tmp/no_macros.yml"
@@ -756,23 +758,24 @@ class ScenarioReader:
 
         return errors
 
-    def _version_is_supported(self, major=None, minor=None, bugfix=None):
+    @staticmethod
+    def supports_version(major: str, minor: str, bugfix: str) -> bool:
         """Check if configuration file format version is supported.
 
-        :param major:  optionally force the major digit parameter (should be
-                       useful for testing only)
-        :param minor:  optionally force the minor digit parameter (should be
-                       useful for testing only)
-        :param bugfix: optionally force the bugfix digit parameter (should be
-                       useful for testing only)
+        :param major:  major version
+        :param minor:  minor version
+        :param bugfix: patch version
 
-        :returns: True if version is supported, otherwise prompt the user for continue or abort.
+        :returns: True if version is supported,
+        otherwise prompt the user for continue or abort.
 
         """
         # get file version
-        major = int(major or self.major)
-        minor = int(minor or self.minor)
-        bugfix = int(bugfix or self.bugfix)
+        major = int(major)
+        minor = int(minor)
+        bugfix = int(bugfix)
+
+        version = f"{major}.{minor}.{bugfix}"
 
         logger.info("Configuration file format version: %i.%i.%i", major, minor, bugfix)
 
@@ -787,14 +790,14 @@ class ScenarioReader:
             compatible_version = False
             logger.error(
                 "File version (%s) too recent for installed WeTest (%s).",
-                self.version,
+                version,
                 f"{MAJOR}.{MINOR}.{BUGFIX}",
             )
         elif minor < MINOR:
             compatible_version = False
             logger.warning(
                 "File version (%s) for older version than the installed WeTest (%s).",
-                self.version,
+                version,
                 f"{MAJOR}.{MINOR}.{BUGFIX}",
             )
 
@@ -806,7 +809,7 @@ class ScenarioReader:
         if not try_continue:
             logger.error(
                 "File format version is: %s, but wetest version is: %s.%s.%s",
-                self.version,
+                version,
                 MAJOR,
                 MINOR,
                 BUGFIX,
