@@ -16,12 +16,12 @@
 # TODO(gohierf): margin should only be used with numbers
 
 import contextlib
+import importlib.metadata
 import logging
 import os
 import re
 import sys
 
-import pkg_resources
 import yaml
 from pkg_resources import resource_filename
 from pykwalify import errors
@@ -54,18 +54,13 @@ stream_handler.setLevel(LVL_FORMAT_VAL)
 fv_logger.addHandler(stream_handler)
 fv_logger.addHandler(FILE_HANDLER)
 
+WETEST_METADATA = importlib.metadata.metadata("WeTest")
+
 # Maximum file version supported
-VERSION = pkg_resources.require("WeTest")[0].version
+VERSION = importlib.metadata.version("WeTest")
 MAJOR, MINOR, BUGFIX = (int(x) for x in VERSION.split("."))
 
-CHANGELOG_WARN = {
-    1: {
-        1: """  - Range now tests the `stop` value,
-  use `include_stop: False` to deactivate""",
-        2: """  - Now only macros from include line are provided to included file,
-  use `--propagate` CLI option to provide all macros already defined instead""",
-    },
-}
+REPOSITORY = WETEST_METADATA["Home-page"]
 
 # Constants used elsewhere
 ABORT = "abort"
@@ -94,43 +89,6 @@ class InvalidFileContentError(WeTestError):
 
 class MacroError(WeTestError):
     """Something went wrong when parsing the macros."""
-
-
-def display_changelog(file_version, wetest_version) -> None:
-    """Display the changelog warnings, only between the two versions."""
-    if file_version > wetest_version:
-        logger.warning("Some feature are not yet implemented in WeTest.")
-        min_version = wetest_version
-        max_version = file_version
-        return
-    if file_version < wetest_version:
-        if file_version[0:2] == wetest_version[0:2]:  # only bugfix change
-            logger.warning("Some retrocompatible changes have been made to WeTest.")
-        else:
-            logger.warning(
-                "Some NON-retrocompatible changes have been made to WeTest since %s",
-                ".".join([str(x) for x in file_version]),
-            )
-        min_version = file_version
-        max_version = wetest_version
-    else:
-        logger.warning("Same version.")
-        return
-
-    for major in range(min_version[0], max_version[0] + 1):  # do stop value too
-        if major in CHANGELOG_WARN:
-            for minor in sorted(CHANGELOG_WARN[major]):
-                if (major, minor) <= min_version[:2]:
-                    continue  # too early
-                if (major, minor) > max_version[:2]:
-                    break  # too new
-
-                logger.warning(
-                    "%d.%d.x:\n%s",
-                    major,
-                    minor,
-                    CHANGELOG_WARN[major][minor],
-                )
 
 
 class MacrosManager:
@@ -767,8 +725,10 @@ class ScenarioReader:
                 f"{MAJOR}.{MINOR}.{BUGFIX}",
             )
 
-        if not compatible_version and try_continue:
-            display_changelog((major, minor, bugfix), (MAJOR, MINOR, BUGFIX))
+        if not compatible_version:
+            logger.warning(
+                "Look at the WeTest repository for the CHANGELOG:\n%s", REPOSITORY
+            )
 
         if not try_continue:
             logger.error(
