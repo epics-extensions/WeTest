@@ -1,0 +1,22 @@
+name: "Nix build"
+
+permissions: read-all
+
+on:
+  # Allows running this workflow manually
+  workflow_dispatch:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  nix-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v24
+      - uses: DeterminateSystems/magic-nix-cache-action@v2
+        with:
+          diagnostic-endpoint: ""
+      - name: Run `nix build`
+        run: nix build -L .

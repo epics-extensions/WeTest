@@ -4,6 +4,7 @@ permissions: read-all
 
 on:
   push:
+    branches: [master]
   pull_request:
 
 jobs:
@@ -11,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v20
+    - uses: cachix/install-nix-action@v24
     - name: "Check EditorConfig"
       # Python already has Ruff,
       # and doesn't necessarily have a consistent 4 spaces indent
