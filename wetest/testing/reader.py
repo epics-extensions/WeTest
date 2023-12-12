@@ -16,17 +16,17 @@
 # TODO(gohierf): margin should only be used with numbers
 
 import contextlib
+import importlib.metadata
 import logging
 import os
 import re
 import sys
-import time
 
-import pkg_resources
 import yaml
 from pkg_resources import resource_filename
 from pykwalify import errors
 from pykwalify.core import Core
+from semver import Version
 
 from wetest.common.constants import (
     FILE_HANDLER,
@@ -55,18 +55,12 @@ stream_handler.setLevel(LVL_FORMAT_VAL)
 fv_logger.addHandler(stream_handler)
 fv_logger.addHandler(FILE_HANDLER)
 
-# Maximum file version supported
-VERSION = pkg_resources.require("WeTest")[0].version
-MAJOR, MINOR, BUGFIX = (int(x) for x in VERSION.split("."))
+WETEST_METADATA = importlib.metadata.metadata("WeTest")
 
-CHANGELOG_WARN = {
-    1: {
-        1: """  - Range now tests the `stop` value,
-  use `include_stop: False` to deactivate""",
-        2: """  - Now only macros from include line are provided to included file,
-  use `--propagate` CLI option to provide all macros already defined instead""",
-    },
-}
+# Maximum file version supported
+VERSION = Version.parse(importlib.metadata.version("WeTest"))
+
+REPOSITORY = WETEST_METADATA["Home-page"]
 
 # Constants used elsewhere
 ABORT = "abort"
@@ -85,6 +79,13 @@ class UnsupportedFileFormatError(WeTestError):
     supported one.
     """
 
+    def __init__(self, version):
+        super().__init__(
+            f"Scenario version '{version}' not supported. "
+            f"Current WeTest version: '{VERSION}'.\n"
+            f"Look at the WeTest repository for the CHANGELOG:\n{REPOSITORY}"
+        )
+
 
 class InvalidFileContentError(WeTestError):
     """Somethings not right in YAML file.
@@ -95,76 +96,6 @@ class InvalidFileContentError(WeTestError):
 
 class MacroError(WeTestError):
     """Something went wrong when parsing the macros."""
-
-
-def display_changelog(file_version, wetest_version) -> None:
-    """Display the changelog warnings, only between the two versions."""
-    if file_version > wetest_version:
-        logger.warning("Some feature are not yet implemented in WeTest.")
-        min_version = wetest_version
-        max_version = file_version
-        return
-    if file_version < wetest_version:
-        if file_version[0:2] == wetest_version[0:2]:  # only bugfix change
-            logger.warning("Some retrocompatible changes have been made to WeTest.")
-        else:
-            logger.warning(
-                "Some NON-retrocompatible changes have been made to WeTest since %s",
-                ".".join([str(x) for x in file_version]),
-            )
-        min_version = file_version
-        max_version = wetest_version
-    else:
-        logger.warning("Same version.")
-        return
-
-    for major in range(min_version[0], max_version[0] + 1):  # do stop value too
-        if major in CHANGELOG_WARN:
-            for minor in sorted(CHANGELOG_WARN[major]):
-                if (major, minor) <= min_version[:2]:
-                    continue  # too early
-                if (major, minor) > max_version[:2]:
-                    break  # too new
-
-                logger.warning(
-                    "%d.%d.x:\n%s",
-                    major,
-                    minor,
-                    CHANGELOG_WARN[major][minor],
-                )
-
-
-def query_yes_no(question, default=None):
-    """Ask a yes/no question via raw_input() and return their answer.
-
-    Args:
-    ----
-    question (str): is a string that is presented to the user.
-    default (str): is the presumed answer if the user just hits <Enter>.
-        It must be "yes" (the default), "no" or None (meaning
-        an answer is required of the user).
-
-    The "answer" return value is True for "yes" or False for "no".
-    """
-    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
-    if default is None:
-        prompt = " [y/n] "
-    elif default == "yes":
-        prompt = " [Y/n] "
-    elif default == "no":
-        prompt = " [y/N] "
-    else:
-        raise ValueError("invalid default answer: '%s'" % default)
-
-    while True:
-        print(question + prompt)
-        choice = input().lower()
-        if default is not None and choice == "":
-            return valid[default]
-        if choice in valid:
-            return valid[choice]
-
-        print("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
 
 class MacrosManager:
@@ -402,7 +333,9 @@ class ScenarioReader:
         self.bugfix = self.deserialized["version"]["bugfix"]
         self.version = f"{self.major!s}.{self.minor!s}.{self.bugfix!s}"
 
-        self.version_is_supported = self._version_is_supported()
+        self.version_is_supported = ScenarioReader.supports_version(
+            int(self.major), int(self.minor), int(self.bugfix)
+        )
 
         # Check YAML file schema and other validation
         tempo_file_path = "/tmp/no_macros.yml"
@@ -756,64 +689,36 @@ class ScenarioReader:
 
         return errors
 
-    def _version_is_supported(self, major=None, minor=None, bugfix=None):
+    @staticmethod
+    def supports_version(major: int, minor: int, bugfix: int) -> bool:
         """Check if configuration file format version is supported.
 
-        :param major:  optionally force the major digit parameter (should be
-                       useful for testing only)
-        :param minor:  optionally force the minor digit parameter (should be
-                       useful for testing only)
-        :param bugfix: optionally force the bugfix digit parameter (should be
-                       useful for testing only)
+        :param major:  major version
+        :param minor:  minor version
+        :param bugfix: patch version
 
-        :returns: True if version is supported, otherwise prompt the user for continue or abort.
+        :returns: True if version is supported,
+        otherwise raises an UnsupportedFileFormatError
 
         """
-        # get file version
-        major = int(major or self.major)
-        minor = int(minor or self.minor)
-        bugfix = int(bugfix or self.bugfix)
+        file_version = Version(major, minor, bugfix)
 
-        logger.info("Configuration file format version: %i.%i.%i", major, minor, bugfix)
+        logger.debug("scenario file version is: %s", file_version)
 
-        compatible_version = True
-        try_continue = True
+        if not file_version.is_compatible(VERSION):
+            raise UnsupportedFileFormatError(file_version)
 
-        if major != MAJOR:
-            compatible_version = False
-            try_continue = False
-            logger.critical("File incompatible with reader of installed WeTest.")
-        elif minor > MINOR:
-            compatible_version = False
-            logger.error(
-                "File version (%s) too recent for installed WeTest (%s).",
-                self.version,
-                f"{MAJOR}.{MINOR}.{BUGFIX}",
-            )
-        elif minor < MINOR:
-            compatible_version = False
+        if file_version.minor < VERSION.minor:
             logger.warning(
-                "File version (%s) for older version than the installed WeTest (%s).",
-                self.version,
-                f"{MAJOR}.{MINOR}.{BUGFIX}",
+                "A new file version is available: '%s'. "
+                "Current scenario file version: '%s'",
+                VERSION,
+                file_version,
             )
-
-        if not compatible_version and try_continue:
-            display_changelog((major, minor, bugfix), (MAJOR, MINOR, BUGFIX))
-            time.sleep(0.2)
-            try_continue = query_yes_no("Try running tests nonetheless ?", "yes")
-
-        if not try_continue:
-            logger.error(
-                "File format version is: %s, but wetest version is: %s.%s.%s",
-                self.version,
-                MAJOR,
-                MINOR,
-                BUGFIX,
+            logger.warning(
+                "Look at the WeTest repository for the CHANGELOG:\n%s", REPOSITORY
             )
-            sys.exit(5)
-
-        return compatible_version
+        return True
 
     def is_valid(self):
         """YAML file format is valid.
@@ -854,7 +759,7 @@ class ScenarioReader:
 
         return deserialized
 
-    def validate_file(self, config=None):
+    def validate_file(self: "ScenarioReader", config: Core) -> bool:
         """Run the schema, non-compulsory and compylsory validation.
 
         if compulsory validation fails, terminate the program with error code 1.
@@ -863,14 +768,13 @@ class ScenarioReader:
 
         :returns: wrether or not all the validation succeeded.
         """
-        if config is not None:
-            fv_logger.info("Validating input file against schema.")
-            try:
-                config.validate()
-                schema_valid = True
-            except errors.SchemaError as err:
-                fv_logger.log(LVL_FORMAT_VAL, "%s", err.msg)
-                schema_valid = False
+        fv_logger.info("Validating input file against schema.")
+        try:
+            config.validate()
+            schema_valid = True
+        except errors.SchemaError as err:
+            fv_logger.log(LVL_FORMAT_VAL, "%s", err.msg)
+            schema_valid = False
 
         ncmp_valid = self.noncompulsory_validation()
         if len(ncmp_valid) != 0:
@@ -887,4 +791,4 @@ class ScenarioReader:
         else:
             fv_logger.info("Validated mandatory rules.")
 
-        return schema_valid and ncmp_valid and mand_valid
+        return schema_valid and ncmp_valid == [] and mand_valid == []

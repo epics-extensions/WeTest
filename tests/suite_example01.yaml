@@ -1,0 +1,11 @@
+version:
+    major: 1
+    minor: 2
+    bugfix: 2
+
+name: "ExampleSuite01"
+
+include:
+    - 'tests/scenario_example01.yaml'
+    - 'tests/scenario_example02.yaml'
+    - 'tests/scenario_example03.yaml'

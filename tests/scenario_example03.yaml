@@ -1,11 +1,11 @@
 version:
-    major: 0
-    minor: 1
-    bugfix: 0
+    major: 1
+    minor: 2
+    bugfix: 2
 
 config:
     type: functional
-    name: "Example 04"
+    name: "Example 03"
     prefix: "LOCATION:"
     delay: 2
 
@@ -16,6 +16,5 @@ tests:
         - name: "Test 1"
           setter: "LockS"
           getter: "LockR"
-          margin: 10
           set_value: 0
           get_value: 0
