@@ -4,6 +4,7 @@ permissions: read-all
 
 on:
   push:
+    branches: [master]
   pull_request:
 
 jobs:
