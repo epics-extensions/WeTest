@@ -12,6 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v40
+      with:
+        files: |
+            **.py
     - uses: cachix/install-nix-action@v20
     - name: "Check Ruff lints"
-      run: nix run 'nixpkgs#ruff' -- check . --output-format=github
+      if: steps.changed-files.outputs.any_changed == 'true'
+      run: nix run 'nixpkgs#ruff' -- check . --output-format=github ${{ steps.changed-files.outputs.all_changed_files }}
