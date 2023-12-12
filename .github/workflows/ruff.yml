@@ -18,7 +18,7 @@ jobs:
       with:
         files: |
             **.py
-    - uses: cachix/install-nix-action@v20
+    - uses: cachix/install-nix-action@v24
     - name: "Check Ruff lints"
       if: steps.changed-files.outputs.any_changed == 'true'
       run: nix run 'nixpkgs#ruff' -- check . --output-format=github ${{ steps.changed-files.outputs.all_changed_files }}
