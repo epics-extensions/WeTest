@@ -23,6 +23,7 @@ import re
 import sys
 
 import yaml
+from packaging.version import Version as PyPIVersion
 from pkg_resources import resource_filename
 from pykwalify import errors
 from pykwalify.core import Core
@@ -57,8 +58,21 @@ fv_logger.addHandler(FILE_HANDLER)
 
 WETEST_METADATA = importlib.metadata.metadata("WeTest")
 
+def _convert2semver(ver: PyPIVersion) -> Version:
+    if ver.epoch != 0:
+        err = "Can't convert an epoch to semver"
+        raise ValueError(err)
+    if ver.post is not None:
+        err = "Can't convert a post part to semver"
+        raise ValueError(err)
+
+    pre = None if not ver.pre else "".join([str(i) for i in ver.pre])
+    return Version(*ver.release, prerelease=pre, build=ver.dev)
+
 # Maximum file version supported
-VERSION = Version.parse(importlib.metadata.version("WeTest"))
+VERSION = _convert2semver(PyPIVersion(importlib.metadata.version("WeTest")))
+# ignore pre-releases when comparing versions
+VERSION = VERSION.finalize_version()
 
 REPOSITORY = WETEST_METADATA["Home-page"]
 
