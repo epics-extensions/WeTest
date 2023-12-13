@@ -19,4 +19,4 @@ jobs:
         with:
           diagnostic-endpoint: ""
       - name: Run `nix build`
-        run: nix build -L .
+        run: nix flake check -L
