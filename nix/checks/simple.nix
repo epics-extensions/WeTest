@@ -16,7 +16,7 @@ pkgs.nixosTest {
 
   testScript = let
     scenario = pkgs.writeText "simple.yml" ''
-      version: {major: 1, minor: 2, bugfix: 2}
+      version: {major: 2, minor: 0, bugfix: 0}
 
       config:
         type: unit

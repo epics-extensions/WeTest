@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wetest"
-version = "1.2.2"
+version = "2.0.0rc1"
 description = "WeTest enables you to test EPICS modules"
 license = "EPICS"
 authors = [
@@ -68,6 +68,8 @@ ignore = [
 ]
 
 # https://git-cliff.org/docs/configuration
+# Run:
+#   git-cliff -c pyproject.toml --bump -u --prepend CHANGELOG.md
 [tool.git-cliff.changelog]
 header = """
 # Changelog\n
