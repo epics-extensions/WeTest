@@ -10,10 +10,7 @@ from wetest.testing.reader import ScenarioReader, UnsupportedFileFormatError
 
 def test_yaml_version_checker():
     """Test supported versions are well identified."""
-    assert ScenarioReader.supports_version(major=1, minor=0, bugfix=0)
-    assert ScenarioReader.supports_version(major=1, minor=1, bugfix=0)
-    assert ScenarioReader.supports_version(major=1, minor=2, bugfix=0)
-    assert ScenarioReader.supports_version(major=1, minor=2, bugfix=2)
+    assert ScenarioReader.supports_version(major=2, minor=0, bugfix=0)
     with pytest.raises(UnsupportedFileFormatError):
         ScenarioReader.supports_version(major=0, minor=0, bugfix=0)
     with pytest.raises(UnsupportedFileFormatError):
