@@ -2,7 +2,11 @@
   description = "A very basic flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-utils.url = "github:numtide/flake-utils";
     epnix.url = "github:epics-extensions/EPNix";
     flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
@@ -13,6 +17,7 @@
   outputs = {
     self,
     nixpkgs,
+    poetry2nix,
     flake-utils,
     epnix,
     flake-compat,
@@ -27,6 +32,8 @@
           })
         ];
       };
+      inherit (epnix.packages.${system}) epics-base;
+      inherit (poetry2nix.lib.mkPoetry2Nix {inherit pkgs;}) mkPoetryApplication;
     in {
       packages.default = let
         # Numpy 1.19.5 doesn't compile with Python3.10+
@@ -35,7 +42,7 @@
         # support Python 3.6, which we need to support older systems.
         python = pkgs.python39;
       in
-        pkgs.poetry2nix.mkPoetryApplication {
+        mkPoetryApplication {
           projectDir = ./.;
 
           inherit python;
@@ -43,15 +50,7 @@
           nativeBuildInputs = with pkgs; [makeWrapper];
           propagatedBuildInputs = with python.pkgs; [tkinter];
 
-          overrides = pkgs.poetry2nix.overrides.withDefaults (_final: prev: {
-            reportlab = prev.reportlab.overridePythonAttrs (_old: {
-              buildInputs = with pkgs; [(freetype.overrideAttrs (_: {dontDisableStatic = true;}))];
-            });
-          });
-
-          postInstall = let
-            inherit (epnix.packages.x86_64-linux) epics-base;
-          in ''
+          postInstall = ''
             wrapProgram $out/bin/wetest \
               --set PYEPICS_LIBCA "${epics-base}/lib/linux-x86_64/libca.so"
           '';
