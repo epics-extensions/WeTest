@@ -8,6 +8,8 @@
     flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
   };
 
+  nixConfig.commit-lockfile-summary = "chore(deps): update flake.lock";
+
   outputs = {
     self,
     nixpkgs,
