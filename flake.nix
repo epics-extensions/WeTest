@@ -71,7 +71,9 @@
         };
 
       devShells.default = pkgs.mkShell {
-        nativeBuildInputs = with pkgs; [poetry python39Full];
+        inputsFrom = [self.packages.${system}.default];
+        nativeBuildInputs = with pkgs; [poetry];
+        env.PYEPICS_LIBCA = "${epics-base}/lib/linux-x86_64/libca.so";
       };
 
       checks = import ./nix/checks {inherit pkgs;};
