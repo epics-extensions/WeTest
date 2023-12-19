@@ -20,23 +20,3 @@ jobs:
           diagnostic-endpoint: ""
       - name: Run `nix build`
         run: nix flake check -L
-  nix-bundle:
-    runs-on: ubuntu-latest
-    # Only run on "v*" tagged commits
-    if: startsWith(github.event.ref, 'refs/tags/v')
-    needs: [nix-build]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v24
-      - uses: DeterminateSystems/magic-nix-cache-action@v2
-        with:
-          diagnostic-endpoint: ""
-      - name: Run `nix bundle`
-        run: |
-          nix bundle --out-link wetest-bundle-link
-          cp --dereference wetest-bundle-link wetest-bundle
-      - name: 'Upload bundle'
-        uses: actions/upload-artifact@v3
-        with:
-          name: wetest-bundle
-          path: wetest-bundle

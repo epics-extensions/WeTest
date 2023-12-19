@@ -6,6 +6,10 @@
     flake-utils.url = "github:numtide/flake-utils";
     epnix.url = "github:epics-extensions/EPNix";
     flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
+    nix-appimage = {
+      url = "github:ralismark/nix-appimage";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -14,6 +18,7 @@
     flake-utils,
     epnix,
     flake-compat,
+    nix-appimage,
   }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {
@@ -68,6 +73,8 @@
             maintainers = with epnix.lib.maintainers; [minijackson];
           };
         };
+
+      packages.AppImage = nix-appimage.bundlers.${system}.default self.packages.${system}.default;
 
       devShells.default = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [poetry python39Full];
