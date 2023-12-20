@@ -36,11 +36,7 @@
       inherit (poetry2nix.lib.mkPoetry2Nix {inherit pkgs;}) mkPoetryApplication;
     in {
       packages.default = let
-        # Numpy 1.19.5 doesn't compile with Python3.10+
-        #
-        # This was fixed in later versions of Numpy, but Numpy >=1.20 doesn't
-        # support Python 3.6, which we need to support older systems.
-        python = pkgs.python39;
+        python = pkgs.python311;
       in
         mkPoetryApplication {
           projectDir = ./.;

@@ -30,13 +30,13 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
-python = ">=3.7, <4"
+python = ">=3.11, <4"
 PyYAML = "^6.0"
-colorlog = "^6.6.0"
-numpy = "^1.19.5, <1.20.0"
+colorlog = "^6.8.0"
+numpy = "^1.26.0"
 pyepics = "^3.5.1"
 pykwalify = "^1.8.0"
-reportlab = "^3.6.8"
+reportlab = "^4.0.0"
 semver = "^3.0.2"
 packaging = "^23.2"
 
