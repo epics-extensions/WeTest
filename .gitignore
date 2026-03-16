@@ -1,4 +1,9 @@
 result*
+
+# For direnv users
+.direnv/
+.envrc
+
 *.swp
 *.pyc
 _build/
